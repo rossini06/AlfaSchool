@@ -5,6 +5,21 @@ Sistema de gestão escolar completo com autenticação, controle de permissões 
 ## 📋 Índice
 
 - [Sobre](#sobre)
+- [Documentação Completa](#documentação-completa)
+- [Funcionalidades](#funcionalidades)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Requisitos](#requisitos)
+- [Instalação](#instalação)
+- [Configuração](#configuração)
+- [Segurança](#segurança)
+- [Permissões e Roles](#permissões-e-roles)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Licença](#licença)
+
+## 📋 Índice
+
+- [Sobre](#sobre)
+- [Documentação Completa](#documentação-completa)
 - [Funcionalidades](#funcionalidades)
 - [Stack Tecnológica](#stack-tecnológica)
 - [Requisitos](#requisitos)
@@ -18,6 +33,52 @@ Sistema de gestão escolar completo com autenticação, controle de permissões 
 ## 📖 Sobre
 
 AlfaSchool é um sistema de gestão escolar desenvolvido em Laravel, focado em segurança e controle de acessos. O sistema permite gerenciar alunos, turmas, notas, frequência e financeiro, com um robusto sistema de permissões baseado em roles.
+
+AlfaSchool é um sistema de gestão escolar desenvolvido em Laravel, focado em segurança e controle de acessos. O sistema permite gerenciar alunos, turmas, notas, frequência e financeiro, com um robusto sistema de permissões baseado em roles.
+
+## 📚 Documentação Completa
+
+Para iniciantes e novos desenvolvedores, recomendamos fortemente a documentação detalhada disponível na pasta `docs/`:
+
+### 📖 Documentação Disponível
+
+| Documento | Descrição |
+|-----------|-----------|
+| [01. Introdução](./docs/01-introducao.md) | Visão geral do sistema, objetivos e casos de uso |
+| [02. Arquitetura](./docs/02-arquitetura.md) | Estrutura técnica, padrões MVC e design decisions |
+| [03. Como Funciona](./docs/03-como-funciona.md) | Fluxos de dados, autenticação e processos |
+| [04. Guia para Iniciantes](./docs/04-para-iniciantes.md) | Explicação detalhada passo a passo de cada implementação |
+| [05. Guia de Permissões](./docs/05-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
+
+### 🚀 Começo Rápido
+
+Se você é novo no projeto, comece aqui:
+
+1. **Leia a Introdução** para entender o que é o AlfaSchool
+2. **Leia o Guia para Iniciantes** para entender como tudo foi feito
+3. **Siga a Stack Tecnológica** para configurar o ambiente
+4. **Siga a Instalação** para colocar o sistema para rodar
+5. **Consulte o Guia de Permissões** para entender o controle de acessos
+
+### 📖 Conceitos Explicados Simplesmente
+
+| Conceito | Explicação Simples | Exemplo |
+|----------|-------------------|---------|
+| **Framework** | Kit de ferramentas prontas | Laravel |
+| **Model** | Molde de dados (como uma ficha de usuário) | User.php |
+| **Controller** | Cérebro que processa pedidos | UserController.php |
+| **View** | O que o usuário vê (HTML) | index.blade.php |
+| **Route** | Endereço da página | /admin/users |
+| **Middleware** | Porteiro que verifica permissões | auth, role |
+| **Migration** | Instruções para criar tabelas | create_users_table.php |
+| **Seeder** | Preenchimento automático do banco | RolePermissionSeeder.php |
+| **Role** | Função do usuário (professor, aluno) | 'professor' |
+| **Permission** | O que pode fazer (ver, criar, editar) | 'users.create' |
+| **RBAC** | Controle de acesso baseado em roles | Spatie Permission |
+| **Sessão** | "Memória" do servidor sobre quem está logado | $_SESSION |
+| **Hash** | Transforma senha em código secreto | bcrypt('senha') |
+| **CSRF** | Proteção contra formulários falsos | @csrf |
+| **XSS** | Proteção contra injeção de código malicioso | Security Headers |
 
 ## ✨ Funcionalidades
 
