@@ -47,7 +47,6 @@ Para iniciantes e novos desenvolvedores, recomendamos fortemente a documentaçã
 | [01. Introdução](./docs/01-introducao.md) | Visão geral do sistema, objetivos e casos de uso |
 | [02. Arquitetura](./docs/02-arquitetura.md) | Estrutura técnica, padrões MVC e design decisions |
 | [03. Como Funciona](./docs/03-como-funciona.md) | Fluxos de dados, autenticação e processos |
-| [04. Guia para Iniciantes](./docs/04-para-iniciantes.md) | Explicação detalhada passo a passo de cada implementação |
 | [05. Guia de Permissões](./docs/05-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
 
 ### 🚀 Começo Rápido
@@ -55,10 +54,9 @@ Para iniciantes e novos desenvolvedores, recomendamos fortemente a documentaçã
 Se você é novo no projeto, comece aqui:
 
 1. **Leia a Introdução** para entender o que é o AlfaSchool
-2. **Leia o Guia para Iniciantes** para entender como tudo foi feito
-3. **Siga a Stack Tecnológica** para configurar o ambiente
-4. **Siga a Instalação** para colocar o sistema para rodar
-5. **Consulte o Guia de Permissões** para entender o controle de acessos
+2. **Siga a Stack Tecnológica** para configurar o ambiente
+3. **Siga a Instalação** para colocar o sistema para rodar
+4. **Consulte o Guia de Permissões** para entender o controle de acessos
 
 ### 📖 Conceitos Explicados Simplesmente
 
