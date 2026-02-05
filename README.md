@@ -47,7 +47,7 @@ Para iniciantes e novos desenvolvedores, recomendamos fortemente a documentaçã
 | [01. Introdução](./docs/01-introducao.md) | Visão geral do sistema, objetivos e casos de uso |
 | [02. Arquitetura](./docs/02-arquitetura.md) | Estrutura técnica, padrões MVC e design decisions |
 | [03. Como Funciona](./docs/03-como-funciona.md) | Fluxos de dados, autenticação e processos |
-| [05. Guia de Permissões](./docs/05-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
+| [05. Guia de Permissões](./docs/04-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
 
 ### 🚀 Começo Rápido
 

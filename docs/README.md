@@ -7,7 +7,7 @@ Bem-vindo à documentação detalhada do sistema AlfaSchool. Esta documentação
 - [01. Introdução](./01-introducao.md) - Visão geral do sistema
 - [02. Arquitetura](./02-arquitetura.md) - Estrutura técnica e design do sistema
 - [03. Como Funciona](./03-como-funciona.md) - Fluxo completo do sistema
-- [05. Guia de Permissões](./05-guia-de-permissoes.md) - Como funcionam roles e permissões
+- [04. Guia de Permissões](./04-guia-de-permissoes.md) - Como funcionam roles e permissões
 
 ## 🚀 Começo Rápido
 
@@ -46,7 +46,7 @@ Para contribuir com a documentação:
 | [01-introducao.md](./01-introducao.md) | Visão geral do sistema AlfaSchool |
 | [02-arquitetura.md](./02-arquitetura.md) | Estrutura técnica e padrões do projeto |
 | [03-como-funciona.md](./03-como-funciona.md) | Fluxo de dados e processos do sistema |
-| [05-guia-de-permissoes.md](./05-guia-de-permissoes.md) | Como funciona o sistema de RBAC |
+| [05-guia-de-permissoes.md](./04-guia-de-permissoes.md) | Como funciona o sistema de RBAC |
 
 ---
 
