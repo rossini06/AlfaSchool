@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form method="POST" action="{{ route('admin.users.update', $user) }}">
@@ -56,6 +56,32 @@
                                     </label>
                                 @endforeach
                             </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium text-gray-700">Permissões Individuais</label>
+                                <span class="text-xs text-gray-500">Permissões extras além dos perfis</span>
+                            </div>
+                            @if($permissions->isNotEmpty())
+                                @foreach($permissions as $module => $modulePermissions)
+                                    <div class="mb-4">
+                                        <h4 class="text-sm font-medium text-gray-900 mb-2 capitalize">{{ $module }}</h4>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            @foreach($modulePermissions as $permission)
+                                                <label class="flex items-center p-2 border rounded hover:bg-gray-50">
+                                                    <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                                        {{ in_array($permission->name, $userPermissions) ? 'checked' : '' }}
+                                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                                    <span class="ml-2 text-sm text-gray-700">{{ $permission->name }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-sm text-gray-500">Nenhuma permissão disponível.</p>
+                            @endif
                         </div>
 
                         <div class="flex items-center justify-between">

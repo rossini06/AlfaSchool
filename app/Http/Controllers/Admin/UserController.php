@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -19,7 +20,10 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view('admin.users.create', compact('roles'));
+        $permissions = Permission::all()->groupBy(function ($item) {
+            return explode('.', $item->name)[0];
+        });
+        return view('admin.users.create', compact('roles', 'permissions'));
     }
 
     public function store(Request $request)
@@ -40,6 +44,8 @@ class UserController extends Controller
             ],
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,name',
         ], [
             'password.regex' => 'A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial (@$!%*#?&)',
         ]);
@@ -54,6 +60,10 @@ class UserController extends Controller
             $user->assignRole($validated['roles']);
         }
 
+        if (!empty($validated['permissions'])) {
+            $user->givePermissionTo($validated['permissions']);
+        }
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário criado com sucesso!');
     }
@@ -63,7 +73,12 @@ class UserController extends Controller
         $roles = Role::all();
         $userRoles = $user->roles->pluck('name')->toArray();
         
-        return view('admin.users.edit', compact('user', 'roles', 'userRoles'));
+        $permissions = Permission::all()->groupBy(function ($item) {
+            return explode('.', $item->name)[0];
+        });
+        $userPermissions = $user->getDirectPermissions()->pluck('name')->toArray();
+        
+        return view('admin.users.edit', compact('user', 'roles', 'userRoles', 'permissions', 'userPermissions'));
     }
 
     public function update(Request $request, User $user)
@@ -84,6 +99,8 @@ class UserController extends Controller
             ],
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,name',
         ], [
             'password.regex' => 'A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial (@$!%*#?&)',
         ]);
@@ -98,6 +115,7 @@ class UserController extends Controller
         }
 
         $user->syncRoles($validated['roles'] ?? []);
+        $user->syncPermissions($validated['permissions'] ?? []);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário atualizado com sucesso!');
@@ -106,7 +124,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         
-        if ($user->id === auth()->id()) {
+        if ($user->id === auth()->user()->id) {
             return back()->with('error', 'Você não pode excluir sua própria conta!');
         }
 
