@@ -504,20 +504,88 @@ tail -f storage/logs/laravel.log
 tail -f storage/logs/audit-$(date +%Y-%m-%d).log
 ```
 
+## 📍 Atalhos Rápidos (Futuro)
+
+> **Nota:** Esta funcionalidade está planejada para uma versão futura. Por enquanto, utilize o menu de navegação lateral do painel admin ou acesse as rotas diretamente.
+
+### Rotas Administrativas Planejadas
+
+| Rota | Descrição | Status |
+|------|-----------|--------|
+| `/admin/quick-links` | Página com todos os atalhos do sistema | 🔜 Em planejamento |
+| `/admin/routes` | Documentação interativa das rotas | 🔜 Em planejamento |
+
+### Como Acessar Agora
+
+Enquanto a página de atalhos não é implementada, você pode:
+
+1. **Usar o menu lateral** do painel admin
+2. **Acessar diretamente** via URL usando as rotas abaixo
+
+---
+
 ## 📊 Rotas Disponíveis
 
+### Autenticação
+
 | Rota | Método | Middleware | Descrição |
-|-------|---------|------------|------------|
-| `/` | GET | - | Redireciona para login |
+|------|--------|------------|------------|
 | `/login` | GET/POST | guest | Login de usuário |
-| `/register` | GET/POST | guest | Registro de usuário |
+| `/logout` | POST | auth | Logout de usuário |
+| `/register` | GET/POST | guest | Registro de novo usuário |
 | `/forgot-password` | GET/POST | guest | Recuperação de senha |
+| `/reset-password/{token}` | GET/POST | guest | Redefinir senha |
+| `/verify-email` | GET | auth, verified | Verificação de email |
+| `/verify-email/{id}/{hash}` | GET | auth | Confirmar email |
+
+### Dashboard
+
+| Rota | Método | Middleware | Descrição |
+|------|--------|------------|------------|
 | `/dashboard` | GET | auth, verified | Dashboard principal |
-| `/admin` | GET | auth, role:admin, throttle | Área administrativa |
+| `/` | GET | - | Redireciona para dashboard ou login |
+
+### Área Administrativa
+
+| Rota | Método | Middleware | Descrição |
+|------|--------|------------|------------|
+| `/admin` | GET | auth, role:admin | Painel administrativo |
 | `/admin/users` | GET | auth, permission:users.view | Listar usuários |
 | `/admin/users/create` | GET/POST | auth, permission:users.create | Criar usuário |
-| `/admin/roles` | GET | auth, permission:roles.view | Listar roles |
+| `/admin/users/{user}` | GET | auth, permission:users.view | Ver detalhes do usuário |
+| `/admin/users/{user}/edit` | GET/POST | auth, permission:users.edit | Editar usuário |
+| `/admin/users/{user}` | DELETE | auth, permission:users.delete | Excluir usuário |
+| `/admin/roles` | GET | auth, permission:roles.view | Listar perfis |
+| `/admin/roles/create` | GET/POST | auth, permission:roles.edit | Criar perfil |
+| `/admin/roles/{role}/edit` | GET/POST | auth, permission:roles.edit | Editar perfil |
 | `/admin/permissions` | GET | auth, permission:roles.view | Listar permissões |
+
+### Perfil do Usuário
+
+| Rota | Método | Middleware | Descrição |
+|------|--------|------------|------------|
+| `/profile` | GET | auth | Editar perfil do usuário |
+| `/profile` | PUT/PATCH | auth | Atualizar perfil |
+| `/profile/password` | PUT | auth | Alterar senha |
+| `/profile/delete` | DELETE | auth | Excluir conta |
+
+### Atalhos Diretos Úteis
+
+```bash
+# Autenticação
+http://localhost:8000/login        # Login
+http://localhost:8000/register    # Registro
+http://localhost:8000/dashboard    # Dashboard
+
+# Admin
+http://localhost:8000/admin/users              # Lista de usuários
+http://localhost:8000/admin/users/create       # Criar usuário
+http://localhost:8000/admin/roles              # Lista de perfis
+http://localhost:8000/admin/permissions        # Lista de permissões
+
+# Perfil
+http://localhost:8000/profile                   # Editar perfil
+```
 
 ## 🔐 Segurança em Produção
 
