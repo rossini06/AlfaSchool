@@ -5,154 +5,40 @@ Sistema de gestão escolar completo com autenticação, controle de permissões 
 ## 📋 Índice
 
 - [Sobre](#sobre)
-- [Documentação Completa](#documentação-completa)
-- [Funcionalidades](#funcionalidades)
+- [Começo Rápido](#começo-rápido)
 - [Stack Tecnológica](#stack-tecnológica)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
+- [Credenciais de Acesso](#credenciais-de-acesso)
+- [Funcionalidades](#funcionalidades)
+- [Sistema Superadmin](#sistema-superadmin)
 - [Segurança](#segurança)
 - [Permissões e Roles](#permissões-e-roles)
-- [Estrutura do Projeto](#estrutura-do-projeto)
+- [phpMyAdmin](#phpmyadmin)
+- [Comandos Úteis](#comandos-úteis)
+- [Rotas Disponíveis](#rotas-disponíveis)
+- [Segurança em Produção](#segurança-em-produção)
+- [Contribuindo](#contribuindo)
 - [Licença](#licença)
 
-## 📋 Índice
-
-- [Sobre](#sobre)
-- [Documentação Completa](#documentação-completa)
-- [Funcionalidades](#funcionalidades)
-- [Stack Tecnológica](#stack-tecnológica)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Segurança](#segurança)
-- [Permissões e Roles](#permissões-e-roles)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Licença](#licença)
+---
 
 ## 📖 Sobre
 
 AlfaSchool é um sistema de gestão escolar desenvolvido em Laravel, focado em segurança e controle de acessos. O sistema permite gerenciar alunos, turmas, notas, frequência e financeiro, com um robusto sistema de permissões baseado em roles.
 
-AlfaSchool é um sistema de gestão escolar desenvolvido em Laravel, focado em segurança e controle de acessos. O sistema permite gerenciar alunos, turmas, notas, frequência e financeiro, com um robusto sistema de permissões baseado em roles.
-
-## 📚 Documentação Completa
+### Documentação Completa
 
 Para iniciantes e novos desenvolvedores, recomendamos fortemente a documentação detalhada disponível na pasta `docs/`:
-
-### 📖 Documentação Disponível
 
 | Documento | Descrição |
 |-----------|-----------|
 | [01. Introdução](./docs/01-introducao.md) | Visão geral do sistema, objetivos e casos de uso |
 | [02. Arquitetura](./docs/02-arquitetura.md) | Estrutura técnica, padrões MVC e design decisions |
 | [03. Como Funciona](./docs/03-como-funciona.md) | Fluxos de dados, autenticação e processos |
-| [05. Guia de Permissões](./docs/04-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
+| [04. Guia de Permissões](./docs/04-guia-de-permissoes.md) | Como funciona RBAC, roles e permissions |
 
-### 🚀 Começo Rápido
+---
 
-Se você é novo no projeto, comece aqui:
-
-1. **Leia a Introdução** para entender o que é o AlfaSchool
-2. **Siga a Stack Tecnológica** para configurar o ambiente
-3. **Siga a Instalação** para colocar o sistema para rodar
-4. **Consulte o Guia de Permissões** para entender o controle de acessos
-
-### 📖 Conceitos Explicados Simplesmente
-
-| Conceito | Explicação Simples | Exemplo |
-|----------|-------------------|---------|
-| **Framework** | Kit de ferramentas prontas | Laravel |
-| **Model** | Molde de dados (como uma ficha de usuário) | User.php |
-| **Controller** | Cérebro que processa pedidos | UserController.php |
-| **View** | O que o usuário vê (HTML) | index.blade.php |
-| **Route** | Endereço da página | /admin/users |
-| **Middleware** | Porteiro que verifica permissões | auth, role |
-| **Migration** | Instruções para criar tabelas | create_users_table.php |
-| **Seeder** | Preenchimento automático do banco | RolePermissionSeeder.php |
-| **Role** | Função do usuário (professor, aluno) | 'professor' |
-| **Permission** | O que pode fazer (ver, criar, editar) | 'users.create' |
-| **RBAC** | Controle de acesso baseado em roles | Spatie Permission |
-| **Sessão** | "Memória" do servidor sobre quem está logado | $_SESSION |
-| **Hash** | Transforma senha em código secreto | bcrypt('senha') |
-| **CSRF** | Proteção contra formulários falsos | @csrf |
-| **XSS** | Proteção contra injeção de código malicioso | Security Headers |
-
-## ✨ Funcionalidades
-
-### Autenticação
-- Login e registro de usuários
-- Recuperação de senha
-- Verificação de email obrigatória
-- Sessão segura com timeout
-- Proteção contra ataques de força bruta
-
-### Controle de Permissões (RBAC)
-- **5 Perfis de Usuário:**
-  - **Admin**: Acesso total ao sistema
-  - **Gestor**: Gestão pedagógica e administrativa
-  - **Professor**: Lançamento de notas e frequência
-  - **Secretaria**: Cadastros e matrículas
-  - **Aluno**: Visualização de dados pessoais e acadêmicos
-
-- **22 Permissões** distribuídas por módulo:
-  - Usuários (view, create, edit, delete)
-  - Roles (view, edit)
-  - Alunos (view, create, edit, delete)
-  - Turmas (view, create, edit, delete)
-  - Notas (view, create, edit)
-  - Frequência (view, create)
-  - Financeiro (view, edit)
-  - Meus Dados (view)
-
-### Dashboard
-- Exibição de informações do usuário logado
-- Lista de perfis e permissões
-- Indicadores de segurança
-
-### Interface Amigável
-- **Sem nomes técnicos confusos**: O sistema usa descrições em português claro
-- **Sem jargon técnico**: Usuários não-técnicos podem gerenciar acessos facilmente
-- **Ajuda contextual**: Cada seção tem instruções claras
-
-| O que o usuário vê | Significado |
-|---------------------|-------------|
-| "Pode ver usuários" | Acesso para visualizar lista de usuários |
-| "Pode criar novos registros" | Acesso para cadastrar novos itens |
-| "Pode editar registros" | Acesso para alterar dados existentes |
-| "Pode excluir registros" | Acesso para remover itens |
-
-### Gestão Administrativa
-- CRUD completo de usuários
-- Gestão de roles e permissões
-- Atribuição múltipla de roles
-- Logs de auditoria de ações sensíveis
-
-## 🚀 Stack Tecnológica
-
-| Componente | Versão |
-|------------|---------|
-| **Backend** | |
-| Laravel | 12.x |
-| PHP | 8.5+ |
-| **Frontend** | |
-| Blade | 4.x |
-| Tailwind CSS | 4.x |
-| **Banco de Dados** | |
-| MySQL | 9.x |
-| **Autenticação** | |
-| Laravel Breeze | 2.x |
-| Spatie Laravel Permission | 6.x |
-
-## 📦 Requisitos
-
-- PHP >= 8.5
-- Composer
-- MySQL >= 5.7 ou MariaDB >= 10.3
-- Node.js >= 18
-- NPM >= 9
-
-## 🔧 Instalação
+## 🚀 Começo Rápido
 
 ### 1. Clone o repositório
 
@@ -215,50 +101,105 @@ npm run build
 php artisan serve
 ```
 
-Acesse: `http://localhost:8000`
+**Acesse:** `http://localhost:8000`
 
 ---
 
-## 🗄️ phpMyAdmin - Gerenciamento do Banco de Dados
+## 🛠️ Stack Tecnológica
 
-O sistema inclui o **phpMyAdmin** para gerenciamento visual do banco de dados MySQL.
+| Componente | Versão |
+|------------|---------|
+| **Backend** | |
+| Laravel | 12.x |
+| PHP | 8.5+ |
+| **Frontend** | |
+| Blade | 4.x |
+| Tailwind CSS | 4.x |
+| **Banco de Dados** | |
+| MySQL | 9.x |
+| **Autenticação** | |
+| Laravel Breeze | 2.x |
+| Spatie Laravel Permission | 6.x |
 
-### Como Acessar
+### Requisitos
 
-**URL:** `http://localhost:8000/phpmyadmin/`
+- PHP >= 8.5
+- Composer
+- MySQL >= 5.7 ou MariaDB >= 10.3
+- Node.js >= 18
+- NPM >= 9
 
-### Credenciais de Acesso
+---
+
+## 🔑 Credenciais de Acesso
+
+### Administrador do Sistema
 
 | Campo | Valor |
 |-------|-------|
-| **Servidor** | 127.0.0.1 |
-| **Usuário** | adminer |
-| **Senha** | adminer123 |
-| **Banco** | alfaschool |
+| **Email** | admin@alfaschool.com |
+| **Senha** | Admin@123 |
 
-### Interface do phpMyAdmin
+### Superadmin (Desenvolvedor)
 
-O phpMyAdmin oferece uma interface profissional e estruturada para:
+| Campo | Valor |
+|-------|-------|
+| **Email** | superadmin@alfaschool.com |
+| **Senha** | SuperAdmin@2024!@#$ |
 
-- ✅ Visualizar todas as tabelas do banco em formato de grade
-- ✅ Ver e editar dados de usuários
-- ✅ Gerenciar papéis e permissões
-- ✅ Executar consultas SQL
-- ✅ Fazer backups (exportar dados)
-- ✅ Estrutura de tabelas com abas organizadas
+> **Nota:** A senha do superadmin é apenas para uso do desenvolvedor. Não compartilhe esta credencial.
 
-### Tabelas Disponíveis
+---
 
-| Tabela | Descrição |
+## ✨ Funcionalidades
+
+### Autenticação
+
+- Login e logout seguro
+- Recuperação de senha
+- Verificação de email obrigatória
+- Sessão segura com timeout (15 minutos)
+- Proteção contra ataques de força bruta
+
+### Controle de Permissões (RBAC)
+
+**5 Perfis de Usuário:**
+
+| Perfil | Descrição |
 |--------|-----------|
-| `users` | Usuários do sistema |
-| `roles` | Perfis de usuário |
-| `permissions` | Permissões individuais |
-| `model_has_roles` | Relação usuários-perfis |
-| `model_has_permissions` | Relação usuários-permissões |
-| `role_has_permissions` | Relação perfis-permissões |
-| `personal_access_tokens` | Tokens de acesso API |
-| `sessions` | Sessões de usuário |
+| **Admin** | Acesso total ao sistema |
+| **Gestor** | Gestão pedagógica e administrativa |
+| **Professor** | Lançamento de notas e frequência |
+| **Secretaria** | Cadastros e matrículas |
+| **Aluno** | Visualização de dados pessoais e acadêmicos |
+
+**Módulos com Permissões:**
+
+| Módulo | Permissões |
+|--------|------------|
+| Usuários | view, create, edit, delete |
+| Perfis | view, edit |
+| Alunos | view, create, edit, delete |
+| Turmas | view, create, edit, delete |
+| Notas | view, create, edit |
+| Frequência | view, create |
+| Financeiro | view, edit |
+| Meus Dados | view |
+
+### Interface Amigável
+
+- Descrições em português claro
+- Sem nomes técnicos confusos
+- Ajuda contextual em cada seção
+- Indicadores visuais de força de senha
+- Validação em tempo real
+
+### Gestão Administrativa
+
+- CRUD completo de usuários
+- Gestão de roles e permissões
+- Atribuição múltipla de roles
+- Logs de auditoria de ações sensíveis
 
 ---
 
@@ -266,7 +207,7 @@ O phpMyAdmin oferece uma interface profissional e estruturada para:
 
 O sistema inclui um usuário **superadmin** especial para uso exclusivo do desenvolvedor.
 
-### Características do Superadmin
+### Características
 
 | Característica | Descrição |
 |----------------|-----------|
@@ -275,71 +216,24 @@ O sistema inclui um usuário **superadmin** especial para uso exclusivo do desen
 | **Edição** | Apenas o próprio superadmin pode editar |
 | **Exclusão** | Impossível via interface |
 
-### Credenciais do Superadmin
-
-| Campo | Valor |
-|-------|-------|
-| **Email** | superadmin@alfaschool.com |
-| **Senha** | SuperAdmin@2024!@#$ |
-
-### Como Criar/Recriar o Superadmin
+### Criar/Recriar Superadmin
 
 ```bash
 php artisan db:seed --class=SuperAdminSeeder
 ```
 
-### Comandos Úteis
+### Verificar Superadmin
 
 ```bash
-# Verificar superadmin
 php artisan tinker --execute="\$u = \App\Models\User::where('email', 'superadmin@alfaschool.com')->first(); echo \$u->name . ' - Superadmin: ' . (\$u->isSuperAdmin() ? 'SIM' : 'NÃO');"
-
-# Verificar se usuário é superadmin
-php artisan tinker --execute="echo auth()->user()->isSuperAdmin() ? 'É superadmin' : 'Não é superadmin';"
 ```
 
 ---
 
-## ⚙️ Configuração
-
-### Credenciais de Acesso
-
-Após executar os seeders, use estas credenciais para acesso inicial:
-
-- **Email:** `admin@alfaschool.com`
-- **Senha:** `Admin@123`
-
-### Variáveis de Ambiente
-
-Principais variáveis configuráveis:
-
-```env
-APP_NAME=AlfaSchool
-APP_ENV=local
-APP_DEBUG=false
-
-# Banco de Dados
-DB_CONNECTION=mysql
-DB_DATABASE=alfaschool
-DB_USERNAME=root
-DB_PASSWORD=
-
-# Sessão
-SESSION_LIFETIME=15
-SESSION_ENCRYPT=true
-
-# Cache
-CACHE_STORE=database
-
-# Queue
-QUEUE_CONNECTION=database
-```
-
 ## 🔒 Segurança
 
-O sistema AlfaSchool implementa as melhores práticas de segurança (OWASP):
-
 ### 1. Autenticação Forte
+
 - Senhas com hash bcrypt (12 rounds)
 - Validação de força de senha:
   - Mínimo 8 caracteres
@@ -351,13 +245,17 @@ O sistema AlfaSchool implementa as melhores práticas de segurança (OWASP):
 - Timeout de sessão (15 minutos)
 
 ### 2. Rate Limiting
-- **Login:** 5 tentativas por minuto
-- **Registro:** 3 tentativas por minuto
-- **Esqueci Senha:** 3 tentativas por minuto
-- **Logout:** 10 tentativas por minuto
-- **Rotas Admin:** 60 requisições por minuto
+
+| Rota | Limite |
+|------|--------|
+| Login | 5 tentativas/minuto |
+| Registro | 3 tentativas/minuto |
+| Esqueci Senha | 3 tentativas/minuto |
+| Logout | 10 tentativas/minuto |
+| Rotas Admin | 60 requisições/minuto |
 
 ### 3. Proteção contra Ataques
+
 - CSRF protection em todos os formulários
 - XSS Protection headers
 - SQL Injection protection via Eloquent ORM
@@ -365,17 +263,13 @@ O sistema AlfaSchool implementa as melhores práticas de segurança (OWASP):
 - HTTP Security Headers (Helmet)
 
 ### 4. Auditoria
+
 - Logs dedicados para ações sensíveis
 - Registro de login/logout
 - Registro de alterações em usuários
 - Registro de alterações em permissões
 
-### 5. Verificação de Email
-- Verificação obrigatória antes do acesso
-- Rotas assinadas para segurança
-- Limite de envio de emails
-
-### 6. HTTP Security Headers
+### 5. HTTP Security Headers
 
 ```
 X-Content-Type-Options: nosniff
@@ -387,30 +281,9 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 Content-Security-Policy: default-src 'self'...
 ```
 
+---
+
 ## 👥 Permissões e Roles
-
-### Interface Amigável
-
-O sistema foi projetado para ser usado por usuários **não-técnicos**. Ao gerenciar permissões, o usuário vê descrições claras em português, sem nomes técnicos confusos.
-
-#### Exemplo de Interface
-
-| Antes (confuso para leigos) | Depois (claro e intuitivo) |
-|------------------------------|---------------------------|
-| ✅ "Pode ver usuários" | ✅ "Pode ver usuários" |
-| ❌ `users.view` | ~~`users.view`~~ (escondido) |
-| ❌ `financeiro.edit` | ~~`financeiro.edit`~~ (escondido) |
-
-#### Como Aparece para o Usuário
-
-```
-🎓 Módulo de Alunos
-Gerenciar dados dos alunos
-
-☑️ Pode ver esta função
-☑️ Pode criar novos registros
-☑️ Pode editar registros existentes
-```
 
 ### Hierarquia de Perfis
 
@@ -443,102 +316,45 @@ Aluno
 └── meus_dados.view
 ```
 
-### Permissões por Módulo
+### Interface Amigável
 
-O usuário vê descrições amigáveis como "Pode ver usuários" em vez de `users.view`.
+O sistema foi projetado para ser usado por usuários **não-técnicos**:
 
-| Módulo | Descrição para Usuário | Roles que Acessam |
-|--------|------------------------|-------------------|
-| **Usuários** | Gerenciar usuários do sistema | Admin |
-| **Perfis** | Gerenciar perfis e permissões | Admin |
-| **Alunos** | Gerenciar dados dos alunos | Admin, Gestor, Secretaria |
-| **Turmas** | Gerenciar turmas e disciplinas | Admin, Gestor, Professor |
-| **Notas** | Lançar e visualizar notas | Admin, Gestor, Professor |
-| **Frequência** | Registrar presença dos alunos | Admin, Gestor, Professor |
-| **Financeiro** | Ver e editar dados financeiros | Admin, Gestor |
+| Nomes Técnicos | Para o Usuário |
+|----------------|----------------|
+| `users.view` | "Pode ver usuários" |
+| `users.create` | "Pode criar novos registros" |
+| `users.edit` | "Pode editar registros existentes" |
+| `users.delete` | "Pode excluir registros" |
 
-### Código Técnico (Interno)
+---
 
-Para referência da equipe de desenvolvimento, as permissões são armazenadas com nomes técnicos no banco:
+## 🗄️ phpMyAdmin
 
-| Permissão Técnica | Descrição | O que Controla |
-|-------------------|-----------|---------------|
-| `users.view` | Pode ver usuários | Lista e detalhes de usuários |
-| `users.create` | Pode criar usuários | Cadastro de novos usuários |
-| `users.edit` | Pode editar usuários | Alteração de dados |
-| `users.delete` | Pode excluir usuários | Remoção de usuários |
-| `alunos.view` | Pode ver alunos | Lista e detalhes de alunos |
-| `alunos.create` | Pode criar alunos | Cadastro de novos alunos |
-| `alunos.edit` | Pode editar alunos | Alteração de dados |
-| `alunos.delete` | Pode excluir alunos | Remoção de alunos |
-| `turmas.view` | Pode ver turmas | Lista e detalhes de turmas |
-| `turmas.create` | Pode criar turmas | Cadastro de novas turmas |
-| `turmas.edit` | Pode editar turmas | Alteração de dados |
-| `turmas.delete` | Pode excluir turmas | Remoção de turmas |
-| `notas.view` | Pode ver notas | Visualização de notas |
-| `notas.create` | Pode criar notas | Lançamento de notas |
-| `notas.edit` | Pode editar notas | Alteração de notas |
-| `frequencia.view` | Pode ver frequência | Visualização de frequência |
-| `frequencia.create` | Pode criar frequência | Registro de presença |
-| `financeiro.view` | Pode ver financeiro | Visualização de dados financeiros |
-| `financeiro.edit` | Pode editar financeiro | Alteração de dados financeiros |
-| `meus_dados.view` | Pode ver meus dados | Visualização de próprios dados |
-| `meus_dados.edit` | Pode editar meus dados | Alteração de próprios dados |
-| `roles.view` | Pode ver perfis | Lista de perfis |
-| `roles.edit` | Pode editar perfis | Alteração de permissões |
+O sistema inclui o **phpMyAdmin** para gerenciamento visual do banco de dados MySQL.
 
-## 📁 Estrutura do Projeto
+### Como Acessar
 
-```
-alfaschool/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/
-│   │   │   │   ├── UserController.php
-│   │   │   │   ├── RoleController.php
-│   │   │   │   └── PermissionController.php
-│   │   │   ├── Auth/
-│   │   │   ├── DashboardController.php
-│   │   │   └── ProfileController.php
-│   │   ├── Middleware/
-│   │   │   ├── LogAuditableActions.php
-│   │   │   └── SecurityHeaders.php
-│   ├── Models/
-│   │   └── User.php
-│   └── Providers/
-│       └── AppServiceProvider.php
-├── database/
-│   ├── migrations/
-│   └── seeders/
-│       ├── DatabaseSeeder.php
-│       ├── RolePermissionSeeder.php
-│       └── AdminSeeder.php
-├── resources/
-│   ├── views/
-│   │   ├── admin/
-│   │   │   ├── users/
-│   │   │   ├── roles/
-│   │   │   └── permissions/
-│   │   ├── auth/
-│   │   ├── layouts/
-│   │   └── components/
-│   ├── css/
-│   └── js/
-├── routes/
-│   ├── web.php
-│   ├── auth.php
-│   └── console.php
-├── config/
-│   ├── auth.php
-│   ├── permission.php
-│   └── logging.php
-├── public/
-└── storage/
-    ├── logs/
-    │   ├── laravel.log
-    │   └── audit-YYYY-MM-DD.log
-```
+**URL:** `http://localhost:8000/phpmyadmin/`
+
+### Credenciais
+
+| Campo | Valor |
+|-------|-------|
+| **Servidor** | 127.0.0.1 |
+| **Usuário** | adminer |
+| **Senha** | adminer123 |
+| **Banco** | alfaschool |
+
+### O que você pode fazer
+
+- Visualizar todas as tabelas do banco
+- Ver e editar dados de usuários
+- Gerenciar papéis e permissões
+- Executar consultas SQL
+- Fazer backups (exportar dados)
+
+---
 
 ## 🛠️ Comandos Úteis
 
@@ -587,122 +403,70 @@ tail -f storage/logs/laravel.log
 tail -f storage/logs/audit-$(date +%Y-%m-%d).log
 ```
 
-## 📍 Atalhos Rápidos (Futuro)
-
-> **Nota:** Esta funcionalidade está planejada para uma versão futura. Por enquanto, utilize o menu de navegação lateral do painel admin ou acesse as rotas diretamente.
-
-### Rotas Administrativas Planejadas
-
-| Rota | Descrição | Status |
-|------|-----------|--------|
-| `/admin/quick-links` | Página com todos os atalhos do sistema | 🔜 Em planejamento |
-| `/admin/routes` | Documentação interativa das rotas | 🔜 Em planejamento |
-
-### Como Acessar Agora
-
-Enquanto a página de atalhos não é implementada, você pode:
-
-1. **Usar o menu lateral** do painel admin
-2. **Acessar diretamente** via URL usando as rotas abaixo
-
 ---
 
-## 🔐 Registro de Usuários
-
-O registro público de usuários está **desabilitado** por segurança. Apenas administradores podem criar novos usuários.
-
-### Como Criar Novos Usuários
-
-Para criar novos usuários no sistema, você deve:
-
-1. Fazer login com uma conta **Admin**
-2. Acessar `/admin/users/create` ou usar o menu lateral
-3. Preencher os dados do usuário
-4. Definir o perfil apropriado (Admin, Gestor, Professor, Secretaria ou Aluno)
-5. Definir permissões extras (opcional)
-
-### Rotas Relacionadas
-
-| Rota | Método | Middleware | Descrição |
-|------|--------|------------|------------|
-| `/admin/users` | GET | auth, permission:users.view | Listar usuários |
-| `/admin/users/create` | GET/POST | auth, permission:users.create | Criar novo usuário |
-
----
-
-## 📊 Rotas Disponíveis
+## 📍 Rotas Disponíveis
 
 ### Autenticação
 
-| Rota | Método | Middleware | Descrição |
-|------|--------|------------|------------|
-| `/login` | GET/POST | guest | Login de usuário |
-| `/logout` | POST | auth | Logout de usuário |
-| `/forgot-password` | GET/POST | guest | Recuperação de senha |
-| `/reset-password/{token}` | GET/POST | guest | Redefinir senha |
-| `/verify-email` | GET | auth, verified | Verificação de email |
-| `/verify-email/{id}/{hash}` | GET | auth | Confirmar email |
-
-> **Nota:** O registro público (`/register`) está desabilitado. Apenas administradores podem criar usuários.
+| Rota | Método | Descrição |
+|------|--------|------------|
+| `/login` | GET/POST | Login de usuário |
+| `/logout` | POST | Logout de usuário |
+| `/forgot-password` | GET/POST | Recuperação de senha |
+| `/reset-password/{token}` | GET/POST | Redefinir senha |
 
 ### Dashboard
 
-| Rota | Método | Middleware | Descrição |
-|------|--------|------------|------------|
-| `/dashboard` | GET | auth, verified | Dashboard principal |
-| `/` | GET | - | Redireciona para dashboard ou login |
+| Rota | Descrição |
+|------|------------|
+| `/dashboard` | Dashboard principal |
+| `/` | Redireciona para dashboard ou login |
 
 ### Área Administrativa
 
-| Rota | Método | Middleware | Descrição |
-|------|--------|------------|------------|
-| `/admin` | GET | auth, role:admin | Painel administrativo |
-| `/admin/users` | GET | auth, permission:users.view | Listar usuários |
-| `/admin/users/create` | GET/POST | auth, permission:users.create | Criar usuário |
-| `/admin/users/{user}` | GET | auth, permission:users.view | Ver detalhes do usuário |
-| `/admin/users/{user}/edit` | GET/POST | auth, permission:users.edit | Editar usuário |
-| `/admin/users/{user}` | DELETE | auth, permission:users.delete | Excluir usuário |
-| `/admin/roles` | GET | auth, permission:roles.view | Listar perfis |
-| `/admin/roles/create` | GET/POST | auth, permission:roles.edit | Criar perfil |
-| `/admin/roles/{role}/edit` | GET/POST | auth, permission:roles.edit | Editar perfil |
-| `/admin/permissions` | GET | auth, permission:roles.view | Listar permissões |
+| Rota | Middleware | Descrição |
+|------|------------|------------|
+| `/admin` | role:admin | Painel administrativo |
+| `/admin/users` | permission:users.view | Listar usuários |
+| `/admin/users/create` | permission:users.create | Criar usuário |
+| `/admin/users/{user}/edit` | permission:users.edit | Editar usuário |
+| `/admin/users/{user}` | permission:users.delete | Excluir usuário |
+| `/admin/roles` | permission:roles.view | Listar perfis |
+| `/admin/roles/{role}/edit` | permission:roles.edit | Editar perfil |
+| `/admin/permissions` | permission:roles.view | Listar permissões |
 
-### Perfil do Usuário
-
-| Rota | Método | Middleware | Descrição |
-|------|--------|------------|------------|
-| `/profile` | GET | auth | Editar perfil do usuário |
-| `/profile` | PUT/PATCH | auth | Atualizar perfil |
-| `/profile/password` | PUT | auth | Alterar senha |
-| `/profile/delete` | DELETE | auth | Excluir conta |
-
-### Atalhos Diretos Úteis
+### Atalhos Diretos
 
 ```bash
-# Autenticação
-http://localhost:8000/login        # Login
-http://localhost:8000/register    # Registro
-http://localhost:8000/dashboard    # Dashboard
+# Login
+http://localhost:8000/login
 
-# Admin
-http://localhost:8000/admin/users              # Lista de usuários
-http://localhost:8000/admin/users/create       # Criar usuário
-http://localhost:8000/admin/roles              # Lista de perfis
-http://localhost:8000/admin/permissions        # Lista de permissões
+# Dashboard
+http://localhost:8000/dashboard
 
-# Perfil
-http://localhost:8000/profile                   # Editar perfil
+# Admin - Usuários
+http://localhost:8000/admin/users
+http://localhost:8000/admin/users/create
+
+# Admin - Perfis
+http://localhost:8000/admin/roles
+
+# phpMyAdmin
+http://localhost:8000/phpmyadmin/
 ```
+
+---
 
 ## 🔐 Segurança em Produção
 
 Antes de colocar em produção:
 
 1. **Alterar ambiente para produção**
-```env
-APP_ENV=production
-APP_DEBUG=false
-```
+   ```env
+   APP_ENV=production
+   APP_DEBUG=false
+   ```
 
 2. **Configurar HTTPS real** com certificado SSL válido
 
@@ -716,6 +480,8 @@ APP_DEBUG=false
 
 7. **Monitorar logs de auditoria** regularmente
 
+---
+
 ## 🤝 Contribuindo
 
 1. Faça um Fork do projeto
@@ -724,13 +490,11 @@ APP_DEBUG=false
 4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
 5. Abra um Pull Request
 
+---
+
 ## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT.
-
-## 👥 Suporte
-
-Para suporte, abra uma issue no repositório do GitHub.
 
 ---
 
