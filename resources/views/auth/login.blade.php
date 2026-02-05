@@ -43,5 +43,11 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Para solicitar acesso ao sistema, entre em contato com o administrador.
+            </p>
+        </div>
     </form>
 </x-guest-layout>

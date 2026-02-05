@@ -524,6 +524,29 @@ Enquanto a página de atalhos não é implementada, você pode:
 
 ---
 
+## 🔐 Registro de Usuários
+
+O registro público de usuários está **desabilitado** por segurança. Apenas administradores podem criar novos usuários.
+
+### Como Criar Novos Usuários
+
+Para criar novos usuários no sistema, você deve:
+
+1. Fazer login com uma conta **Admin**
+2. Acessar `/admin/users/create` ou usar o menu lateral
+3. Preencher os dados do usuário
+4. Definir o perfil apropriado (Admin, Gestor, Professor, Secretaria ou Aluno)
+5. Definir permissões extras (opcional)
+
+### Rotas Relacionadas
+
+| Rota | Método | Middleware | Descrição |
+|------|--------|------------|------------|
+| `/admin/users` | GET | auth, permission:users.view | Listar usuários |
+| `/admin/users/create` | GET/POST | auth, permission:users.create | Criar novo usuário |
+
+---
+
 ## 📊 Rotas Disponíveis
 
 ### Autenticação
@@ -532,11 +555,12 @@ Enquanto a página de atalhos não é implementada, você pode:
 |------|--------|------------|------------|
 | `/login` | GET/POST | guest | Login de usuário |
 | `/logout` | POST | auth | Logout de usuário |
-| `/register` | GET/POST | guest | Registro de novo usuário |
 | `/forgot-password` | GET/POST | guest | Recuperação de senha |
 | `/reset-password/{token}` | GET/POST | guest | Redefinir senha |
 | `/verify-email` | GET | auth, verified | Verificação de email |
 | `/verify-email/{id}/{hash}` | GET | auth | Confirmar email |
+
+> **Nota:** O registro público (`/register`) está desabilitado. Apenas administradores podem criar usuários.
 
 ### Dashboard
 

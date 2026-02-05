@@ -12,11 +12,13 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store'])
-    ->middleware('throttle:3,1');
+    // Registro público desabilitado por segurança
+// Apenas administradores podem criar usuários via /admin/users/create
+// Route::get('register', [RegisteredUserController::class, 'create'])
+//     ->name('register');
+//
+// Route::post('register', [RegisteredUserController::class, 'store'])
+// ->middleware('throttle:3,1');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
