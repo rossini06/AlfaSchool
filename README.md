@@ -219,32 +219,33 @@ Acesse: `http://localhost:8000`
 
 ---
 
-## 🗄️ Adminer - Gerenciamento do Banco de Dados
+## 🗄️ phpMyAdmin - Gerenciamento do Banco de Dados
 
-O sistema inclui o **Adminer** para gerenciamento visual do banco de dados.
+O sistema inclui o **phpMyAdmin** para gerenciamento visual do banco de dados MySQL.
 
 ### Como Acessar
 
-**URL:** `http://localhost:8000/adminer.php`
+**URL:** `http://localhost:8000/phpmyadmin/`
 
-### Credenciais do Adminer
+### Credenciais de Acesso
 
 | Campo | Valor |
 |-------|-------|
-| **Sistema** | MySQL |
 | **Servidor** | 127.0.0.1 |
-| **Porta** | 3306 |
 | **Usuário** | adminer |
 | **Senha** | adminer123 |
-| **Banco de dados** | alfaschool |
+| **Banco** | alfaschool |
 
-### O que você pode fazer no Adminer
+### Interface do phpMyAdmin
 
-- ✅ Visualizar todas as tabelas do banco
+O phpMyAdmin oferece uma interface profissional e estruturada para:
+
+- ✅ Visualizar todas as tabelas do banco em formato de grade
 - ✅ Ver e editar dados de usuários
 - ✅ Gerenciar papéis e permissões
 - ✅ Executar consultas SQL
 - ✅ Fazer backups (exportar dados)
+- ✅ Estrutura de tabelas com abas organizadas
 
 ### Tabelas Disponíveis
 
