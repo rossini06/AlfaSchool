@@ -26,5 +26,29 @@
                 {{ $slot }}
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const lockoutMessage = document.querySelector('.bg-red-100');
+                if (lockoutMessage && lockoutMessage.textContent.includes('bloqueada')) {
+                    let minutes = 15;
+                    const countdownElement = document.createElement('div');
+                    countdownElement.className = 'mt-2 text-sm font-bold flex items-center';
+                    countdownElement.innerHTML = '<svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Tempo restante: <span id="lockout-countdown" class="ml-1">' + minutes + '</span> minutos';
+                    lockoutMessage.appendChild(countdownElement);
+
+                    function updateCountdown() {
+                        if (minutes <= 0) {
+                            document.getElementById('lockout-countdown').textContent = 'Atualize a página';
+                            return;
+                        }
+                        minutes--;
+                        document.getElementById('lockout-countdown').textContent = minutes;
+                        setTimeout(updateCountdown, 60000);
+                    }
+                    setTimeout(updateCountdown, 60000);
+                }
+            });
+        </script>
     </body>
 </html>
