@@ -244,7 +244,50 @@ php artisan tinker --execute="\$u = \App\Models\User::where('email', 'superadmin
 - Sessão criptografada
 - Timeout de sessão (15 minutos)
 
-### 2. Rate Limiting
+### 2. Bloqueio de Conta por Tentativas Falhas
+
+O sistema implementa proteção contra ataques de força bruta, bloqueando temporariamente contas após múltiplas tentativas de login incorretas.
+
+#### Sistema de Bloqueio Progressivo
+
+| Tentativas Falhas | Bloqueio | Tempo |
+|-------------------|----------|-------|
+| 5 tentativas | 🔒 Leve | 15 minutos |
+| 10 tentativas | 🔒 Médio | 1 hora |
+| 15+ tentativas | 🔒 Alto | 24 horas |
+
+#### Mensagens de Erro
+
+```
+1-4 tentativas: "Email ou senha incorretos. Você tem X tentativas restantes."
+5-9 tentativas: "Conta bloqueada por 15 minutos. Tente novamente mais tarde."
+10-14 tentativas: "Conta bloqueada por 1 hora. Tente novamente mais tarde."
+15+ tentativas: "Conta bloqueada por 24 horas. Por favor, entre em contato."
+```
+
+#### Comandos de Gerenciamento
+
+```bash
+# Listar usuários bloqueados
+php artisan users:locked --all
+
+# Limpar bloqueios expirados
+php artisan users:clear-locks
+
+# Desbloquear usuário específico
+php artisan users:unlock email@exemplo.com
+
+# Resetar tentativas de login
+php artisan users:reset email@exemplo.com
+```
+
+#### Reset de Contador
+
+O contador de tentativas é resetado quando:
+- Login bem-sucedido é realizado
+- Tempo de bloqueio expira
+
+### 3. Rate Limiting
 
 | Rota | Limite |
 |------|--------|
