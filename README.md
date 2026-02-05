@@ -217,6 +217,50 @@ php artisan serve
 
 Acesse: `http://localhost:8000`
 
+---
+
+## 🗄️ Adminer - Gerenciamento do Banco de Dados
+
+O sistema inclui o **Adminer** para gerenciamento visual do banco de dados.
+
+### Como Acessar
+
+**URL:** `http://localhost:8000/adminer.php`
+
+### Credenciais do Adminer
+
+| Campo | Valor |
+|-------|-------|
+| **Sistema** | MySQL |
+| **Servidor** | 127.0.0.1 |
+| **Porta** | 3306 |
+| **Usuário** | adminer |
+| **Senha** | adminer123 |
+| **Banco de dados** | alfaschool |
+
+### O que você pode fazer no Adminer
+
+- ✅ Visualizar todas as tabelas do banco
+- ✅ Ver e editar dados de usuários
+- ✅ Gerenciar papéis e permissões
+- ✅ Executar consultas SQL
+- ✅ Fazer backups (exportar dados)
+
+### Tabelas Disponíveis
+
+| Tabela | Descrição |
+|--------|-----------|
+| `users` | Usuários do sistema |
+| `roles` | Perfis de usuário |
+| `permissions` | Permissões individuais |
+| `model_has_roles` | Relação usuários-perfis |
+| `model_has_permissions` | Relação usuários-permissões |
+| `role_has_permissions` | Relação perfis-permissões |
+| `personal_access_tokens` | Tokens de acesso API |
+| `sessions` | Sessões de usuário |
+
+---
+
 ## ⚙️ Configuração
 
 ### Credenciais de Acesso
