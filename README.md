@@ -262,6 +262,44 @@ O phpMyAdmin oferece uma interface profissional e estruturada para:
 
 ---
 
+## 👑 Sistema Superadmin
+
+O sistema inclui um usuário **superadmin** especial para uso exclusivo do desenvolvedor.
+
+### Características do Superadmin
+
+| Característica | Descrição |
+|----------------|-----------|
+| **Acesso** | Total ao sistema |
+| **Visibilidade** | Não aparece na lista de usuários do admin |
+| **Edição** | Apenas o próprio superadmin pode editar |
+| **Exclusão** | Impossível via interface |
+
+### Credenciais do Superadmin
+
+| Campo | Valor |
+|-------|-------|
+| **Email** | superadmin@alfaschool.com |
+| **Senha** | SuperAdmin@2024!@#$ |
+
+### Como Criar/Recriar o Superadmin
+
+```bash
+php artisan db:seed --class=SuperAdminSeeder
+```
+
+### Comandos Úteis
+
+```bash
+# Verificar superadmin
+php artisan tinker --execute="\$u = \App\Models\User::where('email', 'superadmin@alfaschool.com')->first(); echo \$u->name . ' - Superadmin: ' . (\$u->isSuperAdmin() ? 'SIM' : 'NÃO');"
+
+# Verificar se usuário é superadmin
+php artisan tinker --execute="echo auth()->user()->isSuperAdmin() ? 'É superadmin' : 'Não é superadmin';"
+```
+
+---
+
 ## ⚙️ Configuração
 
 ### Credenciais de Acesso
