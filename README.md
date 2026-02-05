@@ -110,6 +110,18 @@ Se você é novo no projeto, comece aqui:
 - Lista de perfis e permissões
 - Indicadores de segurança
 
+### Interface Amigável
+- **Sem nomes técnicos confusos**: O sistema usa descrições em português claro
+- **Sem jargon técnico**: Usuários não-técnicos podem gerenciar acessos facilmente
+- **Ajuda contextual**: Cada seção tem instruções claras
+
+| O que o usuário vê | Significado |
+|---------------------|-------------|
+| "Pode ver usuários" | Acesso para visualizar lista de usuários |
+| "Pode criar novos registros" | Acesso para cadastrar novos itens |
+| "Pode editar registros" | Acesso para alterar dados existentes |
+| "Pode excluir registros" | Acesso para remover itens |
+
 ### Gestão Administrativa
 - CRUD completo de usuários
 - Gestão de roles e permissões
@@ -294,6 +306,29 @@ Content-Security-Policy: default-src 'self'...
 
 ## 👥 Permissões e Roles
 
+### Interface Amigável
+
+O sistema foi projetado para ser usado por usuários **não-técnicos**. Ao gerenciar permissões, o usuário vê descrições claras em português, sem nomes técnicos confusos.
+
+#### Exemplo de Interface
+
+| Antes (confuso para leigos) | Depois (claro e intuitivo) |
+|------------------------------|---------------------------|
+| ✅ "Pode ver usuários" | ✅ "Pode ver usuários" |
+| ❌ `users.view` | ~~`users.view`~~ (escondido) |
+| ❌ `financeiro.edit` | ~~`financeiro.edit`~~ (escondido) |
+
+#### Como Aparece para o Usuário
+
+```
+🎓 Módulo de Alunos
+Gerenciar dados dos alunos
+
+☑️ Pode ver esta função
+☑️ Pode criar novos registros
+☑️ Pode editar registros existentes
+```
+
 ### Hierarquia de Perfis
 
 ```
@@ -327,15 +362,47 @@ Aluno
 
 ### Permissões por Módulo
 
-| Módulo | Permissões | Roles que Acessam |
-|---------|-------------|-------------------|
-| **Usuários** | view, create, edit, delete | Admin |
-| **Roles** | view, edit | Admin |
-| **Alunos** | view, create, edit, delete | Admin, Gestor, Secretaria |
-| **Turmas** | view, create, edit, delete | Admin, Gestor, Professor |
-| **Notas** | view, create, edit | Admin, Gestor, Professor |
-| **Frequência** | view, create | Admin, Gestor, Professor |
-| **Financeiro** | view, edit | Admin, Gestor |
+O usuário vê descrições amigáveis como "Pode ver usuários" em vez de `users.view`.
+
+| Módulo | Descrição para Usuário | Roles que Acessam |
+|--------|------------------------|-------------------|
+| **Usuários** | Gerenciar usuários do sistema | Admin |
+| **Perfis** | Gerenciar perfis e permissões | Admin |
+| **Alunos** | Gerenciar dados dos alunos | Admin, Gestor, Secretaria |
+| **Turmas** | Gerenciar turmas e disciplinas | Admin, Gestor, Professor |
+| **Notas** | Lançar e visualizar notas | Admin, Gestor, Professor |
+| **Frequência** | Registrar presença dos alunos | Admin, Gestor, Professor |
+| **Financeiro** | Ver e editar dados financeiros | Admin, Gestor |
+
+### Código Técnico (Interno)
+
+Para referência da equipe de desenvolvimento, as permissões são armazenadas com nomes técnicos no banco:
+
+| Permissão Técnica | Descrição | O que Controla |
+|-------------------|-----------|---------------|
+| `users.view` | Pode ver usuários | Lista e detalhes de usuários |
+| `users.create` | Pode criar usuários | Cadastro de novos usuários |
+| `users.edit` | Pode editar usuários | Alteração de dados |
+| `users.delete` | Pode excluir usuários | Remoção de usuários |
+| `alunos.view` | Pode ver alunos | Lista e detalhes de alunos |
+| `alunos.create` | Pode criar alunos | Cadastro de novos alunos |
+| `alunos.edit` | Pode editar alunos | Alteração de dados |
+| `alunos.delete` | Pode excluir alunos | Remoção de alunos |
+| `turmas.view` | Pode ver turmas | Lista e detalhes de turmas |
+| `turmas.create` | Pode criar turmas | Cadastro de novas turmas |
+| `turmas.edit` | Pode editar turmas | Alteração de dados |
+| `turmas.delete` | Pode excluir turmas | Remoção de turmas |
+| `notas.view` | Pode ver notas | Visualização de notas |
+| `notas.create` | Pode criar notas | Lançamento de notas |
+| `notas.edit` | Pode editar notas | Alteração de notas |
+| `frequencia.view` | Pode ver frequência | Visualização de frequência |
+| `frequencia.create` | Pode criar frequência | Registro de presença |
+| `financeiro.view` | Pode ver financeiro | Visualização de dados financeiros |
+| `financeiro.edit` | Pode editar financeiro | Alteração de dados financeiros |
+| `meus_dados.view` | Pode ver meus dados | Visualização de próprios dados |
+| `meus_dados.edit` | Pode editar meus dados | Alteração de próprios dados |
+| `roles.view` | Pode ver perfis | Lista de perfis |
+| `roles.edit` | Pode editar perfis | Alteração de permissões |
 
 ## 📁 Estrutura do Projeto
 
