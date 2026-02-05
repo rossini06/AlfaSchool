@@ -4,92 +4,250 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            
+            <!-- Ajuda Inicial -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>Como funciona:</strong> 
+                            Primeiro, escolha o <strong>Perfil</strong> do usuário. 
+                            Depois, se precisar de permissões especiais, adicione em <strong>Permissões Extras</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form method="POST" action="{{ route('admin.users.update', $user) }}">
                         @csrf
                         @method('PUT')
                         
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                            @error('name')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        <!-- Dados Pessoais -->
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Dados Pessoais
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                                <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                @error('name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                                <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                @error('email')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Nova Senha (deixe vazio para manter)</label>
+                                <input type="password" name="password" id="password" minlength="8"
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Mínimo 8 caracteres">
+                                @error('password')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                            @error('email')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <hr class="my-6 border-gray-200">
 
-                        <div class="mb-4">
-                            <label for="password" class="block text-sm font-medium text-gray-700">Senha (deixe em branco para manter atual)</label>
-                            <input type="password" name="password" id="password" minlength="8"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                            @error('password')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <!-- Perfis -->
+                        <div class="mb-8">
+                            <div class="flex items-center mb-4">
+                                <svg class="h-6 w-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                <h3 class="text-lg font-medium text-gray-900">1. Escolher o Perfil do Usuário</h3>
+                            </div>
+                            
+                            <p class="text-sm text-gray-600 mb-4">
+                                O <strong>Perfil</strong> define o cargo do usuário na escola. 
+                                Cada perfil já vem com permissões padrões definidas.
+                            </p>
 
-                        <div class="mb-4">
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Perfis</label>
-                            <div class="space-y-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 @foreach($roles as $role)
-                                    <label class="flex items-center">
-                                        <input type="checkbox" name="roles[]" value="{{ $role->name }}"
-                                            {{ in_array($role->name, $userRoles) ? 'checked' : '' }}
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                        <span class="ml-2 text-sm text-gray-700">{{ ucfirst($role->name) }}</span>
+                                    @php
+                                        $roleDescriptions = [
+                                            'admin' => 'Acesso total ao sistema. Pode fazer tudo.',
+                                            'gestor' => 'Gerencia alunos, turmas e visualiza relatórios.',
+                                            'professor' => 'Lança notas e frequência dos alunos.',
+                                            'secretaria' => 'Cadastra alunos e mantém registros.',
+                                            'aluno' => 'Visualiza suas próprias notas e frequência.',
+                                        ];
+                                    @endphp
+                                    <label class="relative flex items-start p-4 border rounded-lg hover:bg-gray-50 cursor-pointer {{ in_array($role->name, $userRoles) ? 'border-purple-500 bg-purple-50' : 'border-gray-200' }}">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" name="roles[]" value="{{ $role->name }}"
+                                                {{ in_array($role->name, $userRoles) ? 'checked' : '' }}
+                                                class="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <span class="block text-sm font-medium text-gray-900 capitalize">{{ $role->name }}</span>
+                                            <span class="block text-sm text-gray-500 mt-1">{{ $roleDescriptions[$role->name] ?? 'Perfil do sistema' }}</span>
+                                        </div>
                                     </label>
                                 @endforeach
                             </div>
                         </div>
 
+                        <hr class="my-6 border-gray-200">
+
+                        <!-- Permissões Individuais -->
                         <div class="mb-6">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Permissões Individuais</label>
-                                <span class="text-xs text-gray-500">Permissões extras além dos perfis</span>
+                            <div class="flex items-center mb-4">
+                                <svg class="h-6 w-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                <h3 class="text-lg font-medium text-gray-900">2. Permissões Extras (Opcional)</h3>
                             </div>
+                            
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-yellow-700">
+                                            <strong>O que são Permissões Extras?</strong><br>
+                                            São acessos adicionais que você pode dar a um usuário, 
+                                            além do que o perfil já permite. 
+                                            Por exemplo: Dar a um professor o acesso para ver o financeiro.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             @if($permissions->isNotEmpty())
                                 @foreach($permissions as $module => $modulePermissions)
-                                    <div class="mb-4">
-                                        <h4 class="text-sm font-medium text-gray-900 mb-2 capitalize">{{ $module }}</h4>
-                                        <div class="grid grid-cols-2 gap-2">
+                                    @php
+                                        $moduleTitles = [
+                                            'users' => '👥 Módulo de Usuários',
+                                            'roles' => '🔑 Módulo de Perfis',
+                                            'alunos' => '🎓 Módulo de Alunos',
+                                            'turmas' => '📚 Módulo de Turmas',
+                                            'notas' => '📝 Módulo de Notas',
+                                            'frequencia' => '📅 Módulo de Frequência',
+                                            'financeiro' => '💰 Módulo Financeiro',
+                                            'meus_dados' => '👤 Meus Dados',
+                                        ];
+                                        
+                                        $moduleHelp = [
+                                            'users' => 'Gerenciar usuários do sistema',
+                                            'roles' => 'Gerenciar perfis e permissões',
+                                            'alunos' => 'Gerenciar dados dos alunos',
+                                            'turmas' => 'Gerenciar turmas e disciplinas',
+                                            'notas' => 'Lançar e visualizar notas',
+                                            'frequencia' => 'Registrar presença dos alunos',
+                                            'financeiro' => 'Ver e editar dados financeiros',
+                                            'meus_dados' => 'Visualizar próprios dados',
+                                        ];
+                                        
+                                        $permissionHelp = [
+                                            'view' => 'Pode ver esta função',
+                                            'create' => 'Pode criar novos registros',
+                                            'edit' => 'Pode editar registros existentes',
+                                            'delete' => 'Pode excluir registros',
+                                        ];
+                                    @endphp
+                                    
+                                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                                        <h4 class="text-md font-medium text-gray-800 mb-2 flex items-center">
+                                            {{ $moduleTitles[$module] ?? '📁 ' . ucfirst($module) }}
+                                        </h4>
+                                        <p class="text-sm text-gray-600 mb-3">{{ $moduleHelp[$module] ?? '' }}</p>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                             @foreach($modulePermissions as $permission)
-                                                <label class="flex items-center p-2 border rounded hover:bg-gray-50">
-                                                    <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                                                        {{ in_array($permission->name, $userPermissions) ? 'checked' : '' }}
-                                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                                    <span class="ml-2 text-sm text-gray-700">{{ $permission->name }}</span>
+                                                @php
+                                                    $parts = explode('.', $permission->name);
+                                                    $action = $parts[1] ?? 'view';
+                                                @endphp
+                                                <label class="flex items-start p-3 bg-white border rounded-lg hover:bg-gray-100 cursor-pointer">
+                                                    <div class="flex items-center h-5">
+                                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                                            {{ in_array($permission->name, $userPermissions) ? 'checked' : '' }}
+                                                            class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-0.5">
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <span class="block text-sm font-medium text-gray-900 capitalize">
+                                                            {{ $permissionHelp[$action] ?? ucfirst($action) }}
+                                                        </span>
+                                                        <span class="block text-xs text-gray-500">{{ $permission->name }}</span>
+                                                    </div>
                                                 </label>
                                             @endforeach
                                         </div>
                                     </div>
                                 @endforeach
                             @else
-                                <p class="text-sm text-gray-500">Nenhuma permissão disponível.</p>
+                                <div class="bg-gray-100 rounded-lg p-4 text-center">
+                                    <p class="text-gray-500">Nenhuma permissão disponível no sistema.</p>
+                                </div>
                             @endif
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <a href="{{ route('admin.users.index') }}" class="text-gray-600 hover:text-gray-900">
-                                Cancelar
+                        <!-- Resumo das Permissões -->
+                        @php
+                            $allUserPermissions = $user->getAllPermissions()->pluck('name')->toArray();
+                        @endphp
+                        @if(count($allUserPermissions) > 0)
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                            <h4 class="text-sm font-medium text-green-800 mb-2 flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Resumo: Este usuário TERÁ ACESSO a estas opções:
+                            </h4>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                @foreach($allUserPermissions as $perm)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {{ $perm }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="flex items-center justify-between pt-4 border-t">
+                            <a href="{{ route('admin.users.index') }}" class="text-gray-600 hover:text-gray-900 flex items-center">
+                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                                </svg>
+                                Voltar para lista
                             </a>
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                                Atualizar
+                            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-medium">
+                                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Salvar Alterações
                             </button>
                         </div>
                     </form>
