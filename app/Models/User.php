@@ -47,4 +47,16 @@ class User extends Authenticatable
             'deleted_at' => 'datetime',
         ];
     }
+
+    /**
+     * Auto-verificar email na criação
+     */
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->email_verified_at)) {
+                $user->email_verified_at = now();
+            }
+        });
+    }
 }
