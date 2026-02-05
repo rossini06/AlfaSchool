@@ -50,7 +50,9 @@
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
                                 <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Digite o email do usuário"
+                                    autocomplete="off">
                                 @error('email')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -60,7 +62,9 @@
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha *</label>
                                 <input type="password" name="password" id="password" required minlength="8"
                                     class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    placeholder="Mínimo 8 caracteres">
+                                    placeholder="Mínimo 8 caracteres (letra maiúscula, número e símbolo)"
+                                    autocomplete="new-password"
+                                    onfocus="this.removeAttribute('readonly');" readonly>
                                 @error('password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -69,7 +73,9 @@
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha *</label>
                                 <input type="password" name="password_confirmation" id="password_confirmation" required
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Digite a mesma senha"
+                                    autocomplete="new-password">
                             </div>
                         </div>
 
