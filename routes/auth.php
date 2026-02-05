@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\CustomLoginController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -20,11 +20,11 @@ Route::middleware('guest')->group(function () {
 // Route::post('register', [RegisteredUserController::class, 'store'])
 // ->middleware('throttle:3,1');
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+    Route::get('login', [CustomLoginController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])
-    ->middleware(['throttle:5,1', 'audit']);
+    Route::post('login', [CustomLoginController::class, 'store'])
+        ->middleware(['throttle:5,1', 'audit']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+    Route::post('logout', [CustomLoginController::class, 'destroy'])
         ->name('logout')
         ->middleware(['throttle:10,1', 'audit']);
 });
