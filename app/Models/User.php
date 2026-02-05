@@ -45,7 +45,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'deleted_at' => 'datetime',
+            'is_superadmin' => 'boolean',
         ];
+    }
+
+    /**
+     * Verificar se é superadmin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_superadmin === true;
     }
 
     /**

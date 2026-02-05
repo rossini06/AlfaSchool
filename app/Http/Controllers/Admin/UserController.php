@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->latest()->paginate(10);
+        $users = User::with('roles')->where('is_superadmin', false)->latest()->paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
@@ -70,6 +70,12 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        // Proteger superadmin
+        if ($user->isSuperAdmin() && auth()->id() !== $user->id) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Você não pode editar o superadmin!');
+        }
+        
         $roles = Role::all();
         $userRoles = $user->roles->pluck('name')->toArray();
         
@@ -83,6 +89,11 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        // Proteger superadmin
+        if ($user->isSuperAdmin() && auth()->id() !== $user->id) {
+            return back()->with('error', 'Você não pode editar o superadmin!')
+                ->withInput();
+        }
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -123,8 +134,12 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        // Proteger superadmin
+        if ($user->isSuperAdmin()) {
+            return back()->with('error', 'O superadmin não pode ser excluído!');
+        }
         
-        if ($user->id === auth()->user()->id) {
+        if ($user->id === auth()->id()) {
             return back()->with('error', 'Você não pode excluir sua própria conta!');
         }
 
