@@ -61,7 +61,10 @@
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Nova Senha (deixe vazio para manter)</label>
                                 <input type="password" name="password" id="password" minlength="8"
                                     class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    placeholder="Mínimo 8 caracteres">
+                                    placeholder="Deixe vazio para manter a senha atual"
+                                    autocomplete="new-password"
+                                    onfocus="this.removeAttribute('readonly');" readonly>
+                                <p class="mt-1 text-xs text-gray-500">Preencha apenas se deseja alterar a senha</p>
                                 @error('password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -70,7 +73,9 @@
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
                                 <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Confirme a nova senha"
+                                    autocomplete="new-password">
                             </div>
                         </div>
 
