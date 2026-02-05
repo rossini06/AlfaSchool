@@ -90,25 +90,25 @@
                                 <div id="password-requirements" class="mt-3 p-3 bg-gray-50 rounded-lg">
                                     <p class="text-xs font-medium text-gray-600 mb-2">Requisitos da senha:</p>
                                     <div class="space-y-1">
-                                        <div id="req-length" class="flex items-center text-sm text-gray-500">
-                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
-                                            Mínimo 8 caracteres
+                                        <div id="req-length" class="flex items-center text-sm text-gray-400">
+                                            <span class="req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs"></span>
+                                            <span class="req-text">Mínimo 8 caracteres</span>
                                         </div>
-                                        <div id="req-uppercase" class="flex items-center text-sm text-gray-500">
-                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
-                                            Letra maiúscula (A-Z)
+                                        <div id="req-uppercase" class="flex items-center text-sm text-gray-400">
+                                            <span class="req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs"></span>
+                                            <span class="req-text">Letra maiúscula (A-Z)</span>
                                         </div>
-                                        <div id="req-lowercase" class="flex items-center text-sm text-gray-500">
-                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
-                                            Letra minúscula (a-z)
+                                        <div id="req-lowercase" class="flex items-center text-sm text-gray-400">
+                                            <span class="req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs"></span>
+                                            <span class="req-text">Letra minúscula (a-z)</span>
                                         </div>
-                                        <div id="req-number" class="flex items-center text-sm text-gray-500">
-                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
-                                            Número (0-9)
+                                        <div id="req-number" class="flex items-center text-sm text-gray-400">
+                                            <span class="req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs"></span>
+                                            <span class="req-text">Número (0-9)</span>
                                         </div>
-                                        <div id="req-special" class="flex items-center text-sm text-gray-500">
-                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
-                                            Símbolo especial (@$!%*#?&)
+                                        <div id="req-special" class="flex items-center text-sm text-gray-400">
+                                            <span class="req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs"></span>
+                                            <span class="req-text">Símbolo especial (@$!%*#?&)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -292,16 +292,16 @@
                     <script>
                         // Configuração dos requisitos
                         const requirements = {
-                            length: { regex: /.{8,}/, element: 'req-length', text: 'Mínimo 8 caracteres' },
-                            uppercase: { regex: /[A-Z]/, element: 'req-uppercase', text: 'Letra maiúscula (A-Z)' },
-                            lowercase: { regex: /[a-z]/, element: 'req-lowercase', text: 'Letra minúscula (a-z)' },
-                            number: { regex: /[0-9]/, element: 'req-number', text: 'Número (0-9)' },
-                            special: { regex: /[@$!%*#?&]/, element: 'req-special', text: 'Símbolo especial (@$!%*#?&)' }
+                            length: { regex: /.{8,}/, element: 'req-length' },
+                            uppercase: { regex: /[A-Z]/, element: 'req-uppercase' },
+                            lowercase: { regex: /[a-z]/, element: 'req-lowercase' },
+                            number: { regex: /[0-9]/, element: 'req-number' },
+                            special: { regex: /[@$!%*#?&]/, element: 'req-special' }
                         };
 
                         // Cores para força da senha
                         const strengthConfig = {
-                            0: { color: 'bg-gray-300', text: '--', textColor: 'text-gray-500' },
+                            0: { color: 'bg-gray-300', text: '--', textColor: 'text-gray-400' },
                             1: { color: 'bg-red-500', text: 'Fraca', textColor: 'text-red-600' },
                             2: { color: 'bg-orange-500', text: 'Média', textColor: 'text-orange-600' },
                             3: { color: 'bg-yellow-500', text: 'Boa', textColor: 'text-yellow-600' },
@@ -328,15 +328,19 @@
                             
                             for (const [key, config] of Object.entries(requirements)) {
                                 const element = document.getElementById(config.element);
+                                const icon = element.querySelector('.req-icon');
+                                const text = element.querySelector('.req-text');
                                 const isMet = config.regex.test(password);
                                 
                                 if (isMet) {
                                     metCount++;
-                                    element.className = 'flex items-center text-sm text-green-600';
-                                    element.querySelector('span:last-child').textContent = config.text;
+                                    icon.textContent = '✓';
+                                    icon.className = 'req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-green-200 text-xs text-green-600';
+                                    text.className = 'req-text text-green-600 font-medium';
                                 } else {
-                                    element.className = 'flex items-center text-sm text-gray-500';
-                                    element.querySelector('span:last-child').textContent = config.text;
+                                    icon.textContent = '○';
+                                    icon.className = 'req-icon w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs text-gray-400';
+                                    text.className = 'req-text text-gray-400';
                                 }
                             }
                             
@@ -355,8 +359,6 @@
                             } else {
                                 strengthContainer.classList.add('hidden');
                             }
-                            
-                            return metCount;
                         }
 
                         // Verificar se senhas coincidem
