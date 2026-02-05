@@ -199,7 +199,6 @@
                                                         <span class="block text-sm font-medium text-gray-900 capitalize">
                                                             {{ $permissionHelp[$action] ?? ucfirst($action) }}
                                                         </span>
-                                                        <span class="block text-xs text-gray-500">{{ $permission->name }}</span>
                                                     </div>
                                                 </label>
                                             @endforeach
