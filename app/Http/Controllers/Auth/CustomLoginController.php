@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Traits\LoginLockout;
 
-class LoginController extends Controller
+class CustomLoginController extends Controller
 {
     use LoginLockout;
 
