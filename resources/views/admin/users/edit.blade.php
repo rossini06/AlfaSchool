@@ -59,11 +59,59 @@
 
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Nova Senha (deixe vazio para manter)</label>
-                                <input type="password" name="password" id="password" minlength="8"
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    placeholder="Deixe vazio para manter a senha atual"
-                                    autocomplete="new-password"
-                                    onfocus="this.removeAttribute('readonly');" readonly>
+                                <div class="relative">
+                                    <input type="password" name="password" id="password" minlength="8"
+                                        class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pr-10 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="Digite nova senha (ou deixe vazio)"
+                                        autocomplete="new-password"
+                                        onfocus="this.removeAttribute('readonly');" readonly>
+                                    <button type="button" onclick="togglePassword('password')"
+                                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg id="password-eye" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Indicador de Força da Senha -->
+                                <div id="password-strength" class="mt-2 hidden">
+                                    <div class="flex items-center mb-1">
+                                        <span class="text-sm font-medium mr-2">Força da senha:</span>
+                                        <span id="strength-text" class="text-sm font-bold">--</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="strength-bar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Requisitos da Senha -->
+                                <div id="password-requirements" class="mt-3 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs font-medium text-gray-600 mb-2">Requisitos da senha:</p>
+                                    <div class="space-y-1">
+                                        <div id="req-length" class="flex items-center text-sm text-gray-500">
+                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
+                                            Mínimo 8 caracteres
+                                        </div>
+                                        <div id="req-uppercase" class="flex items-center text-sm text-gray-500">
+                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
+                                            Letra maiúscula (A-Z)
+                                        </div>
+                                        <div id="req-lowercase" class="flex items-center text-sm text-gray-500">
+                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
+                                            Letra minúscula (a-z)
+                                        </div>
+                                        <div id="req-number" class="flex items-center text-sm text-gray-500">
+                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
+                                            Número (0-9)
+                                        </div>
+                                        <div id="req-special" class="flex items-center text-sm text-gray-500">
+                                            <span class="w-5 h-5 mr-2 flex items-center justify-center rounded-full bg-gray-200 text-xs">✓</span>
+                                            Símbolo especial (@$!%*#?&)
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <p class="mt-1 text-xs text-gray-500">Preencha apenas se deseja alterar a senha</p>
                                 @error('password')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -72,10 +120,23 @@
 
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
-                                <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    placeholder="Confirme a nova senha"
-                                    autocomplete="new-password">
+                                <div class="relative">
+                                    <input type="password" name="password_confirmation" id="password_confirmation"
+                                        class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pr-10 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="Confirme a nova senha"
+                                        autocomplete="new-password"
+                                        oninput="checkPasswordMatch()">
+                                    <button type="button" onclick="togglePassword('password_confirmation')"
+                                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg id="password_confirmation-eye" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div id="password-match" class="mt-2 text-sm hidden">
+                                    <span id="match-text"></span>
+                                </div>
                             </div>
                         </div>
 
@@ -249,6 +310,106 @@
                             </button>
                         </div>
                     </form>
+                    
+                    <script>
+                        // Configuração dos requisitos
+                        const requirements = {
+                            length: { regex: /.{8,}/, element: 'req-length', text: 'Mínimo 8 caracteres' },
+                            uppercase: { regex: /[A-Z]/, element: 'req-uppercase', text: 'Letra maiúscula (A-Z)' },
+                            lowercase: { regex: /[a-z]/, element: 'req-lowercase', text: 'Letra minúscula (a-z)' },
+                            number: { regex: /[0-9]/, element: 'req-number', text: 'Número (0-9)' },
+                            special: { regex: /[@$!%*#?&]/, element: 'req-special', text: 'Símbolo especial (@$!%*#?&)' }
+                        };
+
+                        // Cores para força da senha
+                        const strengthConfig = {
+                            0: { color: 'bg-gray-300', text: '--', textColor: 'text-gray-500' },
+                            1: { color: 'bg-red-500', text: 'Fraca', textColor: 'text-red-600' },
+                            2: { color: 'bg-orange-500', text: 'Média', textColor: 'text-orange-600' },
+                            3: { color: 'bg-yellow-500', text: 'Boa', textColor: 'text-yellow-600' },
+                            4: { color: 'bg-green-500', text: 'Forte', textColor: 'text-green-600' }
+                        };
+
+                        // Mostrar/ocultar senha
+                        function togglePassword(fieldId) {
+                            const field = document.getElementById(fieldId);
+                            const eyeIcon = document.getElementById(fieldId + '-eye');
+                            
+                            if (field.type === 'password') {
+                                field.type = 'text';
+                                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
+                            } else {
+                                field.type = 'password';
+                                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+                            }
+                        }
+
+                        // Atualizar indicador de requisitos
+                        function updateRequirements(password) {
+                            let metCount = 0;
+                            
+                            for (const [key, config] of Object.entries(requirements)) {
+                                const element = document.getElementById(config.element);
+                                const isMet = config.regex.test(password);
+                                
+                                if (isMet) {
+                                    metCount++;
+                                    element.className = 'flex items-center text-sm text-green-600';
+                                    element.querySelector('span:last-child').textContent = config.text;
+                                } else {
+                                    element.className = 'flex items-center text-sm text-gray-500';
+                                    element.querySelector('span:last-child').textContent = config.text;
+                                }
+                            }
+                            
+                            // Atualizar força da senha
+                            const strengthBar = document.getElementById('strength-bar');
+                            const strengthText = document.getElementById('strength-text');
+                            const strengthContainer = document.getElementById('password-strength');
+                            
+                            if (password.length > 0) {
+                                strengthContainer.classList.remove('hidden');
+                                const strength = strengthConfig[metCount];
+                                strengthBar.className = 'h-full transition-all duration-300 ' + strength.color;
+                                strengthBar.style.width = (metCount * 20) + '%';
+                                strengthText.textContent = strength.text;
+                                strengthText.className = 'text-sm font-bold ' + strength.textColor;
+                            } else {
+                                strengthContainer.classList.add('hidden');
+                            }
+                            
+                            return metCount;
+                        }
+
+                        // Verificar se senhas coincidem
+                        function checkPasswordMatch() {
+                            const password = document.getElementById('password').value;
+                            const confirmation = document.getElementById('password_confirmation').value;
+                            const matchDiv = document.getElementById('password-match');
+                            const matchText = document.getElementById('match-text');
+                            
+                            if (confirmation.length > 0) {
+                                matchDiv.classList.remove('hidden');
+                                if (password === confirmation) {
+                                    matchDiv.className = 'mt-2 text-sm text-green-600';
+                                    matchText.innerHTML = '<span class="font-medium">✓</span> As senhas coincidem!';
+                                } else {
+                                    matchDiv.className = 'mt-2 text-sm text-red-600';
+                                    matchText.innerHTML = '<span class="font-medium">✗</span> As senhas não coincidem!';
+                                }
+                            } else {
+                                matchDiv.classList.add('hidden');
+                            }
+                        }
+
+                        // Event listeners
+                        document.getElementById('password').addEventListener('input', function() {
+                            updateRequirements(this.value);
+                            checkPasswordMatch();
+                        });
+
+                        document.getElementById('password_confirmation').addEventListener('input', checkPasswordMatch);
+                    </script>
                 </div>
             </div>
         </div>
