@@ -12,7 +12,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-600 font-sans antialiased dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <body class="min-h-screen bg-gradient-to-br from-indigo-700 via-indigo-600 to-teal-700 font-sans antialiased dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         @php($schoolName = config('app.school_name', 'AlfaSchool'))
 
         <main class="grid min-h-screen grid-cols-1 md:grid-cols-2">
@@ -112,15 +112,16 @@
                 </div>
             </section>
 
-            <section class="relative isolate flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-white to-slate-50 p-6 sm:p-10" data-fade data-delay="180">
+            <section class="relative isolate flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-white to-slate-50 p-5 sm:p-8" data-fade data-delay="160">
                 <div class="pointer-events-none absolute inset-0 z-0 hidden md:block">
-                    <img src="{{ asset('images/login-context-education.svg') }}" alt="Gestor escolar analisando dados e dashboards" class="h-full w-full object-cover opacity-40 blur-[1.5px]" />
+                    <img src="{{ asset('images/login-context-education.svg') }}" alt="Gestor escolar analisando dados e dashboards" class="h-full w-full object-cover opacity-35 blur-[0.8px]" />
                 </div>
-                <div class="pointer-events-none absolute inset-0 z-0 hidden md:block bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-indigo-900/20"></div>
+                <div class="pointer-events-none absolute inset-0 z-0 hidden md:block bg-gradient-to-br from-teal-950/45 via-slate-900/30 to-indigo-900/25"></div>
                 <div class="pointer-events-none absolute left-1/2 top-1/2 z-0 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-3xl"></div>
+                <div class="pointer-events-none absolute inset-0 z-0 opacity-[0.03]" style="background-image: radial-gradient(circle at 1px 1px, #0f172a 1px, transparent 0); background-size: 14px 14px;"></div>
 
-                <div class="relative z-10 w-full max-w-md rounded-2xl bg-white p-9 shadow-2xl ring-1 ring-slate-200 backdrop-blur-sm" style="max-width: 420px;">
-                    <div class="mb-8">
+                <div class="relative z-10 w-full max-w-md rounded-2xl bg-white p-7 shadow-xl ring-1 ring-slate-200 backdrop-blur-sm" style="max-width: 420px;" data-fade data-delay="260">
+                    <div class="mb-7">
                         <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{{ $schoolName }}</p>
                         <h2 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Acesse sua conta</h2>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Entre com suas credenciais para continuar</p>
@@ -150,14 +151,14 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-6">
+                    <form method="POST" action="{{ route('login') }}" id="login-form" class="space-y-5">
                         @csrf
 
                         <div>
                             <x-input-label for="email" :value="__('E-mail')" class="text-sm font-medium text-slate-600 dark:text-slate-300" />
                             <x-text-input
                                 id="email"
-                                class="mt-1.5 block w-full rounded-xl border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 transition duration-200 focus:-translate-y-0.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/25 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                                class="mt-1.5 block w-full rounded-xl border bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/60 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 {{ $errors->has('email') ? 'border-red-300 focus:border-red-400 focus:ring-red-300/60' : 'border-slate-300 dark:border-slate-700' }}"
                                 type="email"
                                 name="email"
                                 :value="old('email')"
@@ -166,21 +167,25 @@
                                 autofocus
                                 autocomplete="username"
                             />
-                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                            @error('email')
+                                <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
                             <x-input-label for="password" :value="__('Senha')" class="text-sm font-medium text-slate-600 dark:text-slate-300" />
                             <x-text-input
                                 id="password"
-                                class="mt-1.5 block w-full rounded-xl border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 transition duration-200 focus:-translate-y-0.5 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/25 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                                class="mt-1.5 block w-full rounded-xl border bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/60 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 {{ $errors->has('password') ? 'border-red-300 focus:border-red-400 focus:ring-red-300/60' : 'border-slate-300 dark:border-slate-700' }}"
                                 type="password"
                                 name="password"
                                 placeholder="••••••••••••"
                                 required
                                 autocomplete="current-password"
                             />
-                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                            @error('password')
+                                <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex items-center justify-between gap-3">
@@ -199,7 +204,7 @@
                         <button
                             id="login-submit"
                             type="submit"
-                            class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition duration-200 hover:scale-[1.05] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-300/70 focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:scale-100 dark:focus:ring-indigo-500/50 dark:focus:ring-offset-slate-900"
+                            class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:scale-100 dark:focus-visible:ring-offset-slate-900"
                             data-loading-text="Entrando..."
                         >
                             <svg id="login-spinner" class="mr-2 hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
