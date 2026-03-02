@@ -19,7 +19,7 @@ public class DashboardController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<DashboardResponseDTO>> dashboard() {
         return ResponseEntity.ok(ApiResponse.of(200, "Dashboard loaded successfully", dashboardService.loadDashboard()));
     }

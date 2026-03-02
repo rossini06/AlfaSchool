@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:alfaschool_local;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+app:
+  security:
+    jwt-secret: ${APP_JWT_SECRET:12345678901234567890123456789012}
+    jwt-expiration-minutes: ${APP_JWT_EXP_MINUTES:120}
+    refresh-expiration-minutes: ${APP_JWT_REFRESH_EXP_MINUTES:10080}
+  admin:
+    email: ${APP_SUPERADMIN_EMAIL:superadmin@alfaschool.com}
+    name: ${APP_SUPERADMIN_NAME:Super Admin}
+    password: ${APP_SUPERADMIN_PASSWORD:SuperAdmin@2026!}
+
+management:
+  endpoint:
+    health:
+      show-details: always
