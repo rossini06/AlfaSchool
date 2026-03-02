@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: alfaschool-backend
+  datasource:
+    url: jdbc:h2:file:./data/alfaschool;AUTO_SERVER=TRUE;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8080
+
+app:
+  security:
+    jwt-secret: ${APP_JWT_SECRET:alfaschool-super-seguro-2026-chave-minima-32-bytes}
+    jwt-expiration-minutes: 120

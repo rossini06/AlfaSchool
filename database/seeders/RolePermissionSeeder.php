@@ -6,20 +6,24 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
-        Role::truncate();
-        Permission::truncate();
-        DB::table('role_has_permissions')->truncate();
-        DB::table('model_has_roles')->truncate();
-        DB::table('model_has_permissions')->truncate();
-        
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        Schema::disableForeignKeyConstraints();
+
+        DB::table('role_has_permissions')->delete();
+        DB::table('model_has_roles')->delete();
+        DB::table('model_has_permissions')->delete();
+        Role::query()->delete();
+        Permission::query()->delete();
+
+        Schema::enableForeignKeyConstraints();
 
         $roles = [
             'admin' => 'Administrador do sistema - acesso total',
@@ -55,11 +59,11 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($roles as $name => $description) {
-            Role::create(['name' => $name]);
+            Role::create(['name' => $name, 'guard_name' => 'web']);
         }
 
         foreach ($permissions as $name => $description) {
-            Permission::create(['name' => $name]);
+            Permission::create(['name' => $name, 'guard_name' => 'web']);
         }
 
         $adminRole = Role::findByName('admin');
@@ -87,5 +91,7 @@ class RolePermissionSeeder extends Seeder
 
         $alunoRole = Role::findByName('aluno');
         $alunoRole->givePermissionTo(['meus_dados.view']);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

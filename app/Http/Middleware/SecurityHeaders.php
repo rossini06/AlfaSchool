@@ -8,6 +8,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
 {
+    private function parseViteOriginFromHotFile(): ?string
+    {
+        $hotFile = public_path('hot');
+
+        if (! is_file($hotFile)) {
+            return null;
+        }
+
+        $url = trim((string) file_get_contents($hotFile));
+
+        if ($url === '') {
+            return null;
+        }
+
+        $parts = parse_url($url);
+
+        if (! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        $origin = $parts['scheme'].'://'.$parts['host'];
+
+        if (isset($parts['port'])) {
+            $origin .= ':'.$parts['port'];
+        }
+
+        return $origin;
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -30,6 +59,8 @@ class SecurityHeaders
         $frameSrc = ["'self'", 'http://localhost:*'];
 
         if (app()->isLocal()) {
+            $hotOrigin = $this->parseViteOriginFromHotFile();
+
             $viteHttpSources = [
                 'http://127.0.0.1:5173',
                 'http://localhost:5173',
@@ -38,6 +69,10 @@ class SecurityHeaders
                 'http://[::1]:5173',
                 'http://[::1]:5174',
             ];
+
+            if ($hotOrigin) {
+                $viteHttpSources[] = $hotOrigin;
+            }
 
             $viteWsSources = [
                 'ws://127.0.0.1:5173',
@@ -48,17 +83,32 @@ class SecurityHeaders
                 'ws://[::1]:5174',
             ];
 
+            if ($hotOrigin && str_starts_with($hotOrigin, 'http://')) {
+                $viteWsSources[] = 'ws://'.substr($hotOrigin, 7);
+            }
+
+            if ($hotOrigin && str_starts_with($hotOrigin, 'https://')) {
+                $viteWsSources[] = 'wss://'.substr($hotOrigin, 8);
+            }
+
             $scriptSrc = array_merge($scriptSrc, $viteHttpSources);
             $styleSrc = array_merge($styleSrc, $viteHttpSources);
             $connectSrc = array_merge($connectSrc, $viteHttpSources, $viteWsSources);
         }
 
+        $scriptSrcList = implode(' ', array_unique($scriptSrc));
+        $styleSrcList = implode(' ', array_unique($styleSrc));
+        $connectSrcList = implode(' ', array_unique($connectSrc));
+        $frameSrcList = implode(' ', array_unique($frameSrc));
+
         $csp = sprintf(
-            "default-src 'self'; script-src %s; style-src %s; img-src 'self' data: https:; font-src 'self' data: https://fonts.bunny.net; connect-src %s; frame-src %s; form-action 'self';",
-            implode(' ', array_unique($scriptSrc)),
-            implode(' ', array_unique($styleSrc)),
-            implode(' ', array_unique($connectSrc)),
-            implode(' ', array_unique($frameSrc))
+            "default-src 'self'; script-src %s; script-src-elem %s; style-src %s; style-src-elem %s; img-src 'self' data: https:; font-src 'self' data: https://fonts.bunny.net; connect-src %s; frame-src %s; form-action 'self';",
+            $scriptSrcList,
+            $scriptSrcList,
+            $styleSrcList,
+            $styleSrcList,
+            $connectSrcList,
+            $frameSrcList
         );
         $response->headers->set('Content-Security-Policy', $csp);
 

@@ -1,5 +1,14 @@
 # AlfaSchool
 
+> ⚠️ **Migração em andamento para Java + React**
+>
+> A nova base da aplicação está em:
+>
+> - `backend/` → Spring Boot (Java 21)
+> - `frontend/` → React + Vite
+>
+> Guia rápido: [MIGRACAO-JAVA-REACT.md](./MIGRACAO-JAVA-REACT.md)
+
 Sistema de gestão escolar completo com autenticação, controle de permissões e segurança avançada.
 
 ## 📋 Índice
