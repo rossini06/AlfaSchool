@@ -1,0 +1,55 @@
+.stat-card {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.stat-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card-title {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.stat-card-value {
+  margin: 0.2rem 0 0;
+  color: #0f172a;
+  font-size: 1.3rem;
+}
+
+.stat-card.success .stat-card-icon {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stat-card.warning .stat-card-icon {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.stat-card.danger .stat-card-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.stat-card.info .stat-card-icon,
+.stat-card.default .stat-card-icon {
+  background: #e0e7ff;
+  color: #4338ca;
+}

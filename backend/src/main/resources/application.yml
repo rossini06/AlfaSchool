@@ -1,27 +1,74 @@
 spring:
   application:
     name: alfaschool-backend
+  profiles:
+    active: ${APP_PROFILE:dev}
   datasource:
-    url: jdbc:h2:file:./data/alfaschool;AUTO_SERVER=TRUE;MODE=PostgreSQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/alfaschool}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+        format_sql: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 app:
   security:
-    jwt-secret: ${APP_JWT_SECRET:alfaschool-super-seguro-2026-chave-minima-32-bytes}
-    jwt-expiration-minutes: 120
+    jwt-secret: ${APP_JWT_SECRET}
+    jwt-expiration-minutes: ${APP_JWT_EXP_MINUTES:120}
+    refresh-expiration-minutes: ${APP_JWT_REFRESH_EXP_MINUTES:10080}
+  admin:
+    email: ${APP_SUPERADMIN_EMAIL:superadmin@alfaschool.com}
+    name: ${APP_SUPERADMIN_NAME:Super Admin}
+    password: ${APP_SUPERADMIN_PASSWORD}
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","level":"%p","logger":"%c{1.}","thread":"%t","message":"%m"}%n'
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+management:
+  endpoint:
+    health:
+      show-details: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+management:
+  endpoint:
+    health:
+      show-details: never

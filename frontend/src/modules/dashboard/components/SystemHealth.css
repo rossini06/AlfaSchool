@@ -1,0 +1,43 @@
+.system-health {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.system-health h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.system-health dl {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.system-health dl div {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 0.45rem;
+}
+
+.system-health dt {
+  color: #475569;
+}
+
+.system-health dd {
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.system-health dd.ok {
+  color: #15803d;
+}
+
+.system-health dd.down {
+  color: #b91c1c;
+}

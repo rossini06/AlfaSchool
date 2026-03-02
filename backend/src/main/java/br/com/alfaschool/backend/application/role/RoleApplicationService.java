@@ -1,0 +1,44 @@
+package br.com.alfaschool.backend.application.role;
+
+import br.com.alfaschool.backend.application.role.dto.CreateRoleRequest;
+import br.com.alfaschool.backend.application.role.dto.RoleResponse;
+import br.com.alfaschool.backend.domain.role.Role;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
+import br.com.alfaschool.backend.security.filter.TenantContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
+
+@Service
+public class RoleApplicationService {
+
+    private final RoleRepository roleRepository;
+
+    public RoleApplicationService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
+
+    @Transactional
+    public RoleResponse create(CreateRoleRequest request) {
+        UUID tenantId = TenantContext.getTenantId();
+        if (tenantId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tenant não identificado");
+        }
+
+        roleRepository.findByTenantIdAndNameIgnoreCase(tenantId, request.name())
+                .ifPresent(role -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Role já existe para este tenant");
+                });
+
+        Role role = new Role();
+        role.setTenantId(tenantId);
+        role.setName(request.name().toUpperCase());
+        role.setDescription(request.description());
+        Role saved = roleRepository.save(role);
+
+        return new RoleResponse(saved.getId(), saved.getTenantId(), saved.getName(), saved.getDescription());
+    }
+}

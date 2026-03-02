@@ -1,13 +1,20 @@
 import { useState } from 'react'
+import DashboardPage from './modules/dashboard/DashboardPage'
 
 function App() {
   const schoolName = 'AlfaSchool'
-  const [email, setEmail] = useState('superadmin@alfaschool.com')
-  const [password, setPassword] = useState('SuperAdmin@2024!@#$')
+  const [tenantId, setTenantId] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [authenticated, setAuthenticated] = useState(false)
+
+  if (authenticated) {
+    return <DashboardPage />
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -16,23 +23,31 @@ function App() {
     setSuccess('')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ tenantId: tenantId || null, email, password }),
       })
 
-      const body = await response.json()
-
-      if (!response.ok) {
-        throw new Error(body.mensagem ?? 'Falha ao realizar login')
+      const rawBody = await response.text()
+      let body = null
+      try {
+        body = rawBody ? JSON.parse(rawBody) : null
+      } catch {
+        body = null
       }
 
-      localStorage.setItem('authToken', body.token)
+      if (!response.ok) {
+        throw new Error(body?.message ?? 'Falha ao realizar login. Verifique os dados informados.')
+      }
+
+      localStorage.setItem('authToken', body.data.accessToken)
+      localStorage.setItem('refreshToken', body.data.refreshToken)
       localStorage.setItem('remember', remember ? '1' : '0')
-      setSuccess(`Bem-vindo, ${body.nome}! Login realizado com sucesso.`)
+      setSuccess(`Bem-vindo, ${email}! Login realizado com sucesso.`)
+      setAuthenticated(true)
     } catch (requestError) {
       setError(requestError.message)
     } finally {
@@ -84,6 +99,17 @@ function App() {
           <p className="subtitle">Entre com suas credenciais para continuar</p>
 
           <form onSubmit={handleSubmit} className="form-grid">
+            <div>
+              <label htmlFor="tenantId">Tenant ID (opcional para Super Admin)</label>
+              <input
+                id="tenantId"
+                type="text"
+                value={tenantId}
+                onChange={(event) => setTenantId(event.target.value)}
+                placeholder="UUID do tenant"
+              />
+            </div>
+
             <div>
               <label htmlFor="email">E-mail</label>
               <input
