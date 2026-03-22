@@ -1,10 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="description" content="AlfaSchool - Plataforma SaaS de Gestão Escolar" />
+    <title>AlfaSchool - Gestão Escolar</title>
+    <style>
+      /* Prevent flash of unstyled content */
+      html { background-color: #0f1117; }
+    </style>
+    <script>
+      // Apply saved theme before React loads to prevent flash
+      (function() {
+        var t = localStorage.getItem('alfaschool-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.style.backgroundColor = t === 'light' ? '#f5f7fa' : '#0f1117';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,161 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../hooks/useTheme";
+import { Icon } from "../components/Icon";
+
+export function LoginPage() {
+  const { login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [tenantId, setTenantId] = useState("");
+  const [showTenant, setShowTenant] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password, tenantId || undefined);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-bg-shapes" />
+
+      {/* Theme toggle */}
+      <div className="login-theme-toggle">
+        <button
+          className="btn btn-secondary"
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+        >
+          <Icon name={theme === "dark" ? "Sun" : "Moon"} size={15} />
+        </button>
+      </div>
+
+      <div className="login-card" style={{ position: "relative", zIndex: 1 }}>
+        {/* Logo */}
+        <div className="login-logo">
+          <div className="login-logo-icon">A</div>
+          <span className="login-logo-text">
+            Alfa<span>School</span>
+          </span>
+        </div>
+
+        {/* Header */}
+        <div className="login-header">
+          <h2>Acesse sua conta</h2>
+          <p>Gestão escolar inteligente e integrada</p>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="login-error" style={{ marginBottom: 16 }}>
+            <Icon name="AlertCircle" size={14} /> {error}
+          </div>
+        )}
+
+        {/* Form */}
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-field">
+            <label className="form-label" htmlFor="email">E-mail</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="seuemail@escola.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="form-label" htmlFor="password">Senha</label>
+            <div style={{ position: "relative" }}>
+              <input
+                id="password"
+                type={showPass ? "text" : "password"}
+                className="form-input"
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ paddingRight: 38 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((v) => !v)}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--color-text-2)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <Icon name="Eye" size={14} />
+              </button>
+            </div>
+          </div>
+
+          {/* Tenant ID (optional, for super admin) */}
+          <div>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ fontSize: 12, padding: "2px 0", color: "var(--color-text-2)" }}
+              onClick={() => setShowTenant((v) => !v)}
+            >
+              {showTenant ? "▼" : "▶"} Tenant ID (opcional — Super Admin)
+            </button>
+            {showTenant && (
+              <div className="form-field" style={{ marginTop: 8 }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="UUID do tenant"
+                  value={tenantId}
+                  onChange={(e) => setTenantId(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <span className="skeleton" style={{ width: 14, height: 14, borderRadius: "50%", flexShrink: 0 }} />
+                Entrando...
+              </span>
+            ) : (
+              "Entrar"
+            )}
+          </button>
+        </form>
+
+        <div style={{ marginTop: 20, textAlign: "center", fontSize: 12, color: "var(--color-text-2)" }}>
+          © {new Date().getFullYear()} AlfaSchool — Gestão Escolar
+        </div>
+      </div>
+    </div>
+  );
+}

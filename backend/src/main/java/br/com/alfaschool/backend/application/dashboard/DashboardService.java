@@ -2,10 +2,15 @@ package br.com.alfaschool.backend.application.dashboard;
 
 import br.com.alfaschool.backend.application.dashboard.dto.AlertDTO;
 import br.com.alfaschool.backend.application.dashboard.dto.DashboardResponseDTO;
+import br.com.alfaschool.backend.application.dashboard.dto.SchoolKpisDTO;
 import br.com.alfaschool.backend.application.dashboard.dto.StatCardDTO;
 import br.com.alfaschool.backend.application.dashboard.dto.SystemHealthDTO;
 import br.com.alfaschool.backend.domain.dashboard.DashboardSnapshot;
 import br.com.alfaschool.backend.infrastructure.persistence.dashboard.DashboardMetricsRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.CursoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.MatriculaRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import br.com.alfaschool.backend.security.jwt.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
@@ -23,10 +28,23 @@ public class DashboardService {
 
     private final DashboardMetricsRepository dashboardMetricsRepository;
     private final SystemHealthService systemHealthService;
+    private final AlunoRepository alunoRepository;
+    private final TurmaRepository turmaRepository;
+    private final CursoRepository cursoRepository;
+    private final MatriculaRepository matriculaRepository;
 
-    public DashboardService(DashboardMetricsRepository dashboardMetricsRepository, SystemHealthService systemHealthService) {
+    public DashboardService(DashboardMetricsRepository dashboardMetricsRepository,
+                            SystemHealthService systemHealthService,
+                            AlunoRepository alunoRepository,
+                            TurmaRepository turmaRepository,
+                            CursoRepository cursoRepository,
+                            MatriculaRepository matriculaRepository) {
         this.dashboardMetricsRepository = dashboardMetricsRepository;
         this.systemHealthService = systemHealthService;
+        this.alunoRepository = alunoRepository;
+        this.turmaRepository = turmaRepository;
+        this.cursoRepository = cursoRepository;
+        this.matriculaRepository = matriculaRepository;
     }
 
     public DashboardResponseDTO loadDashboard() {
@@ -47,7 +65,18 @@ public class DashboardService {
                 new StatCardDTO("accessToday", "Acessos Hoje", snapshot.accessToday())
         );
 
-        return new DashboardResponseDTO(stats, buildAlerts(snapshot), healthDTO);
+        SchoolKpisDTO schoolKpis = buildSchoolKpis(tenantId);
+
+        return new DashboardResponseDTO(stats, buildAlerts(snapshot), healthDTO, schoolKpis);
+    }
+
+    private SchoolKpisDTO buildSchoolKpis(UUID tenantId) {
+        long totalAlunos = alunoRepository.countByTenantIdAndDeletedFalse(tenantId);
+        long totalTurmas = turmaRepository.countByTenantIdAndDeletedFalse(tenantId);
+        long totalCursos = cursoRepository.countByTenantIdAndDeletedFalse(tenantId);
+        long matriculasAtivas = matriculaRepository.countByTenantIdAndStatusAndDeletedFalse(tenantId, "ativa");
+        long matriculasCanceladas = matriculaRepository.countByTenantIdAndStatusAndDeletedFalse(tenantId, "cancelada");
+        return new SchoolKpisDTO(totalAlunos, totalTurmas, totalCursos, matriculasAtivas, matriculasCanceladas);
     }
 
     private UUID currentUnitId() {
