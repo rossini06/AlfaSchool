@@ -1,0 +1,26 @@
+# PHP/Laravel (não usado no Docker)
+vendor/
+node_modules/
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+public/hot
+public/storage
+.env
+
+# Frontend build output
+frontend/node_modules/
+frontend/dist/
+
+# Backend build output
+backend/target/
+
+# IDE e misc
+.git/
+.idea/
+*.iml
+*.log
+README.md
+docs/

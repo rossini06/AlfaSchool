@@ -1,18 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 // https://vite.dev/config/
 export default defineConfig({
   server: {
-    host: '127.0.0.1',
-    port: 8000,
+    host: '0.0.0.0',
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: BACKEND_URL,
         changeOrigin: true,
       },
       '/actuator': {
-        target: 'http://127.0.0.1:8080',
+        target: BACKEND_URL,
         changeOrigin: true,
       },
     },
