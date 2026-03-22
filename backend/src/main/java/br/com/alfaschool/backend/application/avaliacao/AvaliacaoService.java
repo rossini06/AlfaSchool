@@ -98,6 +98,7 @@ public class AvaliacaoService {
         a.setDescricao(req.descricao());
         a.setCriterios(req.criterios());
         a.setDataEntrega(req.dataEntrega());
+        a.setPermiteRecuperacao(req.permiteRecuperacao() != null ? req.permiteRecuperacao() : true);
     }
 
     private UUID requiredTenant() {

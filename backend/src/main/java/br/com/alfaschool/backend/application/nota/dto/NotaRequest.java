@@ -7,8 +7,11 @@ import java.util.UUID;
 
 public record NotaRequest(
         @NotNull(message = "Aluno é obrigatório")     UUID alunoId,
+        UUID matriculaId,
         @NotNull(message = "Avaliação é obrigatória") UUID avaliacaoId,
         @DecimalMin(value = "0.0", message = "Nota mínima é 0")
         BigDecimal nota,
+        @DecimalMin(value = "0.0", message = "Nota de recuperação mínima é 0")
+        BigDecimal notaRecuperacao,
         String obs
 ) {}

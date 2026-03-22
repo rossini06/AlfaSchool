@@ -49,6 +49,9 @@ public class Avaliacao extends BaseEntity {
     @Column(name = "data_entrega")
     private LocalDate dataEntrega;
 
+    @Column(name = "permite_recuperacao", nullable = false)
+    private Boolean permiteRecuperacao = true;
+
     // --- getters / setters ---
 
     public UUID getTurmaId() { return turmaId; }
@@ -89,4 +92,7 @@ public class Avaliacao extends BaseEntity {
 
     public LocalDate getDataEntrega() { return dataEntrega; }
     public void setDataEntrega(LocalDate v) { this.dataEntrega = v; }
+
+    public Boolean getPermiteRecuperacao() { return permiteRecuperacao; }
+    public void setPermiteRecuperacao(Boolean v) { this.permiteRecuperacao = v; }
 }

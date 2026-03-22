@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,9 +17,13 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, UUID> {
     Page<Disciplina> findByTenantIdAndDeletedFalse(UUID tenantId, Pageable pageable);
 
     @Query("SELECT d FROM Disciplina d WHERE d.tenantId = :tenantId AND d.deleted = false AND LOWER(d.nome) LIKE LOWER(CONCAT('%',:q,'%'))")
-    Page<Disciplina> search(UUID tenantId, String q, Pageable pageable);
+    Page<Disciplina> search(@Param("tenantId") UUID tenantId, @Param("q") String q, Pageable pageable);
 
     List<Disciplina> findByTenantIdAndDeletedFalseAndAtivaTrue(UUID tenantId);
     boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalse(UUID tenantId, String nome);
     boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalseAndIdNot(UUID tenantId, String nome, UUID id);
+
+    // Novo: buscar disciplinas por cursoId
+    List<Disciplina> findByTenantIdAndCursoIdAndAtivaAndDeletedFalse(UUID tenantId, UUID cursoId, boolean ativa);
+    List<Disciplina> findByTenantIdAndCursoIdAndDeletedFalse(UUID tenantId, UUID cursoId);
 }

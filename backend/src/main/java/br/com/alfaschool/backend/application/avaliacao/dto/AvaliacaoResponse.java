@@ -22,6 +22,7 @@ public record AvaliacaoResponse(
         String descricao,
         String criterios,
         LocalDate dataEntrega,
+        Boolean permiteRecuperacao,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -42,6 +43,7 @@ public record AvaliacaoResponse(
                 a.getDescricao(),
                 a.getCriterios(),
                 a.getDataEntrega(),
+                a.getPermiteRecuperacao(),
                 a.getCreatedAt(),
                 a.getUpdatedAt()
         );

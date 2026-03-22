@@ -19,5 +19,6 @@ public record AvaliacaoRequest(
         String status,
         String descricao,
         String criterios,
-        LocalDate dataEntrega
+        LocalDate dataEntrega,
+        Boolean permiteRecuperacao
 ) {}

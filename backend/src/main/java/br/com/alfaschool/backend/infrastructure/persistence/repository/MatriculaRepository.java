@@ -17,4 +17,8 @@ public interface MatriculaRepository extends JpaRepository<Matricula, UUID> {
     boolean existsByTenantIdAndAlunoIdAndTurmaIdAndDeletedFalse(UUID tenantId, UUID alunoId, UUID turmaId);
     long countByTenantIdAndStatusAndDeletedFalse(UUID tenantId, String status);
     Optional<Matricula> findByNumeroMatriculaAndTenantIdAndDeletedFalse(String numero, UUID tenantId);
+
+    // Novos métodos para o diário de classe
+    List<Matricula> findByTenantIdAndTurmaIdAndStatusAndDeletedFalse(UUID tenantId, UUID turmaId, String status);
+    Optional<Matricula> findByTenantIdAndIdAndDeletedFalse(UUID tenantId, UUID id);
 }

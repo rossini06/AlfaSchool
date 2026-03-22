@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,12 @@ public class NotaController {
         return ResponseEntity.ok(ApiResponse.of(200, "Notas do aluno", notaService.listByAluno(alunoId)));
     }
 
+    @GetMapping("/matricula/{matriculaId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<NotaResponse>>> listByMatricula(@PathVariable UUID matriculaId) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Notas da matrícula", notaService.listByMatricula(matriculaId)));
+    }
+
     @GetMapping("/avaliacao/{avaliacaoId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<NotaResponse>>> listByAvaliacao(@PathVariable UUID avaliacaoId) {
@@ -39,6 +46,15 @@ public class NotaController {
     public ResponseEntity<ApiResponse<NotaResponse>> lancar(@Valid @RequestBody NotaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Nota lançada", notaService.lancar(request)));
+    }
+
+    @PatchMapping("/{id}/recuperacao")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<NotaResponse>> lancarRecuperacao(
+            @PathVariable UUID id,
+            @RequestParam BigDecimal notaRecuperacao) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Nota de recuperação lançada",
+                notaService.lancarRecuperacao(id, notaRecuperacao)));
     }
 
     @DeleteMapping("/{id}")

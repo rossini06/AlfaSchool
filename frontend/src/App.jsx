@@ -14,7 +14,9 @@ import { AlunosPage } from "./pages/AlunosPage";
 import { MatriculasPage } from "./pages/MatriculasPage";
 import { DispositivosPage } from "./pages/DispositivosPage";
 import { FrequenciaPage } from "./pages/FrequenciaPage";
+import { ConteudoMinistradoPage } from "./pages/ConteudoMinistradoPage";
 import { NotasPage } from "./pages/NotasPage";
+import { BoletimPage } from "./pages/BoletimPage";
 import { FinanceiroPage } from "./pages/FinanceiroPage";
 import { UsuariosPage } from "./pages/UsuariosPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
@@ -60,24 +62,29 @@ export default function App() {
       >
         <Route index element={<DashboardPage />} />
         {/* Acadêmico */}
-        <Route path="cursos"       element={<CursosPage />} />
-        <Route path="disciplinas"  element={<DisciplinasPage />} />
-        <Route path="turmas"       element={<TurmasPage />} />
-        <Route path="professores"  element={<ProfessoresPage />} />
-        <Route path="alunos"       element={<AlunosPage />} />
+        <Route path="cursos" element={<CursosPage />} />
+        <Route path="disciplinas" element={<DisciplinasPage />} />
+        <Route path="turmas" element={<TurmasPage />} />
+        <Route path="professores" element={<ProfessoresPage />} />
+        <Route path="alunos" element={<AlunosPage />} />
         <Route path="responsaveis" element={<ResponsaveisPage />} />
-        <Route path="matriculas"   element={<MatriculasPage />} />
+        <Route path="matriculas" element={<MatriculasPage />} />
         {/* Diário de Classe */}
-        <Route path="frequencia"   element={<FrequenciaPage />} />
-        <Route path="avaliacoes"   element={<AvaliacaoPage />} />
-        <Route path="notas"        element={<NotasPage />} />
+        <Route path="frequencia" element={<FrequenciaPage />} />
+        <Route
+          path="conteudo-ministrado"
+          element={<ConteudoMinistradoPage />}
+        />
+        <Route path="avaliacoes" element={<AvaliacaoPage />} />
+        <Route path="notas" element={<NotasPage />} />
+        <Route path="boletim" element={<BoletimPage />} />
         {/* Financeiro */}
-        <Route path="financeiro"   element={<FinanceiroPage />} />
+        <Route path="financeiro" element={<FinanceiroPage />} />
         {/* Escola */}
         <Route path="dispositivos" element={<DispositivosPage />} />
         {/* Sistema */}
-        <Route path="usuarios"     element={<UsuariosPage />} />
-        <Route path="auditoria"    element={<AuditoriaPage />} />
+        <Route path="usuarios" element={<UsuariosPage />} />
+        <Route path="auditoria" element={<AuditoriaPage />} />
 
         {/* SUPER_ADMIN only */}
         <Route
