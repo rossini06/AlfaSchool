@@ -45,7 +45,7 @@ export function AdminLayout() {
         onMobileClose={closeMobile}
       />
 
-      <div className={`main-area ${collapsed ? "collapsed" : ""}`}>
+      <div className="main-area">
         <Header onMenuToggle={toggleMobile} />
         <main className="content-area">
           <Outlet />
