@@ -5,12 +5,15 @@ import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
 
 const PAGE_SIZE = 20;
-
 const TURNOS = ["Manhã", "Tarde", "Noite", "Integral"];
+const STATUS_OPTS = ["planejada", "em_andamento", "encerrada", "suspensa"];
+const STATUS_LABELS = { planejada: "Planejada", em_andamento: "Em andamento", encerrada: "Encerrada", suspensa: "Suspensa" };
+const STATUS_BADGE = { planejada: "badge-info", em_andamento: "badge-success", encerrada: "badge-secondary", suspensa: "badge-warning" };
 
 const EMPTY_FORM = {
   nome: "", cursoId: "", anoLetivo: new Date().getFullYear().toString(),
-  turno: "Manhã", professor: "", capacidade: "", ativo: true,
+  turno: "Manhã", professorResponsavel: "", capacidadeMaxima: "",
+  dataInicio: "", dataFim: "", status: "planejada", ativa: true,
 };
 
 export function TurmasPage() {
@@ -50,7 +53,7 @@ export function TurmasPage() {
 
   useEffect(() => {
     load(0);
-    api.get("/cursos?size=200&ativo=true").then((d) => setCursos(d?.content || d || [])).catch(() => {});
+    api.get("/cursos?size=200").then((d) => setCursos(d?.content || d || [])).catch(() => {});
   }, []);
 
   const openNew = () => { setEditItem(null); setForm(EMPTY_FORM); setModalOpen(true); };
@@ -60,11 +63,14 @@ export function TurmasPage() {
     setForm({
       nome: item.nome || "",
       cursoId: item.cursoId || "",
-      anoLetivo: item.anoLetivo || "",
+      anoLetivo: item.anoLetivo || new Date().getFullYear(),
       turno: item.turno || "Manhã",
-      professor: item.professor || "",
-      capacidade: item.capacidade ?? "",
-      ativo: item.ativo !== false,
+      professorResponsavel: item.professorResponsavel || "",
+      capacidadeMaxima: item.capacidadeMaxima ?? "",
+      dataInicio: item.dataInicio || "",
+      dataFim: item.dataFim || "",
+      status: item.status || "planejada",
+      ativa: item.ativa !== false,
     });
     setModalOpen(true);
   };
@@ -74,7 +80,13 @@ export function TurmasPage() {
     if (!form.cursoId) { alert("Selecione o curso"); return; }
     setSaving(true);
     try {
-      const body = { ...form, capacidade: form.capacidade ? Number(form.capacidade) : null };
+      const body = {
+        ...form,
+        anoLetivo: Number(form.anoLetivo),
+        capacidadeMaxima: form.capacidadeMaxima ? Number(form.capacidadeMaxima) : null,
+        dataInicio: form.dataInicio || null,
+        dataFim: form.dataFim || null,
+      };
       if (editItem) {
         await api.put(`/turmas/${editItem.id}`, body);
       } else {
@@ -102,7 +114,6 @@ export function TurmasPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const f = (k) => (e) => setForm((prev) => ({ ...prev, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
-
   const getCursoNome = (id) => cursos.find((c) => c.id === id)?.nome || "—";
 
   const turnoBadge = (t) => {
@@ -110,7 +121,6 @@ export function TurmasPage() {
     return <span className={`badge ${map[t] || "badge-secondary"}`}>{t}</span>;
   };
 
-  // Generate year options
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 1 + i);
 
@@ -168,9 +178,8 @@ export function TurmasPage() {
               <th>Curso</th>
               <th>Ano Letivo</th>
               <th>Turno</th>
-              <th>Professor</th>
+              <th>Prof. Responsável</th>
               <th>Capacidade</th>
-              <th>Alunos</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -178,10 +187,10 @@ export function TurmasPage() {
           <tbody>
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i}>{Array.from({ length: 9 }).map((_, j) => <td key={j}><div className="skeleton skeleton-text" /></td>)}</tr>
+                <tr key={i}>{Array.from({ length: 8 }).map((_, j) => <td key={j}><div className="skeleton skeleton-text" /></td>)}</tr>
               ))
             ) : items.length === 0 ? (
-              <tr><td colSpan={9}>
+              <tr><td colSpan={8}>
                 <div className="empty-state">
                   <div className="empty-state-icon"><Icon name="Users" size={28} /></div>
                   <h3>Nenhuma turma encontrada</h3>
@@ -192,19 +201,14 @@ export function TurmasPage() {
               items.map((item) => (
                 <tr key={item.id}>
                   <td><strong>{item.nome}</strong></td>
-                  <td className="td-muted">{item.cursoNome || getCursoNome(item.cursoId)}</td>
+                  <td className="td-muted">{getCursoNome(item.cursoId)}</td>
                   <td className="td-muted">{item.anoLetivo || "—"}</td>
                   <td>{turnoBadge(item.turno)}</td>
-                  <td className="td-muted">{item.professor || "—"}</td>
-                  <td className="td-muted">{item.capacidade ?? "—"}</td>
+                  <td className="td-muted">{item.professorResponsavel || "—"}</td>
+                  <td className="td-muted">{item.capacidadeMaxima ?? "—"}</td>
                   <td>
-                    {item.totalAlunos !== undefined ? (
-                      <span className="badge badge-brand">{item.totalAlunos} alunos</span>
-                    ) : "—"}
-                  </td>
-                  <td>
-                    <span className={`badge ${item.ativo !== false ? "badge-success" : "badge-danger"}`}>
-                      {item.ativo !== false ? "Ativa" : "Inativa"}
+                    <span className={`badge ${item.ativa !== false ? STATUS_BADGE[item.status] || "badge-success" : "badge-danger"}`}>
+                      {item.ativa !== false ? (STATUS_LABELS[item.status] || item.status || "Ativa") : "Inativa"}
                     </span>
                   </td>
                   <td>
@@ -225,7 +229,6 @@ export function TurmasPage() {
         <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => load(p)} />
       </div>
 
-      {/* Modal */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
         title={editItem ? "Editar Turma" : "Nova Turma"}
         footer={
@@ -265,22 +268,37 @@ export function TurmasPage() {
           </div>
           <div className="form-grid-2">
             <div className="form-field">
+              <label className="form-label">Data de Início</label>
+              <input className="form-input" type="date" value={form.dataInicio} onChange={f("dataInicio")} />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Data de Fim</label>
+              <input className="form-input" type="date" value={form.dataFim} onChange={f("dataFim")} />
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field">
               <label className="form-label">Professor Responsável</label>
-              <input className="form-input" value={form.professor} onChange={f("professor")} placeholder="Nome do professor" />
+              <input className="form-input" value={form.professorResponsavel} onChange={f("professorResponsavel")} placeholder="Nome do professor" />
             </div>
             <div className="form-field">
               <label className="form-label">Capacidade (alunos)</label>
-              <input className="form-input" type="number" min="0" value={form.capacidade} onChange={f("capacidade")} placeholder="40" />
+              <input className="form-input" type="number" min="1" value={form.capacidadeMaxima} onChange={f("capacidadeMaxima")} placeholder="40" />
             </div>
           </div>
+          <div className="form-field">
+            <label className="form-label">Status</label>
+            <select className="form-select" value={form.status} onChange={f("status")}>
+              {STATUS_OPTS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </select>
+          </div>
           <label className="form-checkbox">
-            <input type="checkbox" checked={form.ativo} onChange={f("ativo")} />
+            <input type="checkbox" checked={form.ativa} onChange={f("ativa")} />
             <span>Turma ativa</span>
           </label>
         </div>
       </Modal>
 
-      {/* Delete confirm */}
       <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Confirmar Exclusão" size="sm"
         footer={
           <>

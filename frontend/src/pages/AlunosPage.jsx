@@ -20,7 +20,7 @@ const EMPTY_FORM = {
   dataNascimento: "", sexo: "", ativo: true,
   endereco: "", cidade: "", estado: "", cep: "",
   nomeResponsavel: "", telefoneResponsavel: "", emailResponsavel: "",
-  foto: "",
+  foto: "", observacoesMedicas: "",
   responsaveis: [],
 };
 
@@ -135,6 +135,7 @@ export function AlunosPage() {
       telefoneResponsavel: item.telefoneResponsavel || "",
       emailResponsavel: item.emailResponsavel || "",
       foto: item.foto || "",
+      observacoesMedicas: item.observacoesMedicas || "",
       responsaveis,
     });
     setActiveTab("pessoal");
@@ -294,6 +295,7 @@ export function AlunosPage() {
     { key: "endereco", label: "Endereço" },
     { key: "responsavel", label: `Responsáveis${form.responsaveis.length > 0 ? ` (${form.responsaveis.length})` : ""}` },
     { key: "foto", label: "Foto" },
+    { key: "saude", label: "Saúde" },
   ];
 
   const parentescoBadgeColor = (p) => {
@@ -643,6 +645,22 @@ export function AlunosPage() {
                   </button>
                 )}
                 <p className="text-muted text-sm">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB.</p>
+              </div>
+            )}
+
+            {activeTab === "saude" && (
+              <div className="form-grid">
+                <div className="form-field">
+                  <label className="form-label">Observações Médicas</label>
+                  <textarea
+                    className="form-textarea"
+                    value={form.observacoesMedicas}
+                    onChange={f("observacoesMedicas")}
+                    rows={6}
+                    placeholder="Alergias, medicamentos em uso, condições especiais, necessidades de saúde..."
+                  />
+                  <span className="form-hint">Estas informações são confidenciais e visíveis apenas à equipe da escola.</span>
+                </div>
               </div>
             )}
           </div>

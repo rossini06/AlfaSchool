@@ -33,6 +33,15 @@ public class Matricula extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String obs;
 
+    @Column(length = 30)
+    private String tipo = "regular";
+
+    @Column(name = "status_academico", length = 30)
+    private String statusAcademico = "cursando";
+
+    @Column(precision = 5, scale = 2)
+    private java.math.BigDecimal desconto;
+
     public UUID getUnitId() { return unitId; }
     public void setUnitId(UUID v) { this.unitId = v; }
     public UUID getAlunoId() { return alunoId; }
@@ -49,4 +58,10 @@ public class Matricula extends BaseEntity {
     public void setStatus(String status) { this.status = status; }
     public String getObs() { return obs; }
     public void setObs(String obs) { this.obs = obs; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String v) { this.tipo = v; }
+    public String getStatusAcademico() { return statusAcademico; }
+    public void setStatusAcademico(String v) { this.statusAcademico = v; }
+    public java.math.BigDecimal getDesconto() { return desconto; }
+    public void setDesconto(java.math.BigDecimal v) { this.desconto = v; }
 }

@@ -57,6 +57,9 @@ public class Aluno extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String foto;
 
+    @Column(name = "observacoes_medicas", columnDefinition = "TEXT")
+    private String observacoesMedicas;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -92,6 +95,8 @@ public class Aluno extends BaseEntity {
     public void setEmailResponsavel(String v) { this.emailResponsavel = v; }
     public String getFoto() { return foto; }
     public void setFoto(String foto) { this.foto = foto; }
+    public String getObservacoesMedicas() { return observacoesMedicas; }
+    public void setObservacoesMedicas(String v) { this.observacoesMedicas = v; }
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
 }

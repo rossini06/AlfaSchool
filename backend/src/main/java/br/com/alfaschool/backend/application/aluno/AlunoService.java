@@ -94,6 +94,7 @@ public class AlunoService {
         aluno.setTelefoneResponsavel(request.telefoneResponsavel());
         aluno.setEmailResponsavel(request.emailResponsavel());
         aluno.setFoto(request.foto());
+        aluno.setObservacoesMedicas(request.observacoesMedicas());
         aluno.setUnitId(request.unitId());
         if (request.ativo() != null) {
             aluno.setAtivo(request.ativo());

@@ -1,6 +1,7 @@
 package br.com.alfaschool.backend.application.professor.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record ProfessorRequest(
@@ -13,5 +14,7 @@ public record ProfessorRequest(
         String email,
         String telefone,
         String especialidade,
+        LocalDate dataNascimento,
+        LocalDate dataContratacao,
         String status
 ) {}

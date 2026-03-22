@@ -6,7 +6,10 @@ import { Icon } from "../components/Icon";
 
 const PAGE_SIZE = 20;
 const STATUS_OPTS = ["ativo", "inativo", "licença"];
-const EMPTY_FORM = { nome: "", cpf: "", email: "", telefone: "", especialidade: "", status: "ativo" };
+const EMPTY_FORM = {
+  nome: "", cpf: "", email: "", telefone: "", especialidade: "",
+  dataNascimento: "", dataContratacao: "", status: "ativo",
+};
 
 export function ProfessoresPage() {
   const [items, setItems] = useState([]);
@@ -39,8 +42,12 @@ export function ProfessoresPage() {
   const openNew = () => { setEditItem(null); setForm(EMPTY_FORM); setModalOpen(true); };
   const openEdit = (item) => {
     setEditItem(item);
-    setForm({ nome: item.nome || "", cpf: item.cpf || "", email: item.email || "",
-      telefone: item.telefone || "", especialidade: item.especialidade || "", status: item.status || "ativo" });
+    setForm({
+      nome: item.nome || "", cpf: item.cpf || "", email: item.email || "",
+      telefone: item.telefone || "", especialidade: item.especialidade || "",
+      dataNascimento: item.dataNascimento || "", dataContratacao: item.dataContratacao || "",
+      status: item.status || "ativo",
+    });
     setModalOpen(true);
   };
 
@@ -150,6 +157,12 @@ export function ProfessoresPage() {
               <select className="form-select" value={form.status} onChange={f("status")}>
                 {STATUS_OPTS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
               </select></div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field"><label className="form-label">Data de Nascimento</label>
+              <input className="form-input" type="date" value={form.dataNascimento} onChange={f("dataNascimento")} /></div>
+            <div className="form-field"><label className="form-label">Data de Contratação</label>
+              <input className="form-input" type="date" value={form.dataContratacao} onChange={f("dataContratacao")} /></div>
           </div>
         </div>
       </Modal>

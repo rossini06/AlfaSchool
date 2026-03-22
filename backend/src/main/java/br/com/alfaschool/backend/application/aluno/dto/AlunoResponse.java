@@ -10,7 +10,7 @@ public record AlunoResponse(
     String email, String telefone, LocalDate dataNascimento, String sexo,
     String endereco, String cidade, String estado, String cep,
     String nomeResponsavel, String telefoneResponsavel, String emailResponsavel,
-    String foto, boolean ativo, Instant createdAt, Instant updatedAt
+    String foto, String observacoesMedicas, boolean ativo, Instant createdAt, Instant updatedAt
 ) {
     public static AlunoResponse from(Aluno a) {
         return new AlunoResponse(
@@ -18,7 +18,7 @@ public record AlunoResponse(
             a.getEmail(), a.getTelefone(), a.getDataNascimento(), a.getSexo(),
             a.getEndereco(), a.getCidade(), a.getEstado(), a.getCep(),
             a.getNomeResponsavel(), a.getTelefoneResponsavel(), a.getEmailResponsavel(),
-            a.getFoto(), a.isAtivo(), a.getCreatedAt(), a.getUpdatedAt()
+            a.getFoto(), a.getObservacoesMedicas(), a.isAtivo(), a.getCreatedAt(), a.getUpdatedAt()
         );
     }
 }

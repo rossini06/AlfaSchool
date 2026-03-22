@@ -21,6 +21,7 @@ public record AlunoRequest(
     String telefoneResponsavel,
     String emailResponsavel,
     String foto,
+    String observacoesMedicas,
     UUID unitId,
     Boolean ativo
 ) {}

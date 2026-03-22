@@ -13,6 +13,9 @@ const STATUS_MAP = {
   concluida: { label: "Concluída", badge: "badge-info"    },
 };
 
+const TIPOS_MATRICULA = ["regular", "transferencia", "rematricula", "especial"];
+const TIPOS_LABELS = { regular: "Regular", transferencia: "Transferência", rematricula: "Rematrícula", especial: "Especial" };
+
 export function MatriculasPage() {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -35,6 +38,8 @@ export function MatriculasPage() {
   const [selectedTurma, setSelectedTurma] = useState(null);
   const [matriculaData, setMatriculaData] = useState(new Date().toISOString().split("T")[0]);
   const [matriculaObs, setMatriculaObs] = useState("");
+  const [matriculaTipo, setMatriculaTipo] = useState("regular");
+  const [matriculaDesconto, setMatriculaDesconto] = useState("");
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async (p = 0) => {
@@ -85,6 +90,8 @@ export function MatriculasPage() {
     setTurmaSearch(""); setSelectedTurma(null);
     setMatriculaData(new Date().toISOString().split("T")[0]);
     setMatriculaObs("");
+    setMatriculaTipo("regular");
+    setMatriculaDesconto("");
     setModalOpen(true);
   };
 
@@ -97,6 +104,8 @@ export function MatriculasPage() {
         turmaId: selectedTurma.id,
         dataMatricula: matriculaData,
         obs: matriculaObs,
+        tipo: matriculaTipo,
+        desconto: matriculaDesconto ? Number(matriculaDesconto) : null,
       });
       setModalOpen(false);
       load(page);
@@ -110,7 +119,13 @@ export function MatriculasPage() {
   const updateStatus = async (id, novoStatus) => {
     if (!confirm(`Alterar status para "${STATUS_MAP[novoStatus]?.label}"?`)) return;
     try {
-      await api.patch(`/matriculas/${id}/status`, { status: novoStatus });
+      const endpointMap = { ativa: "reativar", trancada: "trancar", cancelada: "cancelar", concluida: "concluir" };
+      const endpoint = endpointMap[novoStatus];
+      if (endpoint) {
+        await api.post(`/matriculas/${id}/${endpoint}`);
+      } else {
+        await api.patch(`/matriculas/${id}/status`, { status: novoStatus });
+      }
       load(page);
     } catch (err) {
       alert(err.message);
@@ -204,7 +219,7 @@ export function MatriculasPage() {
               items.map((item) => (
                 <tr key={item.id}>
                   <td className="td-muted" style={{ fontFamily: "monospace", fontSize: 12 }}>
-                    {item.numero || item.id?.toString().padStart(6, "0") || "—"}
+                    {item.numeroMatricula || "—"}
                   </td>
                   <td><strong>{item.alunoNome || "—"}</strong></td>
                   <td className="td-muted">
@@ -453,10 +468,25 @@ export function MatriculasPage() {
               </div>
             </div>
 
+            <div className="form-grid-2">
+              <div className="form-field">
+                <label className="form-label">Tipo de Matrícula</label>
+                <select className="form-select" value={matriculaTipo} onChange={(e) => setMatriculaTipo(e.target.value)}>
+                  {TIPOS_MATRICULA.map(t => <option key={t} value={t}>{TIPOS_LABELS[t]}</option>)}
+                </select>
+              </div>
+              <div className="form-field">
+                <label className="form-label">Data da Matrícula</label>
+                <input className="form-input" type="date" value={matriculaData}
+                  onChange={(e) => setMatriculaData(e.target.value)} />
+              </div>
+            </div>
+
             <div className="form-field">
-              <label className="form-label">Data da Matrícula</label>
-              <input className="form-input" type="date" value={matriculaData}
-                onChange={(e) => setMatriculaData(e.target.value)} />
+              <label className="form-label">Desconto (%)</label>
+              <input className="form-input" type="number" min="0" max="100" step="0.01"
+                value={matriculaDesconto} onChange={(e) => setMatriculaDesconto(e.target.value)}
+                placeholder="0.00" />
             </div>
 
             <div className="form-field">

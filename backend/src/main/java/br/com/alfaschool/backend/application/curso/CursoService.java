@@ -76,12 +76,24 @@ public class CursoService {
     }
 
     private void applyRequest(Curso curso, CursoRequest request) {
+        if (request.idadeMinima() != null && request.idadeMaxima() != null
+                && request.idadeMinima() >= request.idadeMaxima()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Idade mínima deve ser menor que a idade máxima");
+        }
         curso.setNome(request.nome());
         curso.setCodigo(request.codigo());
         curso.setDescricao(request.descricao());
         curso.setCargaHoraria(request.cargaHoraria());
         curso.setModalidade(request.modalidade() != null ? request.modalidade() : "presencial");
         curso.setNivel(request.nivel());
+        curso.setTipo(request.tipo());
+        curso.setDuracaoMeses(request.duracaoMeses());
+        curso.setIdadeMinima(request.idadeMinima());
+        curso.setIdadeMaxima(request.idadeMaxima());
+        curso.setPrecoBase(request.precoBase());
+        curso.setNotaMinimaAprovacao(request.notaMinimaAprovacao());
+        curso.setFrequenciaMinimaAprovacao(request.frequenciaMinimaAprovacao());
         curso.setUnitId(request.unitId());
         if (request.ativo() != null) {
             curso.setAtivo(request.ativo());

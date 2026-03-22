@@ -63,6 +63,9 @@ public class MatriculaService {
         matricula.setDataMatricula(request.dataMatricula() != null ? request.dataMatricula() : LocalDate.now());
         matricula.setDataConclusao(request.dataConclusao());
         matricula.setObs(request.obs());
+        matricula.setTipo(request.tipo() != null ? request.tipo() : "regular");
+        matricula.setStatusAcademico(request.statusAcademico() != null ? request.statusAcademico() : "cursando");
+        matricula.setDesconto(request.desconto());
         matricula.setStatus("ativa");
         matricula.setNumeroMatricula(generateNumero(tenantId));
         return MatriculaResponse.from(matriculaRepository.save(matricula));
@@ -82,6 +85,9 @@ public class MatriculaService {
         }
         matricula.setDataConclusao(request.dataConclusao());
         matricula.setObs(request.obs());
+        if (request.tipo() != null) matricula.setTipo(request.tipo());
+        if (request.statusAcademico() != null) matricula.setStatusAcademico(request.statusAcademico());
+        if (request.desconto() != null) matricula.setDesconto(request.desconto());
         return MatriculaResponse.from(matriculaRepository.save(matricula));
     }
 
@@ -113,6 +119,42 @@ public class MatriculaService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
         matricula.setStatus("trancada");
         return MatriculaResponse.from(matriculaRepository.save(matricula));
+    }
+
+    @Transactional
+    public MatriculaResponse reativar(UUID id) {
+        UUID tenantId = requiredTenant();
+        Matricula matricula = matriculaRepository.findById(id)
+                .filter(m -> tenantId.equals(m.getTenantId()) && !Boolean.TRUE.equals(m.getDeleted()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
+        matricula.setStatus("ativa");
+        return MatriculaResponse.from(matriculaRepository.save(matricula));
+    }
+
+    @Transactional
+    public MatriculaResponse concluir(UUID id) {
+        UUID tenantId = requiredTenant();
+        Matricula matricula = matriculaRepository.findById(id)
+                .filter(m -> tenantId.equals(m.getTenantId()) && !Boolean.TRUE.equals(m.getDeleted()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
+        matricula.setStatus("concluida");
+        matricula.setStatusAcademico("aprovado");
+        if (matricula.getDataConclusao() == null) {
+            matricula.setDataConclusao(LocalDate.now());
+        }
+        return MatriculaResponse.from(matriculaRepository.save(matricula));
+    }
+
+    @Transactional
+    public MatriculaResponse updateStatus(UUID id, String novoStatus) {
+        return switch (novoStatus) {
+            case "ativa"     -> reativar(id);
+            case "trancada"  -> trancar(id);
+            case "cancelada" -> cancelar(id);
+            case "concluida" -> concluir(id);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Status inválido: " + novoStatus);
+        };
     }
 
     private String generateNumero(UUID tenantId) {

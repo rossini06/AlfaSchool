@@ -84,6 +84,8 @@ public class ProfessorService {
         p.setEmail(req.email());
         p.setTelefone(req.telefone());
         p.setEspecialidade(req.especialidade());
+        p.setDataNascimento(req.dataNascimento());
+        p.setDataContratacao(req.dataContratacao());
         p.setUnitId(req.unitId());
         if (req.status() != null) p.setStatus(req.status());
     }

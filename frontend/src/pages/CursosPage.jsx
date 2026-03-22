@@ -8,10 +8,14 @@ const PAGE_SIZE = 20;
 
 const MODALIDADES = ["Presencial", "EAD", "Híbrido"];
 const NIVEIS = ["Fundamental", "Médio", "Técnico", "Superior", "Pós-graduação", "Extensão"];
+const TIPOS = ["Regular", "Técnico", "Livre", "Profissionalizante", "Preparatório", "Extensão"];
 
 const EMPTY_FORM = {
-  nome: "", codigo: "", modalidade: "Presencial", nivel: "Médio",
-  cargaHoraria: "", descricao: "", ativo: true,
+  nome: "", codigo: "", modalidade: "Presencial", nivel: "Médio", tipo: "",
+  cargaHoraria: "", duracaoMeses: "", descricao: "",
+  idadeMinima: "", idadeMaxima: "", precoBase: "",
+  notaMinimaAprovacao: "5.0", frequenciaMinimaAprovacao: "75.0",
+  ativo: true,
 };
 
 export function CursosPage() {
@@ -57,8 +61,15 @@ export function CursosPage() {
       codigo: item.codigo || "",
       modalidade: item.modalidade || "Presencial",
       nivel: item.nivel || "Médio",
+      tipo: item.tipo || "",
       cargaHoraria: item.cargaHoraria ?? "",
+      duracaoMeses: item.duracaoMeses ?? "",
       descricao: item.descricao || "",
+      idadeMinima: item.idadeMinima ?? "",
+      idadeMaxima: item.idadeMaxima ?? "",
+      precoBase: item.precoBase ?? "",
+      notaMinimaAprovacao: item.notaMinimaAprovacao ?? "5.0",
+      frequenciaMinimaAprovacao: item.frequenciaMinimaAprovacao ?? "75.0",
       ativo: item.ativo !== false,
     });
     setModalOpen(true);
@@ -68,7 +79,16 @@ export function CursosPage() {
     if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
     setSaving(true);
     try {
-      const body = { ...form, cargaHoraria: form.cargaHoraria ? Number(form.cargaHoraria) : null };
+      const body = {
+        ...form,
+        cargaHoraria: form.cargaHoraria ? Number(form.cargaHoraria) : null,
+        duracaoMeses: form.duracaoMeses ? Number(form.duracaoMeses) : null,
+        idadeMinima: form.idadeMinima ? Number(form.idadeMinima) : null,
+        idadeMaxima: form.idadeMaxima ? Number(form.idadeMaxima) : null,
+        precoBase: form.precoBase ? Number(form.precoBase) : null,
+        notaMinimaAprovacao: form.notaMinimaAprovacao ? Number(form.notaMinimaAprovacao) : null,
+        frequenciaMinimaAprovacao: form.frequenciaMinimaAprovacao ? Number(form.frequenciaMinimaAprovacao) : null,
+      };
       if (editItem) {
         await api.put(`/cursos/${editItem.id}`, body);
       } else {
@@ -224,8 +244,11 @@ export function CursosPage() {
               <input className="form-input" value={form.codigo} onChange={f("codigo")} placeholder="Ex: EMR-01" />
             </div>
             <div className="form-field">
-              <label className="form-label">Carga Horária (h)</label>
-              <input className="form-input" type="number" min="0" value={form.cargaHoraria} onChange={f("cargaHoraria")} placeholder="800" />
+              <label className="form-label">Tipo</label>
+              <select className="form-select" value={form.tipo} onChange={f("tipo")}>
+                <option value="">Selecione...</option>
+                {TIPOS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
           </div>
           <div className="form-grid-2">
@@ -240,6 +263,42 @@ export function CursosPage() {
               <select className="form-select" value={form.nivel} onChange={f("nivel")}>
                 {NIVEIS.map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field">
+              <label className="form-label">Carga Horária (h)</label>
+              <input className="form-input" type="number" min="1" value={form.cargaHoraria} onChange={f("cargaHoraria")} placeholder="800" />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Duração (meses)</label>
+              <input className="form-input" type="number" min="1" value={form.duracaoMeses} onChange={f("duracaoMeses")} placeholder="12" />
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field">
+              <label className="form-label">Idade Mínima</label>
+              <input className="form-input" type="number" min="0" value={form.idadeMinima} onChange={f("idadeMinima")} placeholder="14" />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Idade Máxima</label>
+              <input className="form-input" type="number" min="0" value={form.idadeMaxima} onChange={f("idadeMaxima")} placeholder="18" />
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field">
+              <label className="form-label">Valor Base (R$)</label>
+              <input className="form-input" type="number" min="0" step="0.01" value={form.precoBase} onChange={f("precoBase")} placeholder="0.00" />
+            </div>
+            <div className="form-field">
+              <label className="form-label">Nota Mínima de Aprovação</label>
+              <input className="form-input" type="number" min="0" max="10" step="0.1" value={form.notaMinimaAprovacao} onChange={f("notaMinimaAprovacao")} placeholder="5.0" />
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-field">
+              <label className="form-label">Frequência Mínima (%)</label>
+              <input className="form-input" type="number" min="0" max="100" step="0.1" value={form.frequenciaMinimaAprovacao} onChange={f("frequenciaMinimaAprovacao")} placeholder="75.0" />
             </div>
           </div>
           <div className="form-field">

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -74,5 +75,26 @@ public class MatriculaController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MatriculaResponse>> trancar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula trancada com sucesso", matriculaService.trancar(id)));
+    }
+
+    @PostMapping("/{id}/reativar")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<MatriculaResponse>> reativar(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Matrícula reativada com sucesso", matriculaService.reativar(id)));
+    }
+
+    @PostMapping("/{id}/concluir")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<MatriculaResponse>> concluir(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Matrícula concluída com sucesso", matriculaService.concluir(id)));
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<MatriculaResponse>> updateStatus(
+            @PathVariable UUID id, @RequestBody Map<String, String> body) {
+        String status = body.get("status");
+        return ResponseEntity.ok(ApiResponse.of(200, "Status atualizado com sucesso",
+                matriculaService.updateStatus(id, status)));
     }
 }

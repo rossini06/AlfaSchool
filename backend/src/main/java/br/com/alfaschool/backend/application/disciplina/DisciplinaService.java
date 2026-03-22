@@ -86,6 +86,12 @@ public class DisciplinaService {
         d.setCodigo(req.codigo());
         d.setCargaHoraria(req.cargaHoraria());
         d.setDescricao(req.descricao());
+        d.setCursoId(req.cursoId());
+        d.setTipo(req.tipo());
+        d.setNotaMaxima(req.notaMaxima());
+        d.setPeso(req.peso());
+        if (req.permiteRecuperacao() != null) d.setPermiteRecuperacao(req.permiteRecuperacao());
+        d.setTipoAvaliacao(req.tipoAvaliacao());
         if (req.ativa() != null) d.setAtiva(req.ativa());
     }
 

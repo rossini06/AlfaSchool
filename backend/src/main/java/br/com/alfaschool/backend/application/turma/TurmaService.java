@@ -77,6 +77,11 @@ public class TurmaService {
     }
 
     private void applyRequest(Turma turma, TurmaRequest request) {
+        if (request.dataInicio() != null && request.dataFim() != null
+                && !request.dataInicio().isBefore(request.dataFim())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Data de início deve ser anterior à data de fim");
+        }
         turma.setCursoId(request.cursoId());
         turma.setNome(request.nome());
         turma.setCodigo(request.codigo());
@@ -84,6 +89,9 @@ public class TurmaService {
         turma.setTurno(request.turno() != null ? request.turno() : "manha");
         turma.setProfessorResponsavel(request.professorResponsavel());
         turma.setCapacidadeMaxima(request.capacidadeMaxima() != null ? request.capacidadeMaxima() : 40);
+        turma.setDataInicio(request.dataInicio());
+        turma.setDataFim(request.dataFim());
+        if (request.status() != null) turma.setStatus(request.status());
         turma.setUnitId(request.unitId());
         if (request.ativa() != null) {
             turma.setAtiva(request.ativa());

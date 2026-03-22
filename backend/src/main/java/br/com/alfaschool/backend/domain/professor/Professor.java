@@ -2,6 +2,7 @@ package br.com.alfaschool.backend.domain.professor;
 
 import br.com.alfaschool.backend.domain.shared.BaseEntity;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +27,12 @@ public class Professor extends BaseEntity {
     @Column(length = 120)
     private String especialidade;
 
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
+
+    @Column(name = "data_contratacao")
+    private LocalDate dataContratacao;
+
     @Column(length = 20, nullable = false)
     private String status = "ativo";
 
@@ -41,6 +48,10 @@ public class Professor extends BaseEntity {
     public void setTelefone(String v) { this.telefone = v; }
     public String getEspecialidade() { return especialidade; }
     public void setEspecialidade(String v) { this.especialidade = v; }
+    public LocalDate getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(LocalDate v) { this.dataNascimento = v; }
+    public LocalDate getDataContratacao() { return dataContratacao; }
+    public void setDataContratacao(LocalDate v) { this.dataContratacao = v; }
     public String getStatus() { return status; }
     public void setStatus(String v) { this.status = v; }
 }
