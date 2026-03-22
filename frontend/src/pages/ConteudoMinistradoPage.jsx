@@ -3,8 +3,6 @@ import { api } from "../services/api";
 import { Icon } from "../components/Icon";
 import { Modal } from "../components/Modal";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
 function fmtDate(d) {
   if (!d) return "—";
   const [y, m, day] = d.split("-");
@@ -22,8 +20,6 @@ function initForm() {
   };
 }
 
-// ─── Page Component ──────────────────────────────────────────────────────────
-
 export function ConteudoMinistradoPage() {
   const [turmas, setTurmas] = useState([]);
   const [disciplinas, setDisciplinas] = useState([]);
@@ -31,21 +27,17 @@ export function ConteudoMinistradoPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Filtros
   const [turmaId, setTurmaId] = useState("");
   const [disciplinaId, setDisciplinaId] = useState("");
 
-  // Modal
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(initForm());
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Delete
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Definir callbacks ANTES dos useEffects que os usam
   const loadTurmas = async () => {
     try {
       const data = await api.get("/turmas?size=100");
@@ -80,13 +72,11 @@ export function ConteudoMinistradoPage() {
     }
   }, [turmaId, disciplinaId]);
 
-  // Carregar turmas e disciplinas
   useEffect(() => {
     loadTurmas();
     loadDisciplinas();
   }, []);
 
-  // Carregar conteúdos quando filtros mudam
   useEffect(() => {
     if (turmaId && disciplinaId) {
       loadConteudos();
@@ -97,11 +87,7 @@ export function ConteudoMinistradoPage() {
 
   const openNew = () => {
     setEditingId(null);
-    setForm({
-      ...initForm(),
-      turmaId,
-      disciplinaId,
-    });
+    setForm({ ...initForm(), turmaId, disciplinaId });
     setModalOpen(true);
   };
 
@@ -122,7 +108,6 @@ export function ConteudoMinistradoPage() {
     e.preventDefault();
     setSaving(true);
     setError("");
-
     const payload = {
       turmaId: form.turmaId || turmaId,
       disciplinaId: form.disciplinaId || disciplinaId,
@@ -131,7 +116,6 @@ export function ConteudoMinistradoPage() {
       objetivos: form.objetivos || null,
       recursos: form.recursos || null,
     };
-
     try {
       if (editingId) {
         await api.put(`/conteudos-ministrados/${editingId}`, payload);
@@ -140,8 +124,8 @@ export function ConteudoMinistradoPage() {
       }
       setModalOpen(false);
       loadConteudos();
-    } catch (e) {
-      setError(e?.message || "Erro ao salvar");
+    } catch (err) {
+      setError(err?.message || "Erro ao salvar");
     } finally {
       setSaving(false);
     }
@@ -162,29 +146,37 @@ export function ConteudoMinistradoPage() {
     }
   };
 
+  const turmaSelecionada = turmas.find((t) => t.id === turmaId);
+  const disciplinaSelecionada = disciplinas.find((d) => d.id === disciplinaId);
+
   return (
-    <>
-      {/* Header */}
+    <div className="page">
+      {/* Cabeçalho */}
       <div className="page-header">
-        <h1 className="page-title">
-          <Icon name="FileEdit" size={24} />
-          Conteúdo Ministrado
-        </h1>
+        <div>
+          <h1 className="page-title" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon name="FileEdit" size={22} />
+            Conteúdo Ministrado
+          </h1>
+          <p className="page-subtitle">Registro de aulas e conteúdos por turma e disciplina</p>
+        </div>
       </div>
 
       {/* Filtros */}
-      <div className="card mb-4">
-        <div className="card-header">Selecione Turma e Disciplina</div>
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">Selecione Turma e Disciplina</span>
+        </div>
         <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-5">
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
+            <div className="form-field" style={{ flex: "1 1 220px" }}>
               <label className="form-label">Turma</label>
               <select
                 className="form-select"
                 value={turmaId}
                 onChange={(e) => setTurmaId(e.target.value)}
               >
-                <option value="">Selecione...</option>
+                <option value="">Selecione a turma...</option>
                 {turmas.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.nome} ({t.anoLetivo})
@@ -192,14 +184,16 @@ export function ConteudoMinistradoPage() {
                 ))}
               </select>
             </div>
-            <div className="col-md-5">
+
+            <div className="form-field" style={{ flex: "1 1 220px" }}>
               <label className="form-label">Disciplina</label>
               <select
                 className="form-select"
                 value={disciplinaId}
                 onChange={(e) => setDisciplinaId(e.target.value)}
+                disabled={!turmaId}
               >
-                <option value="">Selecione...</option>
+                <option value="">Selecione a disciplina...</option>
                 {disciplinas.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.nome}
@@ -207,99 +201,179 @@ export function ConteudoMinistradoPage() {
                 ))}
               </select>
             </div>
-            <div className="col-md-2 d-flex align-items-end">
-              <button
-                className="btn btn-primary w-100"
-                disabled={!turmaId || !disciplinaId}
-                onClick={openNew}
-              >
-                <Icon name="Plus" size={16} /> Novo
-              </button>
-            </div>
+
+            <button
+              className="btn btn-primary"
+              disabled={!turmaId || !disciplinaId}
+              onClick={openNew}
+              style={{ flexShrink: 0 }}
+            >
+              <Icon name="Plus" size={15} />
+              Novo Conteúdo
+            </button>
           </div>
         </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && (
+        <div
+          style={{
+            background: "var(--color-danger-dim)",
+            border: "1px solid var(--color-danger)",
+            borderRadius: "var(--radius-sm)",
+            padding: "10px 16px",
+            color: "var(--color-danger)",
+            fontSize: 13.5,
+          }}
+        >
+          {error}
+        </div>
+      )}
 
-      {/* Lista */}
-      <div className="card">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0">
-            <thead>
+      {/* Indicador de seleção ativa */}
+      {turmaId && disciplinaId && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 14px",
+            background: "var(--color-brand-dim)",
+            border: "1px solid var(--color-brand)",
+            borderRadius: "var(--radius-sm)",
+            fontSize: 13,
+            color: "var(--color-brand)",
+          }}
+        >
+          <Icon name="BookOpen" size={14} />
+          <strong>{turmaSelecionada?.nome}</strong>
+          <span style={{ opacity: 0.6 }}>·</span>
+          <span>{disciplinaSelecionada?.nome}</span>
+          <span style={{ marginLeft: "auto", opacity: 0.7 }}>{conteudos.length} registro(s)</span>
+        </div>
+      )}
+
+      {/* Tabela */}
+      <div className="table-wrapper">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th style={{ width: 110 }}>Data</th>
+              <th>Descrição do Conteúdo</th>
+              <th>Objetivos</th>
+              <th>Recursos</th>
+              <th style={{ width: 90 }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
               <tr>
-                <th style={{ width: 100 }}>Data</th>
-                <th>Descrição</th>
-                <th>Objetivos</th>
-                <th style={{ width: 100 }}>Ações</th>
+                <td colSpan={5}>
+                  <div className="empty-state" style={{ padding: "40px 0" }}>
+                    <Icon name="Loader" size={24} style={{ opacity: 0.4, animation: "spin 1s linear infinite" }} />
+                    <p style={{ marginTop: 8 }}>Carregando...</p>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="text-center text-muted py-5">
-                    <div className="spinner-border spinner-border-sm me-2"></div>
-                    Carregando...
+            ) : conteudos.length === 0 ? (
+              <tr>
+                <td colSpan={5}>
+                  <div className="empty-state">
+                    <div className="empty-state-icon">
+                      <Icon name={turmaId && disciplinaId ? "FileEdit" : "Filter"} size={26} />
+                    </div>
+                    <h3>
+                      {turmaId && disciplinaId
+                        ? "Nenhum conteúdo registrado"
+                        : "Selecione turma e disciplina"}
+                    </h3>
+                    <p>
+                      {turmaId && disciplinaId
+                        ? "Clique em \"+ Novo Conteúdo\" para registrar a primeira aula."
+                        : "Use os filtros acima para visualizar os registros."}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              conteudos.map((c) => (
+                <tr key={c.id}>
+                  <td>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                        fontWeight: 600,
+                        fontSize: 13,
+                        color: "var(--color-brand)",
+                      }}
+                    >
+                      <Icon name="Calendar" size={13} />
+                      {fmtDate(c.data)}
+                    </span>
                   </td>
-                </tr>
-              ) : conteudos.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center text-muted py-5">
-                    {turmaId && disciplinaId
-                      ? "Nenhum conteúdo registrado"
-                      : "Selecione turma e disciplina"}
+                  <td>
+                    <div
+                      style={{
+                        maxWidth: 380,
+                        whiteSpace: "pre-wrap",
+                        lineHeight: 1.5,
+                        fontSize: 13.5,
+                      }}
+                    >
+                      {c.descricao}
+                    </div>
                   </td>
-                </tr>
-              ) : (
-                conteudos.map((c) => (
-                  <tr key={c.id}>
-                    <td>{fmtDate(c.data)}</td>
-                    <td>
-                      <div style={{ maxWidth: 400, whiteSpace: "pre-wrap" }}>
-                        {c.descricao}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ maxWidth: 300, whiteSpace: "pre-wrap" }}>
-                        {c.objetivos || "—"}
-                      </div>
-                    </td>
-                    <td>
+                  <td>
+                    <div
+                      className="td-muted"
+                      style={{ maxWidth: 260, whiteSpace: "pre-wrap", lineHeight: 1.4 }}
+                    >
+                      {c.objetivos || "—"}
+                    </div>
+                  </td>
+                  <td>
+                    {c.recursos ? (
+                      <span className="badge badge-info">{c.recursos}</span>
+                    ) : (
+                      <span className="td-muted">—</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="td-actions">
                       <button
-                        className="btn btn-sm btn-outline-primary me-1"
+                        className="btn btn-ghost btn-icon btn-sm"
                         title="Editar"
                         onClick={() => openEdit(c)}
                       >
-                        <Icon name="Edit" size={14} />
+                        <Icon name="Edit2" size={14} />
                       </button>
                       <button
-                        className="btn btn-sm btn-outline-danger"
+                        className="btn btn-ghost btn-icon btn-sm"
                         title="Excluir"
                         onClick={() => confirmDelete(c.id)}
+                        style={{ color: "var(--color-danger)" }}
                       >
                         <Icon name="Trash2" size={14} />
                       </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* Modal de edição */}
+      {/* Modal — Novo / Editar */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editingId ? "Editar Conteúdo" : "Novo Conteúdo"}
         footer={
           <>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setModalOpen(false)}
-            >
+            <button className="btn btn-secondary" onClick={() => setModalOpen(false)}>
               Cancelar
             </button>
             <button
@@ -313,76 +387,95 @@ export function ConteudoMinistradoPage() {
           </>
         }
       >
-        <form id="conteudo-form" onSubmit={save}>
-          <div className="mb-3">
-            <label className="form-label">Data *</label>
+        <form id="conteudo-form" onSubmit={save} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Data */}
+          <div className="form-field">
+            <label className="form-label required">Data da Aula</label>
             <input
               type="date"
-              className="form-control"
+              className="form-input"
               value={form.data}
               onChange={(e) => setForm({ ...form, data: e.target.value })}
               required
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Descrição *</label>
+
+          {/* Descrição */}
+          <div className="form-field">
+            <label className="form-label required">Descrição do Conteúdo</label>
             <textarea
-              className="form-control"
+              className="form-textarea"
               rows={4}
               value={form.descricao}
-              onChange={(e) =>
-                setForm({ ...form, descricao: e.target.value })
-              }
-              placeholder="Descreva o conteúdo ministrado..."
+              onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+              placeholder="Descreva o conteúdo ministrado em aula..."
               required
+              style={{ minHeight: 100 }}
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Objetivos</label>
+
+          {/* Objetivos */}
+          <div className="form-field">
+            <label className="form-label">Objetivos da Aula</label>
             <textarea
-              className="form-control"
-              rows={2}
+              className="form-textarea"
+              rows={3}
               value={form.objetivos}
-              onChange={(e) =>
-                setForm({ ...form, objetivos: e.target.value })
-              }
-              placeholder="Objetivos da aula..."
+              onChange={(e) => setForm({ ...form, objetivos: e.target.value })}
+              placeholder="Objetivos pedagógicos esperados..."
+              style={{ minHeight: 72 }}
             />
           </div>
-          <div className="mb-3">
+
+          {/* Recursos */}
+          <div className="form-field">
             <label className="form-label">Recursos Utilizados</label>
             <input
               type="text"
-              className="form-control"
+              className="form-input"
               value={form.recursos}
               onChange={(e) => setForm({ ...form, recursos: e.target.value })}
-              placeholder="Livro, slides, vídeo, etc."
+              placeholder="Ex: Livro didático, projetor, vídeo, lousa..."
             />
+            <span className="form-hint">Materiais e tecnologias usados na aula</span>
           </div>
+
+          {error && (
+            <div style={{ color: "var(--color-danger)", fontSize: 13, padding: "8px 12px", background: "var(--color-danger-dim)", borderRadius: "var(--radius-sm)" }}>
+              {error}
+            </div>
+          )}
         </form>
       </Modal>
 
-      {/* Modal de exclusão */}
+      {/* Modal — Confirmação de exclusão */}
       <Modal
         isOpen={deleteModal}
         onClose={() => setDeleteModal(false)}
         title="Confirmar Exclusão"
+        size="sm"
         footer={
           <>
-            <button
-              className="btn btn-secondary"
-              onClick={() => setDeleteModal(false)}
-            >
+            <button className="btn btn-secondary" onClick={() => setDeleteModal(false)}>
               Cancelar
             </button>
             <button className="btn btn-danger" onClick={doDelete}>
+              <Icon name="Trash2" size={14} />
               Excluir
             </button>
           </>
         }
       >
-        <p>Deseja realmente excluir este conteúdo?</p>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, textAlign: "center", padding: "8px 0" }}>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "var(--color-danger-dim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon name="AlertTriangle" size={24} style={{ color: "var(--color-danger)" }} />
+          </div>
+          <div>
+            <p style={{ fontWeight: 600, marginBottom: 4 }}>Excluir este conteúdo?</p>
+            <p style={{ color: "var(--color-text-2)", fontSize: 13 }}>Esta ação não pode ser desfeita.</p>
+          </div>
+        </div>
       </Modal>
-    </>
+    </div>
   );
 }

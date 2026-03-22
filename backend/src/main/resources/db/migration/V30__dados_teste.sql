@@ -2,17 +2,25 @@
 -- V30 - Dados de Teste para QA
 -- ============================================
 
+-- Desabilitar FK checks para inserção de dados de teste
+SET FOREIGN_KEY_CHECKS=0;
+
 -- Usar um tenant de teste
 SET @tenant_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+
+-- Garantir que o tenant de teste existe
+INSERT INTO tenants (id, tenant_id, name, document, active, created_at, updated_at, deleted, status_saas)
+VALUES ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Escola Demo QA', '00.000.000/0001-00', TRUE, NOW(), NOW(), FALSE, 'ACTIVE')
+ON DUPLICATE KEY UPDATE updated_at = NOW();
 
 -- ============================================
 -- 1. CURSO
 -- ============================================
-INSERT INTO cursos (id, tenant_id, nome, nivel, carga_horaria_total, max_disciplinas, duracao_meses, created_at, updated_at, deleted, ativo)
+INSERT INTO cursos (id, tenant_id, nome, nivel, carga_horaria, duracao_meses, created_at, updated_at, deleted, ativo)
 VALUES
-('c0000001-0000-0000-0000-000000000001', @tenant_id, 'Ensino Fundamental - 9º Ano', 'FUNDAMENTAL', 800, 12, 10, NOW(), NOW(), FALSE, TRUE),
-('c0000001-0000-0000-0000-000000000002', @tenant_id, 'Ensino Médio - 1ª Série', 'MEDIO', 1000, 14, 10, NOW(), NOW(), FALSE, TRUE),
-('c0000001-0000-0000-0000-000000000003', @tenant_id, 'Educação Infantil - Pré II', 'INFANTIL', 400, 6, 10, NOW(), NOW(), FALSE, TRUE)
+('c0000001-0000-0000-0000-000000000001', @tenant_id, 'Ensino Fundamental - 9º Ano', 'FUNDAMENTAL', 800, 10, NOW(), NOW(), FALSE, TRUE),
+('c0000001-0000-0000-0000-000000000002', @tenant_id, 'Ensino Médio - 1ª Série', 'MEDIO', 1000, 10, NOW(), NOW(), FALSE, TRUE),
+('c0000001-0000-0000-0000-000000000003', @tenant_id, 'Educação Infantil - Pré II', 'INFANTIL', 400, 10, NOW(), NOW(), FALSE, TRUE)
 ON DUPLICATE KEY UPDATE updated_at = NOW();
 
 -- ============================================
@@ -227,3 +235,6 @@ VALUES
 -- Lucas - Matemática (reprovado por frequência)
 ('md000001-0000-0000-0000-000000000003', @tenant_id, 'm0000001-0000-0000-0000-000000000003', 'd0000001-0000-0000-0000-000000000001', 't0000001-0000-0000-0000-000000000001', '1bim', 5.10, 50.00, 10, 5, 5, 0, 'REPROVADO_FREQUENCIA', NOW(), NOW(), FALSE)
 ON DUPLICATE KEY UPDATE updated_at = NOW();
+
+-- Reabilitar FK checks
+SET FOREIGN_KEY_CHECKS=1;

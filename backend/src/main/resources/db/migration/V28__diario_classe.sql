@@ -5,31 +5,31 @@
 -- 1. Ajustes na tabela de frequências
 -- Adicionar status detalhado e número da aula
 ALTER TABLE frequencias
-    ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'PRESENTE',
-    ADD COLUMN IF NOT EXISTS numero_aula INT DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS matricula_id CHAR(36);
+    ADD COLUMN status VARCHAR(20) DEFAULT 'PRESENTE',
+    ADD COLUMN numero_aula INT DEFAULT 1,
+    ADD COLUMN matricula_id CHAR(36);
 
 -- Atualizar status baseado no campo presente existente
 UPDATE frequencias SET status = CASE WHEN presente = true THEN 'PRESENTE' ELSE 'AUSENTE' END WHERE status IS NULL OR status = '';
 
 -- Criar índice para matricula_id
-CREATE INDEX IF NOT EXISTS idx_frequencias_matricula ON frequencias(matricula_id);
-CREATE INDEX IF NOT EXISTS idx_frequencias_status ON frequencias(status);
+CREATE INDEX idx_frequencias_matricula ON frequencias(matricula_id);
+CREATE INDEX idx_frequencias_status ON frequencias(status);
 
 -- 2. Ajustes na tabela de avaliações
 -- Adicionar campo para permitir recuperação
 ALTER TABLE avaliacoes
-    ADD COLUMN IF NOT EXISTS permite_recuperacao BOOLEAN DEFAULT TRUE;
+    ADD COLUMN permite_recuperacao BOOLEAN DEFAULT TRUE;
 
 -- 3. Ajustes na tabela de notas
 -- Adicionar nota de recuperação, nota final e vincular a matrícula
 ALTER TABLE notas
-    ADD COLUMN IF NOT EXISTS nota_recuperacao DECIMAL(5,2),
-    ADD COLUMN IF NOT EXISTS nota_final DECIMAL(5,2),
-    ADD COLUMN IF NOT EXISTS matricula_id CHAR(36);
+    ADD COLUMN nota_recuperacao DECIMAL(5,2),
+    ADD COLUMN nota_final DECIMAL(5,2),
+    ADD COLUMN matricula_id CHAR(36);
 
 -- Índice para matricula_id em notas
-CREATE INDEX IF NOT EXISTS idx_notas_matricula ON notas(matricula_id);
+CREATE INDEX idx_notas_matricula ON notas(matricula_id);
 
 -- 4. Nova tabela: Conteúdo Ministrado
 CREATE TABLE IF NOT EXISTS conteudos_ministrados (

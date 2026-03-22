@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { api } from "../services/api";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../hooks/useTheme";
@@ -28,12 +29,51 @@ const getRoleLabel = (roles) => {
   return "Usuário";
 };
 
+function SearchGroup({ label, items, route }) {
+  if (!items?.length) return null;
+  return (
+    <div style={{ borderBottom: "1px solid var(--color-border)", padding: "8px 0" }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "var(--color-text-2)", padding: "0 16px 4px" }}>
+        {label}
+      </div>
+      {items.map((item) => (
+        <a
+          key={item.id || item.cpf || item.email}
+          href={`/${route}/${item.id || ""}`}
+          style={{
+            display: "block",
+            padding: "8px 16px",
+            color: "var(--color-text)",
+            textDecoration: "none",
+            fontSize: 14,
+            borderRadius: 4,
+            transition: "background 0.15s",
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-3)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        >
+          {item.nome || item.nomeCompleto || item.email || "Sem nome"}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function Header({ onMenuToggle }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState({
+    alunos: [],
+    responsaveis: [],
+    professores: [],
+  });
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchDropdown, setSearchDropdown] = useState(false);
+  const searchTimeout = useRef(null);
   const dropdownRef = useRef(null);
 
   const pageTitle = PAGE_TITLES[location.pathname] || "AlfaSchool";
@@ -53,6 +93,49 @@ export function Header({ onMenuToggle }) {
     return nome.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
   };
 
+  // Busca global
+  useEffect(() => {
+    if (!searchValue.trim()) {
+      setSearchResults({ alunos: [], responsaveis: [], professores: [] });
+      setSearchDropdown(false);
+      return;
+    }
+    setSearchLoading(true);
+    setSearchDropdown(true);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      const q = encodeURIComponent(searchValue);
+      const safe = (promise) => promise.catch(() => ({ content: [] }));
+      try {
+        const [alunos, responsaveis, professores] = await Promise.all([
+          safe(api.get(`/alunos?search=${q}&page=0&size=5`)).then((r) => r.content || []),
+          safe(api.get(`/responsaveis?search=${q}&page=0&size=5`)).then((r) => r.content || []),
+          safe(api.get(`/professores?q=${q}&page=0&size=5`)).then((r) => r.content || []),
+        ]);
+        setSearchResults({ alunos, responsaveis, professores });
+      } catch {
+        setSearchResults({ alunos: [], responsaveis: [], professores: [] });
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 350);
+    // eslint-disable-next-line
+  }, [searchValue]);
+
+  // Fecha dropdown ao clicar fora
+  useEffect(() => {
+    function handleClick(e) {
+      if (!e.target.closest(".header-search")) setSearchDropdown(false);
+    }
+    if (searchDropdown) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [searchDropdown]);
+
+  const hasResults =
+    searchResults.alunos.length > 0 ||
+    searchResults.responsaveis.length > 0 ||
+    searchResults.professores.length > 0;
+
   return (
     <header className="header">
       <div className="header-left">
@@ -63,16 +146,54 @@ export function Header({ onMenuToggle }) {
       </div>
 
       <div className="header-center">
-        <div className="header-search">
+        <div className="header-search" style={{ position: "relative" }}>
           <span className="header-search-icon">
             <Icon name="Search" size={14} />
           </span>
           <input
             type="text"
-            placeholder="Pesquisar..."
+            placeholder="Pesquisar alunos, responsáveis, professores..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            onFocus={() => searchValue && setSearchDropdown(true)}
+            style={{ minWidth: 220 }}
           />
+          {searchDropdown && (
+            <div
+              className="header-search-dropdown"
+              style={{
+                position: "absolute",
+                top: 40,
+                left: 0,
+                right: 0,
+                background: "var(--color-bg-2)",
+                border: "1px solid var(--color-border)",
+                borderRadius: 8,
+                zIndex: 1000,
+                boxShadow: "var(--shadow-md)",
+                maxHeight: 380,
+                overflowY: "auto",
+              }}
+            >
+              {searchLoading && (
+                <div style={{ padding: 16, textAlign: "center", color: "var(--color-text-2)" }}>
+                  Buscando...
+                </div>
+              )}
+              {!searchLoading && (
+                <>
+                  <SearchGroup label="Alunos" items={searchResults.alunos} route="alunos" />
+                  <SearchGroup label="Responsáveis" items={searchResults.responsaveis} route="responsaveis" />
+                  <SearchGroup label="Professores" items={searchResults.professores} route="professores" />
+                  {!hasResults && (
+                    <div style={{ padding: 16, color: "var(--color-text-2)", textAlign: "center" }}>
+                      Nenhum resultado encontrado
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -109,7 +230,10 @@ export function Header({ onMenuToggle }) {
               <div className="dropdown-divider" />
               <button
                 className="dropdown-item danger"
-                onClick={() => { setDropdownOpen(false); logout(); }}
+                onClick={() => {
+                  setDropdownOpen(false);
+                  logout();
+                }}
               >
                 <Icon name="LogOut" size={16} /> Sair
               </button>

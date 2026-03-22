@@ -53,14 +53,14 @@ ALTER TABLE historico_notas
     ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- 6. Índices compostos para melhorar performance de queries frequentes
-CREATE INDEX IF NOT EXISTS idx_frequencias_matricula_disciplina
+CREATE INDEX idx_frequencias_matricula_disciplina
     ON frequencias(matricula_id, disciplina_id);
 
-CREATE INDEX IF NOT EXISTS idx_notas_matricula_avaliacao
+CREATE INDEX idx_notas_matricula_avaliacao
     ON notas(matricula_id, avaliacao_id);
 
-CREATE INDEX IF NOT EXISTS idx_medias_matricula_periodo
+CREATE INDEX idx_medias_matricula_periodo
     ON medias(matricula_id, periodo);
 
-CREATE INDEX IF NOT EXISTS idx_conteudos_turma_disciplina_data
+CREATE INDEX idx_conteudos_turma_disciplina_data
     ON conteudos_ministrados(turma_id, disciplina_id, data);

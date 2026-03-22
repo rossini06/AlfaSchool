@@ -54,7 +54,10 @@
       "Bash(find /c/xampp/htdocs/AlfaControl -type f \\\\\\(-name *layout* -o -name *sidebar* -o -name *navbar* -o -name *header* -o -name *nav* -o -name *menu* -o -name App.jsx -o -name App.tsx -o -name App.js \\\\\\) -iname *.jsx -o -iname *.tsx -o -iname *.js -o -iname *.css -o -iname *.scss)",
       "Bash(node_modules/.bin/vite build:*)",
       "Bash(npx vite:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(docker exec:*)",
+      "Bash(find c:/xampp/htdocs/AlfaSchool/backend/src -name *Funcionario* -o -name *funcionario*)",
+      "Bash(curl -s -o /dev/null -w %{http_code} http://localhost/)"
     ]
   }
 }
