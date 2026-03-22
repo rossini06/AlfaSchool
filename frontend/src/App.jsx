@@ -7,10 +7,15 @@ import { RedesEnsinoPage } from "./pages/RedesEnsinoPage";
 import { EscolasPage } from "./pages/EscolasPage";
 import { SaasAdminPage } from "./pages/SaasAdminPage";
 import { CursosPage } from "./pages/CursosPage";
+import { DisciplinasPage } from "./pages/DisciplinasPage";
 import { TurmasPage } from "./pages/TurmasPage";
+import { ProfessoresPage } from "./pages/ProfessoresPage";
 import { AlunosPage } from "./pages/AlunosPage";
 import { MatriculasPage } from "./pages/MatriculasPage";
 import { DispositivosPage } from "./pages/DispositivosPage";
+import { FrequenciaPage } from "./pages/FrequenciaPage";
+import { NotasPage } from "./pages/NotasPage";
+import { FinanceiroPage } from "./pages/FinanceiroPage";
 import { UsuariosPage } from "./pages/UsuariosPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
 
@@ -52,11 +57,21 @@ export default function App() {
         }
       >
         <Route index element={<DashboardPage />} />
+        {/* Acadêmico */}
         <Route path="cursos"       element={<CursosPage />} />
+        <Route path="disciplinas"  element={<DisciplinasPage />} />
         <Route path="turmas"       element={<TurmasPage />} />
+        <Route path="professores"  element={<ProfessoresPage />} />
         <Route path="alunos"       element={<AlunosPage />} />
         <Route path="matriculas"   element={<MatriculasPage />} />
+        {/* Diário de Classe */}
+        <Route path="frequencia"   element={<FrequenciaPage />} />
+        <Route path="notas"        element={<NotasPage />} />
+        {/* Financeiro */}
+        <Route path="financeiro"   element={<FinanceiroPage />} />
+        {/* Escola */}
         <Route path="dispositivos" element={<DispositivosPage />} />
+        {/* Sistema */}
         <Route path="usuarios"     element={<UsuariosPage />} />
         <Route path="auditoria"    element={<AuditoriaPage />} />
 

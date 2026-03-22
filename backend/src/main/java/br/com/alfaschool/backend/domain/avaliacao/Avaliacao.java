@@ -1,0 +1,48 @@
+package br.com.alfaschool.backend.domain.avaliacao;
+
+import br.com.alfaschool.backend.domain.shared.BaseEntity;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Entity
+@Table(name = "avaliacoes")
+public class Avaliacao extends BaseEntity {
+
+    @Column(name = "turma_id", nullable = false)
+    private UUID turmaId;
+
+    @Column(name = "disciplina_id", nullable = false)
+    private UUID disciplinaId;
+
+    @Column(nullable = false, length = 120)
+    private String nome;
+
+    @Column(length = 40, nullable = false)
+    private String tipo = "prova";
+
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal peso = BigDecimal.ONE;
+
+    @Column(name = "data_avaliacao")
+    private LocalDate dataAvaliacao;
+
+    @Column(name = "nota_maxima", nullable = false, precision = 5, scale = 2)
+    private BigDecimal notaMaxima = BigDecimal.TEN;
+
+    public UUID getTurmaId() { return turmaId; }
+    public void setTurmaId(UUID v) { this.turmaId = v; }
+    public UUID getDisciplinaId() { return disciplinaId; }
+    public void setDisciplinaId(UUID v) { this.disciplinaId = v; }
+    public String getNome() { return nome; }
+    public void setNome(String v) { this.nome = v; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String v) { this.tipo = v; }
+    public BigDecimal getPeso() { return peso; }
+    public void setPeso(BigDecimal v) { this.peso = v; }
+    public LocalDate getDataAvaliacao() { return dataAvaliacao; }
+    public void setDataAvaliacao(LocalDate v) { this.dataAvaliacao = v; }
+    public BigDecimal getNotaMaxima() { return notaMaxima; }
+    public void setNotaMaxima(BigDecimal v) { this.notaMaxima = v; }
+}
