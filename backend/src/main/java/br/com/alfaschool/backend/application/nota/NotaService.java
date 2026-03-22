@@ -2,7 +2,9 @@ package br.com.alfaschool.backend.application.nota;
 
 import br.com.alfaschool.backend.application.nota.dto.NotaRequest;
 import br.com.alfaschool.backend.application.nota.dto.NotaResponse;
+import br.com.alfaschool.backend.domain.avaliacao.Avaliacao;
 import br.com.alfaschool.backend.domain.nota.Nota;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AvaliacaoRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.NotaRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,9 +20,11 @@ import java.util.UUID;
 public class NotaService {
 
     private final NotaRepository notaRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
 
-    public NotaService(NotaRepository notaRepository) {
+    public NotaService(NotaRepository notaRepository, AvaliacaoRepository avaliacaoRepository) {
         this.notaRepository = notaRepository;
+        this.avaliacaoRepository = avaliacaoRepository;
     }
 
     public List<NotaResponse> listByAluno(UUID alunoId) {
@@ -37,6 +42,19 @@ public class NotaService {
     @Transactional
     public NotaResponse lancar(NotaRequest request) {
         UUID tenantId = requiredTenant();
+
+        if (request.nota() != null) {
+            Avaliacao avaliacao = avaliacaoRepository
+                    .findByIdAndTenantIdAndDeletedFalse(request.avaliacaoId(), tenantId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Avaliação não encontrada"));
+
+            BigDecimal notaMaxima = avaliacao.getNotaMaxima();
+            if (notaMaxima != null && request.nota().compareTo(notaMaxima) > 0) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Nota " + request.nota() + " excede a nota máxima da avaliação (" + notaMaxima + ")");
+            }
+        }
+
         // Upsert: atualiza se já existe, cria se não existe
         return notaRepository.findByTenantIdAndAlunoIdAndAvaliacaoIdAndDeletedFalse(
                 tenantId, request.alunoId(), request.avaliacaoId())

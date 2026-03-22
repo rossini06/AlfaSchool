@@ -12,4 +12,6 @@ public interface CursoRepository extends JpaRepository<Curso, UUID> {
     Page<Curso> findByTenantIdAndDeletedFalse(UUID tenantId, Pageable pageable);
     Page<Curso> findByTenantIdAndNomeContainingIgnoreCaseAndDeletedFalse(UUID tenantId, String nome, Pageable pageable);
     long countByTenantIdAndDeletedFalse(UUID tenantId);
+    boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalse(UUID tenantId, String nome);
+    boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalseAndIdNot(UUID tenantId, String nome, UUID id);
 }

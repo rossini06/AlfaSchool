@@ -1,6 +1,5 @@
 package br.com.alfaschool.backend.application.nota.dto;
 
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -10,7 +9,6 @@ public record NotaRequest(
         @NotNull(message = "Aluno é obrigatório")     UUID alunoId,
         @NotNull(message = "Avaliação é obrigatória") UUID avaliacaoId,
         @DecimalMin(value = "0.0", message = "Nota mínima é 0")
-        @DecimalMax(value = "10.0", message = "Nota máxima é 10")
         BigDecimal nota,
         String obs
 ) {}

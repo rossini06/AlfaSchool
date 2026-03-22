@@ -1,11 +1,12 @@
 package br.com.alfaschool.backend.application.aluno.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.UUID;
 
 public record AlunoRequest(
-    @NotBlank String nome,
+    @NotBlank @Size(max = 255) String nome,
     String cpf,
     String rg,
     String email,

@@ -43,6 +43,9 @@ public class CursoService {
     @Transactional
     public CursoResponse create(CursoRequest request) {
         UUID tenantId = requiredTenant();
+        if (cursoRepository.existsByTenantIdAndNomeIgnoreCaseAndDeletedFalse(tenantId, request.nome())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um curso com este nome");
+        }
         Curso curso = new Curso();
         curso.setTenantId(tenantId);
         applyRequest(curso, request);
@@ -55,6 +58,9 @@ public class CursoService {
         Curso curso = cursoRepository.findById(id)
                 .filter(c -> tenantId.equals(c.getTenantId()) && !Boolean.TRUE.equals(c.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso não encontrado"));
+        if (cursoRepository.existsByTenantIdAndNomeIgnoreCaseAndDeletedFalseAndIdNot(tenantId, request.nome(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um curso com este nome");
+        }
         applyRequest(curso, request);
         return CursoResponse.from(cursoRepository.save(curso));
     }

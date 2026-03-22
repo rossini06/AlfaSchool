@@ -49,6 +49,9 @@ public class DisciplinaService {
     @Transactional
     public DisciplinaResponse create(DisciplinaRequest request) {
         UUID tenantId = requiredTenant();
+        if (disciplinaRepository.existsByTenantIdAndNomeIgnoreCaseAndDeletedFalse(tenantId, request.nome())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma disciplina com este nome");
+        }
         Disciplina d = new Disciplina();
         d.setTenantId(tenantId);
         applyRequest(d, request);
@@ -61,6 +64,9 @@ public class DisciplinaService {
         Disciplina d = disciplinaRepository.findById(id)
                 .filter(x -> tenantId.equals(x.getTenantId()) && !Boolean.TRUE.equals(x.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disciplina não encontrada"));
+        if (disciplinaRepository.existsByTenantIdAndNomeIgnoreCaseAndDeletedFalseAndIdNot(tenantId, request.nome(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma disciplina com este nome");
+        }
         applyRequest(d, request);
         return DisciplinaResponse.from(disciplinaRepository.save(d));
     }

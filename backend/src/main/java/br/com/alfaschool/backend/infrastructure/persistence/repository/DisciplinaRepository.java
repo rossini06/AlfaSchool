@@ -19,4 +19,6 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, UUID> {
     Page<Disciplina> search(UUID tenantId, String q, Pageable pageable);
 
     List<Disciplina> findByTenantIdAndDeletedFalseAndAtivaTrue(UUID tenantId);
+    boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalse(UUID tenantId, String nome);
+    boolean existsByTenantIdAndNomeIgnoreCaseAndDeletedFalseAndIdNot(UUID tenantId, String nome, UUID id);
 }

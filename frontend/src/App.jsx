@@ -18,6 +18,8 @@ import { NotasPage } from "./pages/NotasPage";
 import { FinanceiroPage } from "./pages/FinanceiroPage";
 import { UsuariosPage } from "./pages/UsuariosPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
+import { ResponsaveisPage } from "./pages/ResponsaveisPage";
+import { AvaliacaoPage } from "./pages/AvaliacaoPage";
 
 function ProtectedRoute({ children, requiredRoles }) {
   const { isAuthenticated, user } = useAuth();
@@ -63,9 +65,11 @@ export default function App() {
         <Route path="turmas"       element={<TurmasPage />} />
         <Route path="professores"  element={<ProfessoresPage />} />
         <Route path="alunos"       element={<AlunosPage />} />
+        <Route path="responsaveis" element={<ResponsaveisPage />} />
         <Route path="matriculas"   element={<MatriculasPage />} />
         {/* Diário de Classe */}
         <Route path="frequencia"   element={<FrequenciaPage />} />
+        <Route path="avaliacoes"   element={<AvaliacaoPage />} />
         <Route path="notas"        element={<NotasPage />} />
         {/* Financeiro */}
         <Route path="financeiro"   element={<FinanceiroPage />} />

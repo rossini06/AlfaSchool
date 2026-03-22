@@ -25,7 +25,7 @@ function ActivitySkeleton() {
 
 const KPI_META = [
   { key: "totalAlunos",      label: "Total de Alunos",    icon: "GraduationCap", color: "brand"   },
-  { key: "turmasAtivas",     label: "Turmas Ativas",      icon: "Users",         color: "success" },
+  { key: "totalTurmas",      label: "Turmas Ativas",      icon: "Users",         color: "success" },
   { key: "matriculasAtivas", label: "Matrículas Ativas",  icon: "ClipboardList", color: "info"    },
   { key: "totalCursos",      label: "Cursos Cadastrados", icon: "BookOpen",      color: "warning" },
 ];
@@ -33,6 +33,7 @@ const KPI_META = [
 export function DashboardPage() {
   const { user } = useAuth();
   const [kpis, setKpis] = useState(null);
+  const [stats, setStats] = useState([]);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,8 +43,9 @@ export function DashboardPage() {
       setLoading(true);
       try {
         const data = await api.get("/dashboard");
-        setKpis(data?.kpis || data || {});
-        setActivity(data?.recentActivity || data?.ultimasMatriculas || []);
+        setKpis(data?.schoolKpis || {});
+        setStats(data?.stats || []);
+        setActivity(data?.recentMatriculas || []);
       } catch (err) {
         // Fallback to mock data if API not available
         setKpis({
@@ -97,7 +99,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* KPIs */}
+      {/* KPIs — principais */}
       <div className="card">
         <div className="card-header">
           <span className="card-title">Visão Geral</span>
@@ -122,6 +124,38 @@ export function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Stats operacionais */}
+      {!loading && stats.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Operacional do Dia</span>
+          </div>
+          <div className="card-body">
+            <div className="kpi-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))" }}>
+              {stats.filter(s => s.key !== "accessToday").map((s) => {
+                const meta = {
+                  totalStudents:  { icon: "GraduationCap", color: "brand"   },
+                  totalStaff:     { icon: "UserCog",       color: "info"    },
+                  attendanceToday:{ icon: "CheckSquare",   color: "success" },
+                  overduePayments:{ icon: "AlertCircle",   color: "danger"  },
+                }[s.key] || { icon: "BarChart2", color: "secondary" };
+                return (
+                  <div className="kpi-card" key={s.key}>
+                    <div className="kpi-card-header">
+                      <span className="kpi-label">{s.title}</span>
+                      <div className={`kpi-icon ${meta.color}`}>
+                        <Icon name={meta.icon} size={18} />
+                      </div>
+                    </div>
+                    <div className="kpi-value">{s.value}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recent Activity */}
       <div className="card">
@@ -151,17 +185,18 @@ export function DashboardPage() {
                   <div className="activity-dot" />
                   <div className="activity-content">
                     <div className="activity-title">
-                      {item.alunoNome || item.nome || "Aluno"}
+                      {item.aluno_nome || item.alunoNome || "Aluno"}
                     </div>
                     <div className="activity-meta">
-                      {item.turmaNome || item.turma || ""}{item.curso ? ` · ${item.curso}` : ""}
+                      {item.turma_nome || item.turmaNome || ""}
+                      {item.status ? ` · ${item.status}` : ""}
                     </div>
                   </div>
                   <div className="activity-time">
-                    {item.dataMatricula
-                      ? new Date(item.dataMatricula).toLocaleDateString("pt-BR")
-                      : item.data
-                      ? new Date(item.data).toLocaleDateString("pt-BR")
+                    {item.data_matricula
+                      ? new Date(item.data_matricula + "T00:00:00").toLocaleDateString("pt-BR")
+                      : item.dataMatricula
+                      ? new Date(item.dataMatricula + "T00:00:00").toLocaleDateString("pt-BR")
                       : ""}
                   </div>
                 </div>

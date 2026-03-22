@@ -28,7 +28,7 @@ app:
   admin:
     email: ${APP_SUPERADMIN_EMAIL:superadmin@alfaschool.com}
     name: ${APP_SUPERADMIN_NAME:Super Admin}
-    password: ${APP_SUPERADMIN_PASSWORD:SuperAdmin@2026!}
+    password: ${APP_SUPERADMIN_PASSWORD:100%Alfa@}
 
 management:
   endpoint:

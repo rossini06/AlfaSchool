@@ -4,12 +4,12 @@ import br.com.alfaschool.backend.application.responsavel.dto.ResponsavelRequest;
 import br.com.alfaschool.backend.application.responsavel.dto.ResponsavelResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,8 +24,12 @@ public class ResponsavelController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<ResponsavelResponse>>> listByAluno(@RequestParam UUID alunoId) {
-        return ResponseEntity.ok(ApiResponse.of(200, "Responsáveis listados", responsavelService.listByAluno(alunoId)));
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<ResponsavelResponse> result = responsavelService.listAll(page, size, search);
+        return ResponseEntity.ok(ApiResponse.of(200, "Responsáveis listados", result));
     }
 
     @GetMapping("/{id}")

@@ -54,6 +54,10 @@ public class SuperAdminInitializer implements CommandLineRunner {
         userRepository.findByTenantIdAndEmailIgnoreCase(masterTenant.getTenantId(), adminProperties.email())
                 .ifPresentOrElse(
                         user -> {
+                            if (!passwordEncoder.matches(adminProperties.password(), user.getPassword())) {
+                                user.setPassword(passwordEncoder.encode(adminProperties.password()));
+                                userRepository.save(user);
+                            }
                         },
                         () -> createSuperAdminUser(masterTenant.getTenantId(), superAdminRole)
                 );

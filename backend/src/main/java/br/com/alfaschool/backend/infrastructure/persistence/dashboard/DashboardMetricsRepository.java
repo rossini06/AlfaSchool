@@ -17,29 +17,29 @@ public class DashboardMetricsRepository {
     }
 
     public DashboardSnapshot buildSnapshot(UUID tenantId, UUID unitId) {
-        return new DashboardSnapshot(
-                queryCount("SELECT COUNT(*) FROM students WHERE tenant_id = ?" + unitCondition("unit_id", unitId), tenantId, unitId),
-                queryCount("SELECT COUNT(*) FROM users WHERE tenant_id = ?" + unitCondition("unit_id", unitId), tenantId, unitId),
-                queryCount("SELECT COUNT(*) FROM attendances WHERE tenant_id = ? AND attendance_date = CURRENT_DATE" + unitCondition("unit_id", unitId), tenantId, unitId),
-                queryCount("SELECT COUNT(*) FROM payments WHERE tenant_id = ? AND due_date < CURRENT_DATE AND paid = false" + unitCondition("unit_id", unitId), tenantId, unitId),
-                queryCount("SELECT COUNT(*) FROM access_logs WHERE tenant_id = ? AND DATE(access_time) = CURRENT_DATE" + unitCondition("unit_id", unitId), tenantId, unitId)
-        );
+        String tid = tenantId.toString();
+
+        long totalStudents = count(
+            "SELECT COUNT(*) FROM alunos WHERE tenant_id = ? AND deleted = false AND ativo = true", tid);
+
+        long totalStaff = count(
+            "SELECT COUNT(*) FROM professores WHERE tenant_id = ? AND deleted = false", tid);
+
+        long attendanceToday = count(
+            "SELECT COUNT(*) FROM frequencias WHERE tenant_id = ? AND data = CURRENT_DATE AND presente = true AND deleted = false", tid);
+
+        long overduePayments = count(
+            "SELECT COUNT(*) FROM cobrancas WHERE tenant_id = ? AND vencimento < CURRENT_DATE AND status = 'pendente' AND deleted = false", tid);
+
+        return new DashboardSnapshot(totalStudents, totalStaff, attendanceToday, overduePayments, 0L);
     }
 
-    private long queryCount(String sql, UUID tenantId, UUID unitId) {
+    private long count(String sql, String tenantId) {
         try {
-            if (unitId == null) {
-                Long value = jdbcTemplate.queryForObject(sql, Long.class, tenantId);
-                return value == null ? 0L : value;
-            }
-            Long value = jdbcTemplate.queryForObject(sql, Long.class, tenantId, unitId);
+            Long value = jdbcTemplate.queryForObject(sql, Long.class, tenantId);
             return value == null ? 0L : value;
-        } catch (DataAccessException exception) {
+        } catch (DataAccessException e) {
             return 0L;
         }
-    }
-
-    private String unitCondition(String column, UUID unitId) {
-        return unitId == null ? "" : " AND " + column + " = ?";
     }
 }

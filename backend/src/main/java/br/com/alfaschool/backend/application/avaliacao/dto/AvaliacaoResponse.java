@@ -7,19 +7,43 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record AvaliacaoResponse(
-        UUID id, UUID tenantId,
-        UUID turmaId, UUID disciplinaId,
-        String nome, String tipo,
-        BigDecimal peso, LocalDate dataAvaliacao, BigDecimal notaMaxima,
-        Instant createdAt, Instant updatedAt
+        UUID id,
+        UUID tenantId,
+        UUID turmaId,
+        UUID disciplinaId,
+        String nome,
+        String tipo,
+        BigDecimal peso,
+        LocalDate dataAvaliacao,
+        BigDecimal notaMaxima,
+        String periodo,
+        BigDecimal notaMinima,
+        String status,
+        String descricao,
+        String criterios,
+        LocalDate dataEntrega,
+        Instant createdAt,
+        Instant updatedAt
 ) {
     public static AvaliacaoResponse from(Avaliacao a) {
         return new AvaliacaoResponse(
-                a.getId(), a.getTenantId(),
-                a.getTurmaId(), a.getDisciplinaId(),
-                a.getNome(), a.getTipo(),
-                a.getPeso(), a.getDataAvaliacao(), a.getNotaMaxima(),
-                a.getCreatedAt(), a.getUpdatedAt()
+                a.getId(),
+                a.getTenantId(),
+                a.getTurmaId(),
+                a.getDisciplinaId(),
+                a.getNome(),
+                a.getTipo(),
+                a.getPeso(),
+                a.getDataAvaliacao(),
+                a.getNotaMaxima(),
+                a.getPeriodo(),
+                a.getNotaMinima(),
+                a.getStatus(),
+                a.getDescricao(),
+                a.getCriterios(),
+                a.getDataEntrega(),
+                a.getCreatedAt(),
+                a.getUpdatedAt()
         );
     }
 }

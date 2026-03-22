@@ -30,6 +30,12 @@ public class AvaliacaoService {
         return avaliacaoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(AvaliacaoResponse::from);
     }
 
+    public Page<AvaliacaoResponse> search(UUID turmaId, UUID disciplinaId, String periodo, String status, Pageable pageable) {
+        UUID tenantId = requiredTenant();
+        return avaliacaoRepository.search(tenantId, turmaId, disciplinaId, periodo, status, pageable)
+                .map(AvaliacaoResponse::from);
+    }
+
     public List<AvaliacaoResponse> listByTurma(UUID turmaId) {
         UUID tenantId = requiredTenant();
         return avaliacaoRepository.findByTenantIdAndTurmaIdAndDeletedFalse(tenantId, turmaId)
@@ -40,6 +46,13 @@ public class AvaliacaoService {
         UUID tenantId = requiredTenant();
         return avaliacaoRepository.findByTenantIdAndTurmaIdAndDisciplinaIdAndDeletedFalse(tenantId, turmaId, disciplinaId)
                 .stream().map(AvaliacaoResponse::from).toList();
+    }
+
+    public AvaliacaoResponse findById(UUID id) {
+        UUID tenantId = requiredTenant();
+        Avaliacao a = avaliacaoRepository.findByIdAndTenantIdAndDeletedFalse(id, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Avaliação não encontrada"));
+        return AvaliacaoResponse.from(a);
     }
 
     @Transactional
@@ -79,6 +92,12 @@ public class AvaliacaoService {
         a.setPeso(req.peso() != null ? req.peso() : BigDecimal.ONE);
         a.setDataAvaliacao(req.dataAvaliacao());
         a.setNotaMaxima(req.notaMaxima() != null ? req.notaMaxima() : BigDecimal.TEN);
+        a.setPeriodo(req.periodo());
+        a.setNotaMinima(req.notaMinima() != null ? req.notaMinima() : new BigDecimal("5.00"));
+        if (req.status() != null) a.setStatus(req.status());
+        a.setDescricao(req.descricao());
+        a.setCriterios(req.criterios());
+        a.setDataEntrega(req.dataEntrega());
     }
 
     private UUID requiredTenant() {

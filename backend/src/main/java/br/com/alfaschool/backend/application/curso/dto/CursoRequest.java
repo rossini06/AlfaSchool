@@ -1,10 +1,11 @@
 package br.com.alfaschool.backend.application.curso.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record CursoRequest(
-    @NotBlank String nome,
+    @NotBlank @Size(max = 255) String nome,
     String codigo,
     String descricao,
     Integer cargaHoraria,

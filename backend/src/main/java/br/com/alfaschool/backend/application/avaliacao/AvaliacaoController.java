@@ -5,6 +5,7 @@ import br.com.alfaschool.backend.application.avaliacao.dto.AvaliacaoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -30,19 +31,32 @@ public class AvaliacaoController {
     public ResponseEntity<ApiResponse<Page<AvaliacaoResponse>>> list(
             @RequestParam(required = false) UUID turmaId,
             @RequestParam(required = false) UUID disciplinaId,
+            @RequestParam(required = false) String periodo,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        if (turmaId != null && disciplinaId != null) {
+
+        // If any filter is active, use the search method
+        if (turmaId != null || disciplinaId != null || periodo != null || status != null) {
+            if (turmaId != null && disciplinaId != null && periodo == null && status == null) {
+                // Exact turma+disciplina match (used by NotasPage)
+                List<AvaliacaoResponse> items = avaliacaoService.listByTurmaAndDisciplina(turmaId, disciplinaId);
+                return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
+                        new PageImpl<>(items, PageRequest.of(0, Math.max(items.size(), 1)), items.size())));
+            }
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("dataAvaliacao").descending());
             return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
-                    org.springframework.data.domain.Page.empty(PageRequest.of(page, size))));
+                    avaliacaoService.search(turmaId, disciplinaId, periodo, status, pageRequest)));
         }
-        if (turmaId != null) {
-            List<AvaliacaoResponse> items = avaliacaoService.listByTurma(turmaId);
-            return ResponseEntity.ok(ApiResponse.of(200, "Avaliações da turma",
-                    new org.springframework.data.domain.PageImpl<>(items)));
-        }
+
         return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
                 avaliacaoService.list(PageRequest.of(page, size, Sort.by("dataAvaliacao").descending()))));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<AvaliacaoResponse>> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Avaliação", avaliacaoService.findById(id)));
     }
 
     @PostMapping

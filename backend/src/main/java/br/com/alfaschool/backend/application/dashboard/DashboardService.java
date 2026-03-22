@@ -13,14 +13,18 @@ import br.com.alfaschool.backend.infrastructure.persistence.repository.Matricula
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import br.com.alfaschool.backend.security.jwt.AuthenticatedUser;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -32,19 +36,22 @@ public class DashboardService {
     private final TurmaRepository turmaRepository;
     private final CursoRepository cursoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public DashboardService(DashboardMetricsRepository dashboardMetricsRepository,
                             SystemHealthService systemHealthService,
                             AlunoRepository alunoRepository,
                             TurmaRepository turmaRepository,
                             CursoRepository cursoRepository,
-                            MatriculaRepository matriculaRepository) {
+                            MatriculaRepository matriculaRepository,
+                            JdbcTemplate jdbcTemplate) {
         this.dashboardMetricsRepository = dashboardMetricsRepository;
         this.systemHealthService = systemHealthService;
         this.alunoRepository = alunoRepository;
         this.turmaRepository = turmaRepository;
         this.cursoRepository = cursoRepository;
         this.matriculaRepository = matriculaRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public DashboardResponseDTO loadDashboard() {
@@ -66,8 +73,9 @@ public class DashboardService {
         );
 
         SchoolKpisDTO schoolKpis = buildSchoolKpis(tenantId);
+        List<Map<String, Object>> recentMatriculas = buildRecentMatriculas(tenantId);
 
-        return new DashboardResponseDTO(stats, buildAlerts(snapshot), healthDTO, schoolKpis);
+        return new DashboardResponseDTO(stats, buildAlerts(snapshot), healthDTO, schoolKpis, recentMatriculas);
     }
 
     private SchoolKpisDTO buildSchoolKpis(UUID tenantId) {
@@ -77,6 +85,21 @@ public class DashboardService {
         long matriculasAtivas = matriculaRepository.countByTenantIdAndStatusAndDeletedFalse(tenantId, "ativa");
         long matriculasCanceladas = matriculaRepository.countByTenantIdAndStatusAndDeletedFalse(tenantId, "cancelada");
         return new SchoolKpisDTO(totalAlunos, totalTurmas, totalCursos, matriculasAtivas, matriculasCanceladas);
+    }
+
+    private List<Map<String, Object>> buildRecentMatriculas(UUID tenantId) {
+        try {
+            String sql = "SELECT m.id, m.data_matricula, m.status, m.numero_matricula, " +
+                         "a.nome AS aluno_nome, t.nome AS turma_nome " +
+                         "FROM matriculas m " +
+                         "LEFT JOIN alunos a ON a.id = m.aluno_id AND a.deleted = false " +
+                         "LEFT JOIN turmas t ON t.id = m.turma_id AND t.deleted = false " +
+                         "WHERE m.tenant_id = ? AND m.deleted = false " +
+                         "ORDER BY m.created_at DESC LIMIT 8";
+            return jdbcTemplate.queryForList(sql, tenantId.toString());
+        } catch (DataAccessException e) {
+            return Collections.emptyList();
+        }
     }
 
     private UUID currentUnitId() {

@@ -13,5 +13,11 @@ public record AvaliacaoRequest(
         String tipo,
         BigDecimal peso,
         LocalDate dataAvaliacao,
-        BigDecimal notaMaxima
+        BigDecimal notaMaxima,
+        String periodo,
+        BigDecimal notaMinima,
+        String status,
+        String descricao,
+        String criterios,
+        LocalDate dataEntrega
 ) {}

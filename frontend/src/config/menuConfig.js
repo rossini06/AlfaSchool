@@ -20,10 +20,12 @@ export const menuItems = [
   { label: "Turmas",           path: "/turmas",        icon: "Users",           group: "academico" },
   { label: "Professores",      path: "/professores",   icon: "UserCheck",       group: "academico" },
   { label: "Alunos",           path: "/alunos",        icon: "GraduationCap",   group: "academico" },
+  { label: "Responsáveis",     path: "/responsaveis",  icon: "Users2",          group: "academico" },
   { label: "Matrículas",       path: "/matriculas",    icon: "ClipboardList",   group: "academico" },
 
   // DIÁRIO DE CLASSE
   { label: "Frequência",       path: "/frequencia",    icon: "CalendarCheck",   group: "diario" },
+  { label: "Avaliações",       path: "/avaliacoes",    icon: "ClipboardCheck",  group: "diario" },
   { label: "Notas",            path: "/notas",         icon: "FileText",        group: "diario" },
 
   // FINANCEIRO
