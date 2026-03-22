@@ -29,18 +29,25 @@ public class TecnicoRule implements EducationRuleStrategy {
         BigDecimal somaPesos = BigDecimal.ZERO;
 
         for (NotaComPeso item : notas) {
-            if (item.nota().getNotaFinal() != null && item.peso() != null) {
-                // Normaliza a nota para escala de 0-10 se necessário
-                BigDecimal notaNormalizada = item.nota().getNotaFinal();
-                if (item.notaMaxima() != null && item.notaMaxima().compareTo(BigDecimal.TEN) != 0) {
-                    notaNormalizada = notaNormalizada
-                            .multiply(BigDecimal.TEN)
-                            .divide(item.notaMaxima(), 2, RoundingMode.HALF_UP);
-                }
-
-                somaPonderada = somaPonderada.add(notaNormalizada.multiply(item.peso()));
-                somaPesos = somaPesos.add(item.peso());
+            // Validação de null safety
+            if (item == null || item.nota() == null || item.nota().getNotaFinal() == null || item.peso() == null) {
+                continue;
             }
+
+            // Normaliza a nota para escala de 0-10 se necessário
+            BigDecimal notaNormalizada = item.nota().getNotaFinal();
+
+            // Bug #4 fix: Validar que notaMaxima > 0 antes de dividir
+            if (item.notaMaxima() != null
+                    && item.notaMaxima().compareTo(BigDecimal.ZERO) > 0
+                    && item.notaMaxima().compareTo(BigDecimal.TEN) != 0) {
+                notaNormalizada = notaNormalizada
+                        .multiply(BigDecimal.TEN)
+                        .divide(item.notaMaxima(), 2, RoundingMode.HALF_UP);
+            }
+
+            somaPonderada = somaPonderada.add(notaNormalizada.multiply(item.peso()));
+            somaPesos = somaPesos.add(item.peso());
         }
 
         if (somaPesos.compareTo(BigDecimal.ZERO) == 0) {
@@ -92,7 +99,11 @@ public class TecnicoRule implements EducationRuleStrategy {
 
         // Técnico permite recuperação se configurado
         if (regra.getPermiteRecuperacao() != null && regra.getPermiteRecuperacao()) {
+            // Bug #6 fix: Garantir que limite de recuperação seja >= 0
             BigDecimal limiteRecuperacao = notaMinima.subtract(new BigDecimal("2.00"));
+            if (limiteRecuperacao.compareTo(BigDecimal.ZERO) < 0) {
+                limiteRecuperacao = BigDecimal.ZERO;
+            }
             if (media.compareTo(limiteRecuperacao) >= 0) {
                 return SituacaoAluno.RECUPERACAO;
             }

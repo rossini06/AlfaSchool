@@ -129,8 +129,13 @@ public class NotaService {
         Nota saved = notaRepository.save(nota);
 
         // Registrar histórico se houve alteração
-        if (!isNew && notaAnterior != null && !notaAnterior.equals(request.nota())) {
+        // Bug #8 fix: Usar compareTo() ao invés de equals() para BigDecimal
+        if (!isNew && notaAnterior != null && request.nota() != null
+                && notaAnterior.compareTo(request.nota()) != 0) {
             registrarHistorico(saved, notaAnterior, request.nota(), "ALTERACAO");
+        } else if (!isNew && notaAnterior == null && request.nota() != null) {
+            // Registrar quando nota era null e agora tem valor
+            registrarHistorico(saved, null, request.nota(), "LANCAMENTO");
         }
 
         // Recalcular média automaticamente
@@ -187,7 +192,11 @@ public class NotaService {
         Nota saved = notaRepository.save(nota);
 
         // Registrar histórico
-        if (notaAnterior == null || !notaAnterior.equals(notaRecuperacao)) {
+        // Bug #8 fix: Usar compareTo() ao invés de equals() para BigDecimal
+        boolean mudouNota = (notaAnterior == null && notaRecuperacao != null)
+                || (notaAnterior != null && notaRecuperacao == null)
+                || (notaAnterior != null && notaRecuperacao != null && notaAnterior.compareTo(notaRecuperacao) != 0);
+        if (mudouNota) {
             registrarHistorico(saved, notaAnterior, notaRecuperacao, "RECUPERACAO");
         }
 

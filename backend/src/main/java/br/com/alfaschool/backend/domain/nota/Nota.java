@@ -53,7 +53,11 @@ public class Nota extends BaseEntity {
     public void setObs(String v) { this.obs = v; }
 
     /**
-     * Calcula a nota final como o maior valor entre nota e nota de recuperação
+     * Calcula a nota final como o maior valor entre nota e nota de recuperação.
+     *
+     * NOTA: Algumas instituições limitam a nota máxima após recuperação
+     * (ex: máximo 6.0 ou igual à nota mínima de aprovação).
+     * Esse limite deve ser aplicado no Service, consultando RegraAprovacao.
      */
     public void calcularNotaFinal() {
         if (nota == null && notaRecuperacao == null) {
@@ -63,6 +67,7 @@ public class Nota extends BaseEntity {
         } else if (notaRecuperacao == null) {
             this.notaFinal = nota;
         } else {
+            // Usa a maior nota (recuperação pode superar a original)
             this.notaFinal = nota.compareTo(notaRecuperacao) >= 0 ? nota : notaRecuperacao;
         }
     }

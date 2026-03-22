@@ -103,6 +103,7 @@ public class BoletimService {
         int disciplinasComFrequencia = 0;
         int totalAprovados = 0;
         int totalReprovados = 0;
+        int totalRecuperacao = 0;
 
         for (Disciplina disc : disciplinas) {
             // Buscar ou calcular média
@@ -189,6 +190,7 @@ public class BoletimService {
                 if (media.getSituacao() == SituacaoAluno.REPROVADO ||
                     media.getSituacao() == SituacaoAluno.REPROVADO_FREQUENCIA ||
                     media.getSituacao() == SituacaoAluno.REPROVADO_NOTA) totalReprovados++;
+                if (media.getSituacao() == SituacaoAluno.RECUPERACAO) totalRecuperacao++;
             }
         }
 
@@ -201,8 +203,8 @@ public class BoletimService {
                 ? somaFrequencias.divide(BigDecimal.valueOf(disciplinasComFrequencia), 2, RoundingMode.HALF_UP)
                 : null;
 
-        // Determinar situação geral
-        SituacaoAluno situacaoGeral = determinarSituacaoGeral(totalAprovados, totalReprovados, disciplinas.size());
+        // Determinar situação geral (Bug #13 fix: incluir recuperação no cálculo)
+        SituacaoAluno situacaoGeral = determinarSituacaoGeral(totalAprovados, totalReprovados, totalRecuperacao, disciplinas.size());
 
         return new BoletimResponse(
                 aluno.getId(),
@@ -224,9 +226,11 @@ public class BoletimService {
         );
     }
 
-    private SituacaoAluno determinarSituacaoGeral(int aprovados, int reprovados, int total) {
+    // Bug #13 fix: Incluir recuperação no cálculo de situação geral
+    private SituacaoAluno determinarSituacaoGeral(int aprovados, int reprovados, int emRecuperacao, int total) {
         if (total == 0) return SituacaoAluno.CURSANDO;
         if (reprovados > 0) return SituacaoAluno.REPROVADO;
+        if (emRecuperacao > 0) return SituacaoAluno.RECUPERACAO;
         if (aprovados == total) return SituacaoAluno.APROVADO;
         return SituacaoAluno.CURSANDO;
     }

@@ -45,21 +45,7 @@ export function ConteudoMinistradoPage() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Carregar turmas e disciplinas
-  useEffect(() => {
-    loadTurmas();
-    loadDisciplinas();
-  }, []);
-
-  // Carregar conteúdos quando filtros mudam
-  useEffect(() => {
-    if (turmaId && disciplinaId) {
-      loadConteudos();
-    } else {
-      setConteudos([]);
-    }
-  }, [turmaId, disciplinaId, loadConteudos]);
-
+  // Definir callbacks ANTES dos useEffects que os usam
   const loadTurmas = async () => {
     try {
       const data = await api.get("/turmas?size=100");
@@ -93,6 +79,21 @@ export function ConteudoMinistradoPage() {
       setLoading(false);
     }
   }, [turmaId, disciplinaId]);
+
+  // Carregar turmas e disciplinas
+  useEffect(() => {
+    loadTurmas();
+    loadDisciplinas();
+  }, []);
+
+  // Carregar conteúdos quando filtros mudam
+  useEffect(() => {
+    if (turmaId && disciplinaId) {
+      loadConteudos();
+    } else {
+      setConteudos([]);
+    }
+  }, [turmaId, disciplinaId, loadConteudos]);
 
   const openNew = () => {
     setEditingId(null);

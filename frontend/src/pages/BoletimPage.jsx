@@ -60,18 +60,7 @@ export function BoletimPage() {
   // Boletim
   const [boletim, setBoletim] = useState(null);
 
-  useEffect(() => {
-    loadTurmas();
-  }, []);
-
-  useEffect(() => {
-    if (turmaId) {
-      loadMatriculas();
-    } else {
-      setMatriculas([]);
-    }
-  }, [turmaId, loadMatriculas]);
-
+  // Definir callbacks ANTES dos useEffects que os usam
   const loadTurmas = async () => {
     try {
       const data = await api.get("/turmas?size=100");
@@ -89,6 +78,18 @@ export function BoletimPage() {
       setError("Erro ao carregar matrículas");
     }
   }, [turmaId]);
+
+  useEffect(() => {
+    loadTurmas();
+  }, []);
+
+  useEffect(() => {
+    if (turmaId) {
+      loadMatriculas();
+    } else {
+      setMatriculas([]);
+    }
+  }, [turmaId, loadMatriculas]);
 
   const gerarBoletim = async () => {
     if (!matriculaId) return;
