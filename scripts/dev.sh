@@ -10,13 +10,14 @@
 # rodamos o jar pronto.
 #
 # Uso:
-#   ./scripts/dev.sh up        sobe banco + api
+#   ./scripts/dev.sh up        sobe banco + api + interface
 #   ./scripts/dev.sh build     recompila o jar
 #   ./scripts/dev.sh restart   recompila e reinicia a api
 #   ./scripts/dev.sh reset-db  APAGA o banco e recria do zero
 #   ./scripts/dev.sh logs      acompanha os logs da api
 #   ./scripts/dev.sh test      roda os testes
 #   ./scripts/dev.sh down      derruba tudo
+#   ./scripts/dev.sh portproxy refaz o encaminhamento para o Windows
 # =====================================================================
 set -euo pipefail
 
@@ -75,11 +76,6 @@ api() {
   for _ in $(seq 1 60); do
     if curl -sf "http://localhost:$PORTA/actuator/health" >/dev/null 2>&1; then
       echo " no ar"
-      echo
-      echo "   API .......... http://localhost:$PORTA"
-      echo "   Health ....... http://localhost:$PORTA/actuator/health"
-      echo "   phpMyAdmin ... http://localhost:8082"
-      echo "   Login ........ superadmin@alfaschool.com"
       return 0
     fi
     echo -n "."; sleep 2
@@ -89,10 +85,89 @@ api() {
   exit 1
 }
 
+WEB="alfaschool-web-dev"
+PORTA_WEB="${FRONTEND_PORT:-5173}"
+
+# ---------------------------------------------------------------------
+# Encaminhamento WSL -> Windows
+#
+# Esta maquina NAO usa o encaminhamento automatico de localhost do WSL:
+# o acesso pelo navegador depende de entradas netsh portproxy explicitas.
+# E o IP do WSL MUDA a cada reinicio, entao as entradas antigas passam a
+# apontar para o vazio e o Chrome responde ERR_CONNECTION_REFUSED mesmo
+# com tudo no ar do lado Linux.
+#
+# Por isso refazemos as entradas a cada "up", sempre apagando antes.
+# ---------------------------------------------------------------------
+resumo() {
+  cat <<TXT
+
+   Interface .... http://localhost:$PORTA_WEB     <-- abra esta
+   API .......... http://localhost:$PORTA
+   Health ....... http://localhost:$PORTA/actuator/health
+   phpMyAdmin ... http://localhost:8082
+
+   Login do tenant Master: superadmin@alfaschool.com
+   Cenario de demonstracao (Colegio Mundo do Saber):
+     docker exec -i alfaschool-mysql mysql -uroot -palfaschool123 alfaschool \\
+       < scripts/seed-mundo-do-saber.sql
+     usuario: coordenacao@mundodosaber.com
+
+TXT
+}
+
+portproxy() {
+  local netsh="/mnt/c/Windows/System32/netsh.exe"
+  [ -x "$netsh" ] || { echo ">> nao parece WSL com Windows; pulando portproxy"; return 0; }
+
+  local ip
+  ip=$(hostname -I | awk '{print $1}')
+  [ -n "$ip" ] || { echo "!! nao consegui descobrir o IP do WSL"; return 1; }
+
+  echo ">> encaminhando portas do Windows para o WSL ($ip)"
+  for porta in "$PORTA" "$PORTA_WEB"; do
+    "$netsh" interface portproxy delete v4tov4 listenport="$porta" listenaddress=0.0.0.0 >/dev/null 2>&1 || true
+    if "$netsh" interface portproxy add v4tov4 \
+         listenport="$porta" listenaddress=0.0.0.0 \
+         connectport="$porta" connectaddress="$ip" >/dev/null 2>&1; then
+      echo "   porta $porta OK"
+    else
+      echo "   porta $porta FALHOU — rode um PowerShell como administrador:"
+      echo "     netsh interface portproxy add v4tov4 listenport=$porta listenaddress=0.0.0.0 connectport=$porta connectaddress=$ip"
+    fi
+  done
+}
+
+web() {
+  echo ">> (re)iniciando a interface na porta $PORTA_WEB"
+  docker rm -f "$WEB" >/dev/null 2>&1 || true
+  docker run -d --name "$WEB" \
+    --network "$REDE" \
+    -p "$PORTA_WEB":5173 \
+    -v "$RAIZ/frontend":/app \
+    -v /app/node_modules \
+    -w /app \
+    -e BACKEND_URL=http://"$API":8080 \
+    node:20-alpine sh -c "npm install --silent && npm run dev -- --host 0.0.0.0" >/dev/null
+
+  echo -n ">> aguardando a interface"
+  for _ in $(seq 1 40); do
+    if curl -sf "http://localhost:$PORTA_WEB" >/dev/null 2>&1; then
+      echo " no ar"; return 0
+    fi
+    echo -n "."; sleep 3
+  done
+  echo; echo "!! a interface nao subiu. Ultimas linhas do log:"
+  docker logs --tail 30 "$WEB"
+  return 1
+}
+
 case "${1:-up}" in
-  up)       infra; build; api ;;
+  up)       infra; build; api; web; portproxy; resumo ;;
   build)    build ;;
   restart)  build; api ;;
+  web)      web ;;
+  portproxy) portproxy ;;
   reset-db)
     echo "!! isto APAGA todos os dados locais de alfaschool"
     read -r -p "   confirmar? (digite SIM): " ok
@@ -100,9 +175,9 @@ case "${1:-up}" in
     infra
     docker exec alfaschool-mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD:-alfaschool123}" \
       -e "DROP DATABASE IF EXISTS alfaschool; CREATE DATABASE alfaschool CHARACTER SET utf8mb4;"
-    build; api ;;
+    build; api; web; portproxy; resumo ;;
   logs)     docker logs -f "$API" ;;
   test)     mvn_run -B test ;;
-  down)     docker rm -f "$API" >/dev/null 2>&1 || true; docker compose down ;;
+  down)     docker rm -f "$API" "$WEB" >/dev/null 2>&1 || true; docker compose down ;;
   *)        sed -n '2,20p' "$0"; exit 1 ;;
 esac

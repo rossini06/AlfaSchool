@@ -66,8 +66,19 @@ nao viam, porque cada fatia passava isolada.
 Para o simulador funcionar, a API precisa subir com
 `ACCESS_SIMULADOR=true` (o `dev.sh` ja faz isso em desenvolvimento).
 
-API em http://localhost:8083 · phpMyAdmin em http://localhost:8082.
+**Interface em http://localhost:5173** — e' esta que se abre no navegador.
+A 8083 e' a API REST: acessar ela direto so' devolve JSON.
+phpMyAdmin em http://localhost:8082.
 Usuario inicial: `superadmin@alfaschool.com`.
+
+### Acesso pelo navegador no Windows
+
+Esta maquina **nao** usa o encaminhamento automatico de localhost do WSL:
+o acesso depende de entradas `netsh portproxy` explicitas, e o IP do WSL
+**muda a cada reinicio**. Quando isso acontece as entradas apontam para o
+vazio e o Chrome responde `ERR_CONNECTION_REFUSED` mesmo com tudo no ar
+do lado Linux. O `dev.sh up` refaz o encaminhamento sozinho; para
+refazer a mao, `./scripts/dev.sh portproxy`.
 
 ### Armadilha do Docker no WSL
 
