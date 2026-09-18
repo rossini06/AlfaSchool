@@ -184,11 +184,66 @@ body {
 .sidebar-nav::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 
 .sidebar-group { display: flex; flex-direction: column; }
+/* Vira botao de acordeao: os grupos de configuracao nascem fechados, e e'
+   isso que impede o menu de virar uma lista sem fim. */
 .sidebar-group-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
   padding: 0.75rem 0.85rem 0.35rem;
   margin-top: 0.25rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.sidebar-group-header:hover .sidebar-group-label { color: var(--color-text-1, #fff); }
+.sidebar-group-chevron {
+  flex-shrink: 0;
+  opacity: 0.55;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+.sidebar-group-chevron.aberto { transform: rotate(0deg); }
+
+/* Busca: com quase 40 telas, achar pelo nome e' mais rapido que lembrar
+   em qual grupo a tela mora. */
+.sidebar-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0.85rem 0.25rem;
+}
+.sidebar-busca-icone {
+  position: absolute;
+  left: 0.55rem;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.sidebar-busca input {
+  width: 100%;
+  padding: 0.4rem 0.5rem 0.4rem 1.85rem;
+  font-size: 0.8rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  outline: none;
+}
+.sidebar-busca input:focus {
+  border-color: var(--color-brand, #2f8f9d);
+  background: rgba(255, 255, 255, 0.1);
+}
+.sidebar-busca input::placeholder { opacity: 0.5; }
+
+.sidebar-vazio {
+  padding: 1rem 0.95rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  opacity: 0.6;
 }
 .sidebar-group-label {
   font-size: 0.65rem;
@@ -264,6 +319,8 @@ body {
 .sidebar.sidebar-collapsed .sidebar-nav-label,
 .sidebar.sidebar-collapsed .sidebar-footer-text,
 .sidebar.sidebar-collapsed .sidebar-group-label { display: none; }
+.sidebar.sidebar-collapsed .sidebar-group-header,
+.sidebar.sidebar-collapsed .sidebar-busca { display: none; }
 
 .sidebar.sidebar-collapsed .sidebar-top {
   justify-content: center;

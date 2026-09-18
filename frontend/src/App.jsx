@@ -65,6 +65,24 @@ function ProtectedRoute({ children, requiredRoles }) {
   return children;
 }
 
+/**
+ * O responsável não é funcionário: o lugar dele é o Portal da Família.
+ *
+ * Sem este desvio ele caía no layout administrativo e via um Dashboard
+ * vazio, porque a única permissão dele é PORTAL_ACESSAR — parecia sistema
+ * quebrado, quando na verdade era a tela errada.
+ */
+function RotaPorPerfil({ children }) {
+  const { user } = useAuth();
+  const roles = user?.roles ?? [];
+  const soResponsavel = roles.length > 0 && roles.every((r) => r === "RESPONSAVEL");
+
+  if (soResponsavel) {
+    return <Navigate to="/portal" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   const { isAuthenticated } = useAuth();
 
@@ -86,7 +104,9 @@ export default function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <AdminLayout />
+            <RotaPorPerfil>
+              <AdminLayout />
+            </RotaPorPerfil>
           </ProtectedRoute>
         }
       >

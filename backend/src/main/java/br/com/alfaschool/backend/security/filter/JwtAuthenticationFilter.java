@@ -45,10 +45,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             ? list.stream().map(String::valueOf).toList()
                             : List.of();
 
-                    List<SimpleGrantedAuthority> authorities = roles.stream()
-                            .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                        Object rawPerms = claims.get("perms");
+                        List<String> perms = rawPerms instanceof List<?> lp
+                            ? lp.stream().map(String::valueOf).toList()
+                            : List.of();
+
+                    // Papel vira ROLE_*, permissao vira PERM_*. Os dois
+                    // convivem no mesmo contexto, e o @PreAuthorize combina
+                    // com "or": papel OU permissao concede: permissao apenas
+                    // ACRESCENTA acesso, nunca tira.
+                    List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>(
+                            roles.stream()
+                                    .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                                    .map(SimpleGrantedAuthority::new)
+                                    .toList());
+                    perms.stream()
+                            .map(perm -> perm.startsWith("PERM_") ? perm : "PERM_" + perm)
                             .map(SimpleGrantedAuthority::new)
-                            .toList();
+                            .forEach(authorities::add);
 
                     AuthenticatedUser principal = new AuthenticatedUser(userId, tenantId, unitId, roles);
                     UsernamePasswordAuthenticationToken authentication =

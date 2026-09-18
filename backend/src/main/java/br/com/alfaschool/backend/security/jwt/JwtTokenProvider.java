@@ -23,7 +23,22 @@ public class JwtTokenProvider {
         this.jwtProperties = jwtProperties;
     }
 
+    /**
+     * Mantido para quem nao resolve permissao (ex.: token do agente local).
+     */
     public String generateAccessToken(UUID userId, UUID tenantId, UUID unitId, Collection<String> roles) {
+        return generateAccessToken(userId, tenantId, unitId, roles, java.util.List.of());
+    }
+
+    /**
+     * As permissoes viajam no token, e nao sao consultadas a cada request.
+     *
+     * A troca: o filtro segue sem tocar o banco — o que importa num sistema
+     * onde cada painel de TV faz polling —, ao custo de uma mudanca de
+     * permissao so' valer no proximo login. A tela avisa isso a quem edita.
+     */
+    public String generateAccessToken(UUID userId, UUID tenantId, UUID unitId,
+                                      Collection<String> roles, Collection<String> permissoes) {
         Instant now = Instant.now();
         Instant expiration = now.plus(jwtProperties.jwtExpirationMinutes(), ChronoUnit.MINUTES);
 
@@ -33,6 +48,7 @@ public class JwtTokenProvider {
                 .claim("tenantId", tenantId.toString())
                 .claim("unitId", unitId == null ? null : unitId.toString())
                 .claim("roles", roles)
+                .claim("perms", permissoes)
                 .claim("type", "access")
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))

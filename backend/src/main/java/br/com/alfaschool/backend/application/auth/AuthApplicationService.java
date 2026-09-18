@@ -20,6 +20,8 @@ import java.util.UUID;
 @Service
 public class AuthApplicationService {
 
+    private final br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService;
+
     private static final int MAX_TENTATIVAS = 5;
 
     private final UserRepository userRepository;
@@ -30,7 +32,9 @@ public class AuthApplicationService {
     public AuthApplicationService(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder,
                                   JwtTokenProvider jwtTokenProvider,
-                                  AuditService auditService) {
+                                  AuditService auditService,
+                                  br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService) {
+        this.permissaoService = permissaoService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -60,7 +64,9 @@ public class AuthApplicationService {
         userRepository.save(user);
 
         List<String> roles = user.getRoles().stream().map(role -> role.getName().toUpperCase()).toList();
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getTenantId(), user.getUnitId(), roles);
+        List<String> permissoes = permissaoService.nomesDe(user);
+        String accessToken = jwtTokenProvider.generateAccessToken(
+                user.getId(), user.getTenantId(), user.getUnitId(), roles, permissoes);
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getTenantId());
 
         auditService.register(user.getTenantId(), user.getId(), "LOGIN_SUCCESS", "USER", user.getId(), ipAddress);
@@ -71,6 +77,7 @@ public class AuthApplicationService {
                 user.getId(),
                 user.getTenantId(),
                 roles,
+                permissoes,
                 user.isMustChangePassword()
         );
     }
@@ -89,7 +96,9 @@ public class AuthApplicationService {
                 .orElseThrow(this::credenciaisInvalidas);
 
         List<String> roles = user.getRoles().stream().map(role -> role.getName().toUpperCase()).toList();
-        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getTenantId(), user.getUnitId(), roles);
+        List<String> permissoes = permissaoService.nomesDe(user);
+        String newAccessToken = jwtTokenProvider.generateAccessToken(
+                user.getId(), user.getTenantId(), user.getUnitId(), roles, permissoes);
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getTenantId());
 
         return new AuthTokensResponse(
@@ -98,6 +107,7 @@ public class AuthApplicationService {
                 user.getId(),
                 user.getTenantId(),
                 roles,
+                permissoes,
                 user.isMustChangePassword()
         );
     }
@@ -116,15 +126,44 @@ public class AuthApplicationService {
         return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Essas credenciais não foram encontradas em nossos registros.");
     }
 
+    /**
+     * Descobre quem esta entrando.
+     *
+     * <p>Com tenant informado, e' busca direta. SEM tenant, resolvemos pelo
+     * e-mail: exigir que um professor digite o UUID da escola para entrar
+     * nao e' login, e' senha dupla. Como e-mail e' unico dentro de uma
+     * escola e quase sempre unico entre elas, isso resolve o caso real.
+     *
+     * <p>Quando o mesmo e-mail existe em MAIS DE UMA escola — a diretora
+     * que responde por duas unidades —, ai sim pedimos o tenant, porque
+     * escolher um por conta propria poderia logar a pessoa na escola
+     * errada. SUPER_ADMIN continua tendo precedencia.
+     */
     private UserAccount resolveUserForLogin(LoginRequest request) {
         if (request.tenantId() != null) {
             return userRepository.findByTenantIdAndEmailIgnoreCase(request.tenantId(), request.email())
                     .orElseGet(() -> findSuperAdminByEmail(request.email()).orElseThrow(this::credenciaisInvalidas));
         }
 
-        return findSuperAdminByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Tenant ID é obrigatório para usuários comuns. Super Admin pode acessar sem tenant."));
+        java.util.Optional<UserAccount> superAdmin = findSuperAdminByEmail(request.email());
+        if (superAdmin.isPresent()) {
+            return superAdmin.get();
+        }
+
+        java.util.List<UserAccount> candidatos = userRepository.findAllByEmailIgnoreCase(request.email()).stream()
+                .filter(u -> !Boolean.TRUE.equals(u.getDeleted()))
+                .toList();
+
+        if (candidatos.size() == 1) {
+            return candidatos.get(0);
+        }
+        if (candidatos.size() > 1) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Este e-mail está cadastrado em mais de uma escola. Informe qual escola deseja acessar.");
+        }
+        // Nenhum candidato: mesma mensagem de senha errada, para nao revelar
+        // quais e-mails existem no sistema.
+        throw credenciaisInvalidas();
     }
 
     private java.util.Optional<UserAccount> findSuperAdminByEmail(String email) {

@@ -250,6 +250,54 @@ VALUES
  ('b1000000-0000-0000-0000-000000025014', @tenant, 'AUTORIZADA', 'b1000000-0000-0000-0000-000000017004', 'demo/resp-maria.jpg',   14, 'CONSENTIMENTO', TRUE, @agora, '1.0', 'PORTARIA', 'Maria Silva',      TRUE, @agora, @agora, FALSE)
 ON DUPLICATE KEY UPDATE foto_key = VALUES(foto_key), updated_at = @agora;
 
+-- ------------------------------------------------- usuarios por perfil
+-- Um usuario para CADA perfil que uma escola usa, para dar para ver na
+-- pratica o que muda de um para o outro. A senha e' a mesma do
+-- superadmin (o hash e' copiado de la): cenario de demonstracao, NAO use
+-- em producao.
+--
+-- Os perfis (roles) em si sao criados pelo PermissaoSeeder no boot, com o
+-- conjunto de permissoes de cada um. Aqui so' criamos as PESSOAS e as
+-- ligamos ao perfil correspondente.
+-- INSERT IGNORE: ON DUPLICATE KEY UPDATE com VALUES() nao e' aceito junto
+-- de INSERT ... SELECT no MySQL 8.4.
+INSERT IGNORE INTO users (id, tenant_id, unit_id, name, email, password, active, locked,
+                   failed_attempts, must_change_password, created_at, updated_at, deleted)
+SELECT u.novo_id, @tenant, @unidade, u.nome, u.email, base.password,
+       TRUE, FALSE, 0, FALSE, @agora, @agora, FALSE
+FROM (
+            SELECT 'b1000000-0000-0000-0000-000000026001' novo_id, 'Helena Dias (Diretora)'      nome, 'diretor@mundodosaber.com'    email
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026002',        'Marcia Prado (Coordenação)',        'coordenador@mundodosaber.com'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026003',        'Juliana Reis (Secretaria)',         'secretaria@mundodosaber.com'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026004',        'Paula Lima (Professora)',           'professor@mundodosaber.com'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026005',        'Antonio Souza (Portaria)',          'portaria@mundodosaber.com'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026006',        'Rita Alves (Financeiro)',           'financeiro@mundodosaber.com'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026007',        'Carlos Silva (Responsável)',        'responsavel@mundodosaber.com'
+) u
+CROSS JOIN (SELECT password FROM users WHERE email = 'superadmin@alfaschool.com' LIMIT 1) base;
+
+-- Liga cada usuario ao perfil de mesmo nome. Se o perfil ainda nao existe
+-- (primeiro boot antes do seeder), o INSERT simplesmente nao encontra a
+-- linha e nada e' criado — rodar o seed de novo depois resolve.
+INSERT IGNORE INTO user_roles (user_id, role_id)
+SELECT m.user_id, r.id
+FROM (
+            SELECT 'b1000000-0000-0000-0000-000000026001' user_id, 'DIRETOR'     perfil
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026002',        'COORDENACAO'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026003',        'SECRETARIA'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026004',        'PROFESSOR'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026005',        'PORTARIA'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026006',        'FINANCEIRO'
+  UNION ALL SELECT 'b1000000-0000-0000-0000-000000026007',        'RESPONSAVEL'
+) m
+JOIN roles r ON r.tenant_id = @tenant AND r.name = m.perfil AND r.deleted = FALSE;
+
+-- O usuario do responsavel aponta para o cadastro do Carlos Silva, para
+-- que o portal mostre os alunos dele — e' o vinculo por id da V44.
+UPDATE responsaveis
+   SET user_id = 'b1000000-0000-0000-0000-000000026007', updated_at = @agora
+ WHERE id = 'b1000000-0000-0000-0000-000000015001';
+
 SELECT 'Cenario Mundo do Saber carregado.' AS status;
 SELECT (SELECT COUNT(*) FROM acc_portarias WHERE tenant_id = @tenant) AS portarias,
        (SELECT COUNT(*) FROM dispositivos  WHERE tenant_id = @tenant) AS leitores,

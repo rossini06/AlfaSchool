@@ -9,6 +9,8 @@ public record AuthTokensResponse(
         UUID userId,
         UUID tenantId,
         List<String> roles,
+        /** Permissoes efetivas: e' o que a tela usa para montar o menu. */
+        List<String> permissoes,
         boolean mustChangePassword
 ) {
 }

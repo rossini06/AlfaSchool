@@ -61,7 +61,10 @@ export function AuthProvider({ children }) {
         throw new Error(data?.message || "Falha ao realizar login. Verifique suas credenciais.");
       }
 
-      const { accessToken, refreshToken, userId, tenantId: tid, roles, mustChangePassword } = data.data;
+      const {
+        accessToken, refreshToken, userId, tenantId: tid, roles,
+        permissoes, mustChangePassword,
+      } = data.data;
 
       const payload = decodeJwt(accessToken);
       const userObj = {
@@ -69,6 +72,10 @@ export function AuthProvider({ children }) {
         nome: payload.nome || payload.name || email.split("@")[0],
         email: payload.email || email,
         roles: roles || payload.roles || [],
+        // Permissões efetivas: é com elas que o menu e as telas decidem o
+        // que mostrar. Mudança de permissão só vale no próximo login —
+        // elas viajam no token, e é o que mantém o filtro sem ida ao banco.
+        permissoes: permissoes || payload.perms || [],
         tenantId: tid || payload.tenantId,
         unitId: payload.unitId || null,
         unitNome: payload.unitNome || null,

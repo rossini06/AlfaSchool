@@ -19,8 +19,20 @@ public class Role extends BaseEntity {
     @Column(nullable = false, length = 80)
     private String name;
 
+    /** Nome legivel para a tela ("Coordenação"); `name` e' a chave tecnica. */
+    @Column(length = 80)
+    private String rotulo;
+
     @Column(length = 255)
     private String description;
+
+    /**
+     * Perfil que o proprio sistema mantem (DIRETOR, COORDENACAO, ...). Nao
+     * pode ser excluido: apagar um deles deixaria usuarios sem perfil algum
+     * e, com isso, sem acesso a nada. Perfil criado pela escola vem false.
+     */
+    @Column(nullable = false)
+    private boolean sistema = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -33,6 +45,14 @@ public class Role extends BaseEntity {
     public String getName() {
         return name;
     }
+
+    public String getRotulo() { return rotulo; }
+
+    public void setRotulo(String rotulo) { this.rotulo = rotulo; }
+
+    public boolean isSistema() { return sistema; }
+
+    public void setSistema(boolean sistema) { this.sistema = sistema; }
 
     public void setName(String name) {
         this.name = name;
