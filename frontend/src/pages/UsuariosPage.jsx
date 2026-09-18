@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 import { Modal } from "../components/Modal";
+import { PermissoesUsuarioModal } from "../components/PermissoesUsuarioModal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
 
@@ -20,6 +21,7 @@ export function UsuariosPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [permissoesDe, setPermissoesDe] = useState(null);
   const [editItem, setEditItem] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -204,8 +206,15 @@ export function UsuariosPage() {
                   </td>
                   <td>
                     <div className="td-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar">
                         <Icon name="Edit" size={13} />
+                      </button>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setPermissoesDe(item)}
+                        title="Permissões"
+                      >
+                        <Icon name="ShieldCheck" size={13} />
                       </button>
                       <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
                         <Icon name="Trash" size={13} />
@@ -219,6 +228,13 @@ export function UsuariosPage() {
         </table>
         <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => load(p)} />
       </div>
+
+      {permissoesDe && (
+        <PermissoesUsuarioModal
+          usuario={permissoesDe}
+          onClose={() => setPermissoesDe(null)}
+        />
+      )}
 
       {/* Modal */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}
