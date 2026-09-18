@@ -178,7 +178,10 @@ function normalizarPessoa(pessoa, prefixo, bruto) {
   return {
     id: primeiro(p.id, achatado("Id")),
     nome: primeiro(p.nome, p.name, achatado("Nome")),
-    foto: primeiro(p.fotoUrl, p.foto, p.fotoKey, achatado("FotoUrl"), achatado("Foto")),
+    // `fotoKey` NÃO entra aqui: é chave de storage, não endereço. Usá-la
+    // como src só produz imagem quebrada. O que carrega é `fotoUrl`, que o
+    // backend assina com prazo curto — sem ela, a silhueta é o certo.
+    foto: primeiro(p.fotoUrl, p.foto, achatado("FotoUrl"), achatado("Foto")),
     parentesco: primeiro(p.parentesco, p.parentescoDescricao, p.vinculo, achatado("Parentesco")),
     turmaNome: primeiro(p.turmaNome, p.turma?.nome, achatado("TurmaNome")),
     salaNome: primeiro(p.salaNome, p.sala?.nome, achatado("SalaNome")),

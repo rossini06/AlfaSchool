@@ -43,11 +43,20 @@ public record RetiradaFilaItem(
         long tempoEsperaMinutos
 ) {
 
-    /** A crianca. `fotoKey` e' chave de storage, nao imagem. */
-    public record AlunoDoCartao(UUID id, String nome, String fotoKey, String turmaNome, String salaNome) {
+    /**
+     * A crianca.
+     *
+     * `fotoKey` e' chave de storage, nao imagem. `fotoUrl` e' o endereco
+     * ASSINADO que a tag img usa: tem prazo de minutos e esta preso a
+     * chave, entao nao serve para outra pessoa nem depois de vencer.
+     * Nulo quando nao ha foto cadastrada — a tela mostra a silhueta.
+     */
+    public record AlunoDoCartao(UUID id, String nome, String fotoKey, String fotoUrl,
+                                String turmaNome, String salaNome) {
     }
 
     /** Quem veio buscar, com o vinculo que a familia declarou. */
-    public record RetiranteDoCartao(UUID id, String nome, String fotoKey, String parentesco) {
+    public record RetiranteDoCartao(UUID id, String nome, String fotoKey, String fotoUrl,
+                                    String parentesco) {
     }
 }

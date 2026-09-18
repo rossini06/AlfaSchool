@@ -88,10 +88,15 @@ public class RetiradaConsultaService {
     private final JdbcTemplate jdbc;
     private final AccRetiradaHistoricoRepository historicoRepository;
 
-    public RetiradaConsultaService(JdbcTemplate jdbc, AccRetiradaHistoricoRepository historicoRepository) {
+    public RetiradaConsultaService(JdbcTemplate jdbc,
+                                  AccRetiradaHistoricoRepository historicoRepository,
+                                  br.com.alfaschool.backend.application.access.biometria.FotoUrlAssinada fotoUrl) {
         this.jdbc = jdbc;
         this.historicoRepository = historicoRepository;
+        this.fotoUrl = fotoUrl;
     }
+
+    private final br.com.alfaschool.backend.application.access.biometria.FotoUrlAssinada fotoUrl;
 
     /**
      * Fila atual, ordenada por ordem de chegada. Sem filtro de status,
@@ -273,12 +278,14 @@ public class RetiradaConsultaService {
                             RetiradaLookupJdbc.uuid(rs.getString("aluno_id")),
                             rs.getString("aluno_nome"),
                             rs.getString("aluno_foto_key"),
+                            fotoUrl.emitir(rs.getString("aluno_foto_key")),
                             turmaNome,
                             salaNome),
                     new RetiradaFilaItem.RetiranteDoCartao(
                             RetiradaLookupJdbc.uuid(rs.getString("pessoa_autorizada_id")),
                             rs.getString("pessoa_nome"),
                             rs.getString("pessoa_foto_key"),
+                            fotoUrl.emitir(rs.getString("pessoa_foto_key")),
                             rs.getString("parentesco")),
                     RetiradaLookupJdbc.uuid(rs.getString("turma_id")),
                     turmaNome,

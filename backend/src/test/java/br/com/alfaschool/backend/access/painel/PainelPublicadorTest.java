@@ -65,9 +65,9 @@ class PainelPublicadorTest {
 
     private RetiradaFilaItem cartao() {
         return new RetiradaFilaItem(UUID.randomUUID(), UNIDADE,
-                new RetiradaFilaItem.AlunoDoCartao(UUID.randomUUID(), "Joao", "faces/joao.jpg",
+                new RetiradaFilaItem.AlunoDoCartao(UUID.randomUUID(), "Joao", "faces/joao.jpg", null,
                         "1o Ano A", "Sala 12"),
-                new RetiradaFilaItem.RetiranteDoCartao(UUID.randomUUID(), "Ana", "faces/ana.jpg", "mae"),
+                new RetiradaFilaItem.RetiranteDoCartao(UUID.randomUUID(), "Ana", "faces/ana.jpg", null, "mae"),
                 TURMA, "1o Ano A", SALA, "Sala 12", PORTARIA, "Portaria Principal",
                 StatusRetirada.PRONTO, 3,
                 Instant.now(), null, null, null, null, false, null, null, 7);

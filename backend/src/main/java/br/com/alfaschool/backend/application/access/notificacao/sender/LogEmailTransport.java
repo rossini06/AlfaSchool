@@ -21,7 +21,7 @@ public class LogEmailTransport implements EmailTransport {
     private static final Logger log = LoggerFactory.getLogger(LogEmailTransport.class);
 
     @Override
-    public String enviar(String remetenteNome, String remetenteEndereco, String destino,
+    public String enviar(ContaSmtp conta, String remetenteNome, String remetenteEndereco, String destino,
                          String assunto, String corpo) {
         if (destino == null || !destino.contains("@")) {
             // Endereco quebrado nunca vai melhorar: erro permanente.

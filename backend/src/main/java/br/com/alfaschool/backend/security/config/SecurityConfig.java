@@ -93,7 +93,14 @@ public class SecurityConfig {
                         // Cuidado ao mexer: NAO usar /api/v1/access/paineis/**,
                         // que abriria o CRUD de painel e o resumo da
                         // coordenacao.
-                        .requestMatchers(HttpMethod.POST, "/api/v1/access/paineis/*/retiradas/*/preparar").permitAll();
+                        .requestMatchers(HttpMethod.POST, "/api/v1/access/paineis/*/retiradas/*/preparar").permitAll()
+
+                        // Foto de referencia. Uma tag <img> nao manda
+                        // cabecalho e a TV nao faz login, entao quem autoriza
+                        // e' a assinatura HMAC da propria URL, com prazo de
+                        // minutos e presa a chave da foto. Sem assinatura
+                        // valida, o endpoint devolve 404.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/access/fotos/**").permitAll();
 
                     if (simuladorHabilitado) {
                         // Firmware falso do simulador, so' em laboratorio.

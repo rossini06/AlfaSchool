@@ -90,8 +90,8 @@ class PainelAcessoServiceTest {
 
     private RetiradaFilaItem item(String nome, UUID salaId, UUID turmaId) {
         return new RetiradaFilaItem(UUID.randomUUID(), UNIDADE,
-                new RetiradaFilaItem.AlunoDoCartao(UUID.randomUUID(), nome, "faces/" + nome, "Turma", "Sala"),
-                new RetiradaFilaItem.RetiranteDoCartao(UUID.randomUUID(), "Responsavel", "faces/resp", "mae"),
+                new RetiradaFilaItem.AlunoDoCartao(UUID.randomUUID(), nome, "faces/" + nome, null, "Turma", "Sala"),
+                new RetiradaFilaItem.RetiranteDoCartao(UUID.randomUUID(), "Responsavel", "faces/resp", null, "mae"),
                 turmaId, "Turma", salaId, "Sala", null, null,
                 StatusRetirada.SOLICITADA, 1, Instant.now(), null, null, null,
                 null, false, null, null, 3);
