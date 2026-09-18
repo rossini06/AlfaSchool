@@ -32,3 +32,6 @@ frontend/.vite/
 # Docker volumes (local bind mounts)
 mysql_data/
 redis_data/
+
+# Worktrees temporarios de agentes
+.claude/worktrees/
