@@ -49,7 +49,22 @@ query** — nao confie num `findById` solto.
 ./scripts/dev.sh restart   # recompila e reinicia
 ./scripts/dev.sh test      # testes
 ./scripts/dev.sh reset-db  # apaga e recria o banco
+
+# cenario de demonstracao (Colegio Mundo do Saber)
+docker exec -i alfaschool-mysql mysql -uroot -palfaschool123 alfaschool \
+  < scripts/seed-mundo-do-saber.sql
+
+# fluxo completo contra a API, pelo simulador de leitor
+./scripts/smoke-fluxo-completo.sh
 ```
+
+O smoke exercita entrada, chegada do responsavel, fila, preparo, entrega,
+saida efetiva e replay. **Rode-o antes de dar qualquer entrega por
+pronta**: ele ja pegou tres bugs de integracao que os testes unitarios
+nao viam, porque cada fatia passava isolada.
+
+Para o simulador funcionar, a API precisa subir com
+`ACCESS_SIMULADOR=true` (o `dev.sh` ja faz isso em desenvolvimento).
 
 API em http://localhost:8083 · phpMyAdmin em http://localhost:8082.
 Usuario inicial: `superadmin@alfaschool.com`.
@@ -97,3 +112,18 @@ buildar a imagem, confira o conteudo antes de confiar nela.
 9. **Biometria de menor exige base legal e consentimento registrados**
    antes de ir para qualquer equipamento (LGPD Art. 11 e 14).
 10. **Notificacao automatica nao carrega foto nem dado biometrico.**
+
+## Armadilha de Spring que ja custou caro aqui
+
+Listener anotado com `@TransactionalEventListener(AFTER_COMMIT)` roda
+**depois** que a transacao de origem foi encerrada. Um `@Transactional`
+comum chamado dali tenta aderir aquela transacao morta: o codigo executa,
+o log diz que deu certo e **nada e' persistido**, em silencio.
+
+Todo listener de AFTER_COMMIT que escreve precisa de
+`@Transactional(propagation = REQUIRES_NEW)`. Foi assim que a permanencia
+e a fila de retirada calculavam tudo sem gravar linha nenhuma.
+
+Pelo mesmo motivo, metodo `@Scheduled` que toca repositorio precisa de
+`@Transactional`: o `TenantRepositoryAspect` aplica o filtro de tenant do
+Hibernate e exige um EntityManager transacional.
