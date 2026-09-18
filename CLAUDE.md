@@ -77,19 +77,29 @@ O Mac chega nesta maquina por **tunel SSH**, nao por localhost. As portas
 precisam estar no tunel; se nao estiverem, o navegador responde
 `ERR_CONNECTION_REFUSED` mesmo com tudo no ar.
 
-No Mac:
+**Use o modo remoto**, que serve tudo numa porta so':
 
 ```
-ssh -N -L 5173:localhost:5173 -L 8083:localhost:8083 dev
+./scripts/dev.sh remoto            # aqui, no WSL
+ssh -N -L 8085:localhost:8085 dev  # no Mac
 ```
 
-Depois, `http://localhost:5173` no Mac. Para nao repetir a cada sessao,
-acrescente as duas linhas ao tunel que o launchd ja mantem:
+Depois, `http://localhost:8085` no Mac.
+
+Por que nao o Vite na 5173: ele depende de um websocket de HMR que
+atravessa tunel mal, e exige encaminhar duas portas em vez de uma. O
+sintoma de tunel incompleto e' traicoeiro — a pagina carrega (do cache,
+ou pela porta que esta encaminhada) e o login morre com
+**"Failed to fetch"**, que parece erro de backend e nao e'.
+
+Para nao repetir a cada sessao, acrescente ao tunel do launchd:
 
 ```
-LocalForward 5173 localhost:5173
-LocalForward 8083 localhost:8083
+LocalForward 8085 localhost:8085
 ```
+
+O preco do modo remoto e' nao ter hot reload: depois de mexer no
+frontend, rode `./scripts/dev.sh remoto` de novo.
 
 ### Acesso pelo navegador no Windows
 

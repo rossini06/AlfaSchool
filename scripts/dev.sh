@@ -18,6 +18,7 @@
 #   ./scripts/dev.sh test      roda os testes
 #   ./scripts/dev.sh down      derruba tudo
 #   ./scripts/dev.sh portproxy refaz o encaminhamento para o Windows
+#   ./scripts/dev.sh remoto    UMA porta so' (8085), para acesso por tunel
 # =====================================================================
 set -euo pipefail
 
@@ -87,6 +88,8 @@ api() {
 
 WEB="alfaschool-web-dev"
 PORTA_WEB="${FRONTEND_PORT:-5173}"
+REMOTO="alfaschool-remoto"
+PORTA_REMOTA="${REMOTE_PORT:-8085}"
 
 # ---------------------------------------------------------------------
 # Encaminhamento WSL -> Windows
@@ -99,6 +102,47 @@ PORTA_WEB="${FRONTEND_PORT:-5173}"
 #
 # Por isso refazemos as entradas a cada "up", sempre apagando antes.
 # ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Modo remoto: UMA porta so'.
+#
+# Serve o build estatico e faz proxy de /api na mesma origem. Para quem
+# acessa de fora por tunel SSH (Mac), isto e' bem mais confiavel que o
+# Vite: nao depende do websocket de HMR, que atravessa tunel mal, e exige
+# encaminhar uma porta em vez de duas. O sintoma de tunel incompleto e'
+# a pagina carregar e o login morrer com "Failed to fetch".
+#
+# O preco: nao ha hot reload. Depois de mexer no frontend, rode de novo.
+# ---------------------------------------------------------------------
+remoto() {
+  echo ">> gerando o build do frontend"
+  docker run --rm -v "$RAIZ/frontend":/app -w /app node:20-alpine \
+    sh -c "npm install --silent && npm run build" >/dev/null
+
+  echo ">> servindo em uma porta so' ($PORTA_REMOTA)"
+  docker rm -f "$REMOTO" >/dev/null 2>&1 || true
+  docker run -d --name "$REMOTO" \
+    --network "$REDE" \
+    -p "$PORTA_REMOTA":80 \
+    -v "$RAIZ/frontend/dist":/usr/share/nginx/html:ro \
+    -v "$RAIZ/infra/nginx/default.remoto.conf":/etc/nginx/conf.d/default.conf:ro \
+    nginx:1.27-alpine >/dev/null
+
+  sleep 2
+  if curl -sf "http://localhost:$PORTA_REMOTA/" >/dev/null 2>&1; then
+    portproxy
+    cat <<TXT
+
+   Tudo em http://localhost:$PORTA_REMOTA
+
+   Do Mac, encaminhe SO' esta porta:
+     ssh -N -L $PORTA_REMOTA:localhost:$PORTA_REMOTA dev
+
+TXT
+  else
+    echo "!! nao subiu:"; docker logs --tail 20 "$REMOTO"; return 1
+  fi
+}
+
 resumo() {
   cat <<TXT
 
@@ -125,7 +169,7 @@ portproxy() {
   [ -n "$ip" ] || { echo "!! nao consegui descobrir o IP do WSL"; return 1; }
 
   echo ">> encaminhando portas do Windows para o WSL ($ip)"
-  for porta in "$PORTA" "$PORTA_WEB"; do
+  for porta in "$PORTA" "$PORTA_WEB" "$PORTA_REMOTA"; do
     "$netsh" interface portproxy delete v4tov4 listenport="$porta" listenaddress=0.0.0.0 >/dev/null 2>&1 || true
     if "$netsh" interface portproxy add v4tov4 \
          listenport="$porta" listenaddress=0.0.0.0 \
@@ -168,6 +212,7 @@ case "${1:-up}" in
   restart)  build; api ;;
   web)      web ;;
   portproxy) portproxy ;;
+  remoto)   remoto ;;
   reset-db)
     echo "!! isto APAGA todos os dados locais de alfaschool"
     read -r -p "   confirmar? (digite SIM): " ok
@@ -178,6 +223,6 @@ case "${1:-up}" in
     build; api; web; portproxy; resumo ;;
   logs)     docker logs -f "$API" ;;
   test)     mvn_run -B test ;;
-  down)     docker rm -f "$API" "$WEB" >/dev/null 2>&1 || true; docker compose down ;;
+  down)     docker rm -f "$API" "$WEB" "$REMOTO" >/dev/null 2>&1 || true; docker compose down ;;
   *)        sed -n '2,20p' "$0"; exit 1 ;;
 esac
