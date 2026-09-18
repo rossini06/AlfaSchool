@@ -1,9 +1,11 @@
 package br.com.alfaschool.backend;
 
+import br.com.alfaschool.backend.domain.professor.Professor;
 import br.com.alfaschool.backend.domain.role.Role;
 import br.com.alfaschool.backend.domain.tenant.Tenant;
 import br.com.alfaschool.backend.domain.user.UserAccount;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AuditLogRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.ProfessorRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TenantRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
@@ -48,6 +50,9 @@ class DashboardControllerTest {
 
     @Autowired
     private AuditLogRepository auditLogRepository;
+
+    @Autowired
+    private ProfessorRepository professorRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -104,6 +109,17 @@ class DashboardControllerTest {
         userB.setPassword(passwordEncoder.encode("123456"));
         userB.getRoles().add(roleUserB);
         userRepository.save(userB);
+
+        professorRepository.save(professorDe(tenantA.getTenantId(), "Professora do Tenant A"));
+        professorRepository.save(professorDe(tenantB.getTenantId(), "Professor do Tenant B"));
+    }
+
+    private Professor professorDe(UUID tenantId, String nome) {
+        Professor professor = new Professor();
+        professor.setTenantId(tenantId);
+        professor.setNome(nome);
+        professor.setStatus("ativo");
+        return professor;
     }
 
     @Test
@@ -160,6 +176,8 @@ class DashboardControllerTest {
                 totalStaff = stat.get("value").asLong();
             }
         }
+        // Cada tenant tem exatamente um professor. Ver 2 significaria que o
+        // dashboard esta somando dados de outra escola.
         assertThat(totalStaff).isEqualTo(1L);
     }
 

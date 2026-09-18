@@ -6,6 +6,11 @@ import br.com.alfaschool.backend.application.dashboard.dto.DashboardResponseDTO;
 import br.com.alfaschool.backend.application.dashboard.dto.SystemHealthDTO;
 import br.com.alfaschool.backend.domain.dashboard.DashboardSnapshot;
 import br.com.alfaschool.backend.infrastructure.persistence.dashboard.DashboardMetricsRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.CursoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.MatriculaRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import br.com.alfaschool.backend.security.jwt.AuthenticatedUser;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +39,24 @@ class DashboardServiceTest {
 
     @Mock
     private SystemHealthService systemHealthService;
+
+    // O DashboardService ganhou estas dependencias depois que o teste foi
+    // escrito, e sem os mocks o @InjectMocks deixava os campos nulos: o
+    // teste quebrava com NPE em buildSchoolKpis, nao por bug de negocio.
+    @Mock
+    private AlunoRepository alunoRepository;
+
+    @Mock
+    private TurmaRepository turmaRepository;
+
+    @Mock
+    private CursoRepository cursoRepository;
+
+    @Mock
+    private MatriculaRepository matriculaRepository;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
 
     @InjectMocks
     private DashboardService dashboardService;

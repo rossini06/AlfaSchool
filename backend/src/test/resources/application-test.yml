@@ -1,17 +1,43 @@
+# =====================================================================
+# Perfil de teste
+#
+# Por que o Flyway fica DESLIGADO aqui:
+# as migrations sao escritas para MySQL 8 (ALTER TABLE ... MODIFY COLUMN,
+# varios ADD COLUMN num mesmo ALTER, ON DUPLICATE KEY UPDATE). O H2 nao
+# aceita isso nem em MODE=MySQL, e a suite inteira ficava vermelha por
+# causa do dialeto, nao por causa de bug de codigo.
+#
+# Aqui o schema vem das ENTIDADES (create-drop), o que mantem o teste
+# rapido e focado em regra de negocio.
+#
+# As migrations sao validadas contra MySQL 8 de verdade por
+# `./scripts/dev.sh reset-db`, que aplica as 42 do zero. Rode isso antes
+# de commitar migration nova — este perfil nao cobre esse risco.
+# =====================================================================
 spring:
   datasource:
-    url: jdbc:h2:mem:alfaschool_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:alfaschool_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     open-in-view: false
+    properties:
+      hibernate:
+        type:
+          preferred_uuid_jdbc_type: CHAR
   flyway:
-    enabled: true
+    enabled: false
+  data:
+    redis:
+      # Redis nao sobe em teste; o que depender dele deve ser mockado.
+      host: localhost
+      port: 16379
 
 app:
+  secret-key: chave-de-teste-com-mais-de-32-caracteres-para-o-cifrador
   security:
     jwt-secret: 12345678901234567890123456789012
     jwt-expiration-minutes: 120
@@ -20,3 +46,8 @@ app:
     email: superadmin@alfaschool.com
     name: Super Admin
     password: SuperAdmin@2026!
+  access:
+    device-timezone: America/Sao_Paulo
+    dedup-window-seconds: 60
+    heartbeat-timeout-seconds: 180
+    simulador-habilitado: false
