@@ -84,7 +84,16 @@ public class SecurityConfig {
 
                         // A TV do painel nao faz login: autentica por token
                         // proprio e revogavel, validado no controller.
-                        .requestMatchers(HttpMethod.GET, "/api/v1/access/paineis/*/stream", "/api/v1/access/paineis/*/estado").permitAll();
+                        .requestMatchers(HttpMethod.GET, "/api/v1/access/paineis/*/stream", "/api/v1/access/paineis/*/estado").permitAll()
+                        // O botao "Preparar aluno para saida" da TV da sala.
+                        // Preparar nao entrega crianca: o ato de
+                        // responsabilidade e' ENTREGAR, que continua exigindo
+                        // colaborador autenticado. A rota so' aceita retirada
+                        // dentro do recorte daquele painel.
+                        // Cuidado ao mexer: NAO usar /api/v1/access/paineis/**,
+                        // que abriria o CRUD de painel e o resumo da
+                        // coordenacao.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/access/paineis/*/retiradas/*/preparar").permitAll();
 
                     if (simuladorHabilitado) {
                         // Firmware falso do simulador, so' em laboratorio.

@@ -178,7 +178,7 @@ export function PainelSalaPage() {
     setErroAcao("");
     setPreparandoId(destaque.id);
     try {
-      await painelPrepararRetirada(destaque.id, token);
+      await painelPrepararRetirada(destaque.id, token, slug);
       // Não esperamos o evento chegar: a professora acabou de apertar o botão.
       setRetiradas((prev) =>
         prev.map((r) => (r.id === destaque.id ? { ...r, status: "PREPARANDO" } : r))
