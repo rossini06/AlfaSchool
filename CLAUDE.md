@@ -71,6 +71,26 @@ A 8083 e' a API REST: acessar ela direto so' devolve JSON.
 phpMyAdmin em http://localhost:8082.
 Usuario inicial: `superadmin@alfaschool.com`.
 
+### Acesso pelo navegador no Mac
+
+O Mac chega nesta maquina por **tunel SSH**, nao por localhost. As portas
+precisam estar no tunel; se nao estiverem, o navegador responde
+`ERR_CONNECTION_REFUSED` mesmo com tudo no ar.
+
+No Mac:
+
+```
+ssh -N -L 5173:localhost:5173 -L 8083:localhost:8083 dev
+```
+
+Depois, `http://localhost:5173` no Mac. Para nao repetir a cada sessao,
+acrescente as duas linhas ao tunel que o launchd ja mantem:
+
+```
+LocalForward 5173 localhost:5173
+LocalForward 8083 localhost:8083
+```
+
 ### Acesso pelo navegador no Windows
 
 Esta maquina **nao** usa o encaminhamento automatico de localhost do WSL:
