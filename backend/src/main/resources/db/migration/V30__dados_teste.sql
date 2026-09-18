@@ -46,19 +46,19 @@ ON DUPLICATE KEY UPDATE updated_at = NOW();
 -- ============================================
 -- 3. PROFESSORES
 -- ============================================
-INSERT INTO professores (id, tenant_id, nome, email, telefone, especializacao, created_at, updated_at, deleted, ativo)
+INSERT INTO professores (id, tenant_id, nome, email, telefone, especialidade, created_at, updated_at, deleted, status)
 VALUES
-('p0000001-0000-0000-0000-000000000001', @tenant_id, 'Prof. Carlos Silva', 'carlos.silva@escola.com', '11999990001', 'Matemática e Física', NOW(), NOW(), FALSE, TRUE),
-('p0000001-0000-0000-0000-000000000002', @tenant_id, 'Profa. Maria Santos', 'maria.santos@escola.com', '11999990002', 'Português e Literatura', NOW(), NOW(), FALSE, TRUE),
-('p0000001-0000-0000-0000-000000000003', @tenant_id, 'Prof. João Oliveira', 'joao.oliveira@escola.com', '11999990003', 'Ciências e Biologia', NOW(), NOW(), FALSE, TRUE),
-('p0000001-0000-0000-0000-000000000004', @tenant_id, 'Profa. Ana Costa', 'ana.costa@escola.com', '11999990004', 'História e Geografia', NOW(), NOW(), FALSE, TRUE),
-('p0000001-0000-0000-0000-000000000005', @tenant_id, 'Profa. Paula Lima', 'paula.lima@escola.com', '11999990005', 'Educação Infantil', NOW(), NOW(), FALSE, TRUE)
+('p0000001-0000-0000-0000-000000000001', @tenant_id, 'Prof. Carlos Silva', 'carlos.silva@escola.com', '11999990001', 'Matemática e Física', NOW(), NOW(), FALSE, 'ativo'),
+('p0000001-0000-0000-0000-000000000002', @tenant_id, 'Profa. Maria Santos', 'maria.santos@escola.com', '11999990002', 'Português e Literatura', NOW(), NOW(), FALSE, 'ativo'),
+('p0000001-0000-0000-0000-000000000003', @tenant_id, 'Prof. João Oliveira', 'joao.oliveira@escola.com', '11999990003', 'Ciências e Biologia', NOW(), NOW(), FALSE, 'ativo'),
+('p0000001-0000-0000-0000-000000000004', @tenant_id, 'Profa. Ana Costa', 'ana.costa@escola.com', '11999990004', 'História e Geografia', NOW(), NOW(), FALSE, 'ativo'),
+('p0000001-0000-0000-0000-000000000005', @tenant_id, 'Profa. Paula Lima', 'paula.lima@escola.com', '11999990005', 'Educação Infantil', NOW(), NOW(), FALSE, 'ativo')
 ON DUPLICATE KEY UPDATE updated_at = NOW();
 
 -- ============================================
 -- 4. TURMAS
 -- ============================================
-INSERT INTO turmas (id, tenant_id, nome, ano_letivo, turno, curso_id, max_alunos, created_at, updated_at, deleted, ativa, data_inicio, data_fim)
+INSERT INTO turmas (id, tenant_id, nome, ano_letivo, turno, curso_id, capacidade_maxima, created_at, updated_at, deleted, ativa, data_inicio, data_fim)
 VALUES
 ('t0000001-0000-0000-0000-000000000001', @tenant_id, '9º Ano A', 2024, 'MANHA', 'c0000001-0000-0000-0000-000000000001', 35, NOW(), NOW(), FALSE, TRUE, '2024-02-01', '2024-12-15'),
 ('t0000001-0000-0000-0000-000000000002', @tenant_id, '9º Ano B', 2024, 'TARDE', 'c0000001-0000-0000-0000-000000000001', 35, NOW(), NOW(), FALSE, TRUE, '2024-02-01', '2024-12-15'),
@@ -110,7 +110,7 @@ ON DUPLICATE KEY UPDATE updated_at = NOW();
 -- ============================================
 -- 7. AVALIAÇÕES (para o 1º Bimestre)
 -- ============================================
-INSERT INTO avaliacoes (id, tenant_id, turma_id, disciplina_id, nome, tipo, peso, nota_maxima, data_aplicacao, periodo, permite_recuperacao, created_at, updated_at, deleted)
+INSERT INTO avaliacoes (id, tenant_id, turma_id, disciplina_id, nome, tipo, peso, nota_maxima, data_avaliacao, periodo, permite_recuperacao, created_at, updated_at, deleted)
 VALUES
 -- Matemática 9º Ano A
 ('av000001-0000-0000-0000-000000000001', @tenant_id, 't0000001-0000-0000-0000-000000000001', 'd0000001-0000-0000-0000-000000000001', 'Prova 1 - Equações', 'PROVA', 3.00, 10.00, '2024-03-15', '1bim', TRUE, NOW(), NOW(), FALSE),
