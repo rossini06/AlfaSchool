@@ -75,8 +75,21 @@ app:
     # um agente morto deixa o leitor marcado online para sempre.
     heartbeat-timeout-seconds: ${ACCESS_HEARTBEAT_TIMEOUT:180}
     # Simulador de leitor Control iD para laboratorio, sem hardware.
-    # NUNCA habilitar em producao.
+    # NUNCA habilitar em producao: ele expoe endpoints .fcgi publicos que
+    # imitam o firmware e aceitam comando sem autenticar.
     simulador-habilitado: ${ACCESS_SIMULADOR:false}
+    # Fotos de referencia enviadas aos leitores. Trocar por S3/MinIO depois
+    # e' so' outra implementacao de FotoStorage.
+    foto-dir: ${ACCESS_FOTO_DIR:/tmp/alfaschool-fotos}
+    foto-max-bytes: ${ACCESS_FOTO_MAX_BYTES:2097152}
+    controlid:
+      # Um leitor mudo nao pode travar o ciclo inteiro: timeouts explicitos.
+      connect-timeout-ms: ${CONTROLID_CONNECT_TIMEOUT:3000}
+      read-timeout-ms: ${CONTROLID_READ_TIMEOUT:8000}
+      # Sessao do firmware e' cacheada por equipamento; sem isso um full sync
+      # de 2000 alunos faria 2000 logins no leitor.
+      sessao-ttl-seconds: ${CONTROLID_SESSAO_TTL:240}
+    heartbeat-check-ms: ${ACCESS_HEARTBEAT_CHECK:30000}
 
 logging:
   level:

@@ -3,6 +3,7 @@ export const menuGroups = [
   { key: "escola", label: "ESCOLA" },
   { key: "academico", label: "ACADÊMICO" },
   { key: "diario", label: "DIÁRIO DE CLASSE" },
+  { key: "acesso", label: "CONTROLE DE ACESSO" },
   { key: "financeiro", label: "FINANCEIRO" },
   { key: "sistema", label: "SISTEMA" },
   { key: "saas", label: "ADMINISTRAÇÃO SAAS" },
@@ -84,6 +85,94 @@ export const menuItems = [
     path: "/boletim",
     icon: "FileSpreadsheet",
     group: "diario",
+  },
+
+  // CONTROLE DE ACESSO (fatia H — cadastros, permanência e relatórios)
+  {
+    label: "Presentes Agora",
+    path: "/access/presentes-agora",
+    icon: "Users",
+    group: "acesso",
+  },
+  {
+    label: "Permanência",
+    path: "/access/permanencia",
+    icon: "Clock",
+    group: "acesso",
+  },
+  {
+    label: "Autorizações",
+    path: "/access/autorizacoes",
+    icon: "UserCheck",
+    group: "acesso",
+  },
+  {
+    label: "Pessoas Autorizadas",
+    path: "/access/pessoas-autorizadas",
+    icon: "Users2",
+    group: "acesso",
+  },
+  {
+    label: "Restrições Judiciais",
+    path: "/access/restricoes",
+    icon: "Shield",
+    group: "acesso",
+  },
+  {
+    label: "Ocorrências",
+    path: "/access/ocorrencias",
+    icon: "AlertCircle",
+    group: "acesso",
+  },
+  {
+    label: "Jornadas",
+    path: "/access/jornadas",
+    icon: "Clock",
+    group: "acesso",
+  },
+  {
+    label: "Jornadas dos Alunos",
+    path: "/access/aluno-jornadas",
+    icon: "GraduationCap",
+    group: "acesso",
+  },
+  {
+    label: "Calendário",
+    path: "/access/calendario",
+    icon: "Calendar",
+    group: "acesso",
+  },
+  {
+    label: "Portarias",
+    path: "/access/portarias",
+    icon: "Home",
+    group: "acesso",
+  },
+  { label: "Zonas", path: "/access/zonas", icon: "Map", group: "acesso" },
+  { label: "Salas", path: "/access/salas", icon: "Home", group: "acesso" },
+  {
+    label: "Turmas nas Salas",
+    path: "/access/turma-salas",
+    icon: "List",
+    group: "acesso",
+  },
+  {
+    label: "Leitores de Acesso",
+    path: "/access/equipamentos",
+    icon: "Cpu",
+    group: "acesso",
+  },
+  {
+    label: "Painéis e TVs",
+    path: "/access/paineis",
+    icon: "Globe",
+    group: "acesso",
+  },
+  {
+    label: "Relatórios de Acesso",
+    path: "/access/relatorios",
+    icon: "BarChart3",
+    group: "acesso",
   },
 
   // FINANCEIRO

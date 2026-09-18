@@ -21,6 +21,23 @@ const PAGE_TITLES = {
   "/access/coordenacao": "Central de Coordenação",
   "/usuarios":     "Usuários",
   "/auditoria":    "Auditoria",
+  // Controle de Acesso — fatia H
+  "/access/portarias":           "Portarias",
+  "/access/zonas":               "Zonas",
+  "/access/salas":               "Salas",
+  "/access/turma-salas":         "Turmas nas Salas",
+  "/access/jornadas":            "Jornadas",
+  "/access/aluno-jornadas":      "Jornadas dos Alunos",
+  "/access/calendario":          "Calendário Escolar",
+  "/access/pessoas-autorizadas": "Pessoas Autorizadas",
+  "/access/autorizacoes":        "Autorizações de Retirada",
+  "/access/restricoes":          "Restrições Judiciais",
+  "/access/equipamentos":        "Leitores de Acesso",
+  "/access/paineis":             "Painéis e TVs",
+  "/access/permanencia":         "Permanência",
+  "/access/presentes-agora":     "Presentes Agora",
+  "/access/relatorios":          "Relatórios de Acesso",
+  "/access/ocorrencias":         "Ocorrências",
 };
 
 const getRoleLabel = (roles) => {

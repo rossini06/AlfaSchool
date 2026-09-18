@@ -24,6 +24,29 @@ import { ResponsaveisPage } from "./pages/ResponsaveisPage";
 import { AvaliacaoPage } from "./pages/AvaliacaoPage";
 import { CoordenacaoPage } from "./pages/access/CoordenacaoPage";
 import { PainelSalaPage } from "./pages/access/PainelSalaPage";
+// ── Controle de Acesso — cadastros, permanência e relatórios (fatia H) ──
+import { PortariasPage } from "./pages/access/PortariasPage";
+import { ZonasPage } from "./pages/access/ZonasPage";
+import { SalasPage } from "./pages/access/SalasPage";
+import { TurmaSalasPage } from "./pages/access/TurmaSalasPage";
+import { JornadasPage } from "./pages/access/JornadasPage";
+import { AlunoJornadasPage } from "./pages/access/AlunoJornadasPage";
+import { CalendarioPage } from "./pages/access/CalendarioPage";
+import { PessoasAutorizadasPage } from "./pages/access/PessoasAutorizadasPage";
+import { AutorizacoesPage } from "./pages/access/AutorizacoesPage";
+import { RestricoesPage } from "./pages/access/RestricoesPage";
+import { EquipamentosAccessPage } from "./pages/access/EquipamentosAccessPage";
+import { PaineisPage } from "./pages/access/PaineisPage";
+import { PermanenciaPage } from "./pages/access/PermanenciaPage";
+import { PresentesAgoraPage } from "./pages/access/PresentesAgoraPage";
+import { RelatoriosAccessPage } from "./pages/access/RelatoriosAccessPage";
+import { OcorrenciasPage } from "./pages/access/OcorrenciasPage";
+// ── Portal da Família (layout próprio, sem sidebar administrativa) ──
+import { PortalLayout } from "./layouts/PortalLayout";
+import { PortalHomePage } from "./pages/portal/PortalHomePage";
+import { PortalHistoricoPage } from "./pages/portal/PortalHistoricoPage";
+import { PortalAutorizacoesPage } from "./pages/portal/PortalAutorizacoesPage";
+import { PortalNotificacoesPage } from "./pages/portal/PortalNotificacoesPage";
 
 function ProtectedRoute({ children, requiredRoles }) {
   const { isAuthenticated, user } = useAuth();
@@ -91,6 +114,30 @@ export default function App() {
         <Route path="dispositivos" element={<DispositivosPage />} />
         {/* Controle de acesso */}
         <Route path="access/coordenacao" element={<CoordenacaoPage />} />
+        {/* Controle de Acesso — cadastros, permanência e relatórios (fatia H) */}
+        <Route path="access/portarias" element={<PortariasPage />} />
+        <Route path="access/zonas" element={<ZonasPage />} />
+        <Route path="access/salas" element={<SalasPage />} />
+        <Route path="access/turma-salas" element={<TurmaSalasPage />} />
+        <Route path="access/jornadas" element={<JornadasPage />} />
+        <Route path="access/aluno-jornadas" element={<AlunoJornadasPage />} />
+        <Route path="access/calendario" element={<CalendarioPage />} />
+        <Route
+          path="access/pessoas-autorizadas"
+          element={<PessoasAutorizadasPage />}
+        />
+        <Route path="access/autorizacoes" element={<AutorizacoesPage />} />
+        <Route path="access/restricoes" element={<RestricoesPage />} />
+        <Route
+          path="access/equipamentos"
+          element={<EquipamentosAccessPage />}
+        />
+        <Route path="access/paineis" element={<PaineisPage />} />
+        <Route path="access/permanencia" element={<PermanenciaPage />} />
+        <Route path="access/presentes-agora" element={<PresentesAgoraPage />} />
+        <Route path="access/relatorios" element={<RelatoriosAccessPage />} />
+        <Route path="access/ocorrencias" element={<OcorrenciasPage />} />
+
         {/* Sistema */}
         <Route path="usuarios" element={<UsuariosPage />} />
         <Route path="auditoria" element={<AuditoriaPage />} />
@@ -120,6 +167,21 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+      </Route>
+
+      {/* Portal da Família — layout próprio, sem sidebar administrativa (fatia H) */}
+      <Route
+        path="/portal"
+        element={
+          <ProtectedRoute>
+            <PortalLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<PortalHomePage />} />
+        <Route path="historico" element={<PortalHistoricoPage />} />
+        <Route path="autorizacoes" element={<PortalAutorizacoesPage />} />
+        <Route path="notificacoes" element={<PortalNotificacoesPage />} />
       </Route>
 
       {/* Catch all */}

@@ -1,0 +1,322 @@
+/* =========================================================
+   AlfaSchool — Controle de Acesso (cadastros, permanência,
+   relatórios e portal da família).
+   Prefixo .ac- para não colidir com o CSS global.
+   ========================================================= */
+
+/* ── Avisos ── */
+.ac-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-2);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+  margin-bottom: 0.85rem;
+}
+.ac-aviso-icone { margin-top: 2px; flex-shrink: 0; }
+.ac-aviso-titulo { display: block; margin-bottom: 2px; font-size: 13px; }
+.ac-aviso-texto { color: var(--color-text-2); }
+.ac-aviso-titulo + .ac-aviso-texto { color: var(--color-text-2); }
+.ac-aviso-info    { border-color: var(--color-info);    background: var(--color-info-dim); }
+.ac-aviso-info    .ac-aviso-icone { color: var(--color-info); }
+.ac-aviso-sucesso { border-color: var(--color-success); background: var(--color-success-dim); }
+.ac-aviso-sucesso .ac-aviso-icone { color: var(--color-success); }
+.ac-aviso-erro    { border-color: var(--color-danger);  background: var(--color-danger-dim); }
+.ac-aviso-erro    .ac-aviso-icone { color: var(--color-danger); }
+.ac-aviso-alerta  { border-color: var(--color-warning); background: var(--color-warning-dim); }
+.ac-aviso-alerta  .ac-aviso-icone { color: var(--color-warning); }
+.ac-aviso-dismiss { align-items: center; }
+.ac-aviso-x { margin-left: auto; }
+
+/* ── Chips de dias da semana ── */
+.ac-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.ac-chip {
+  position: relative;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-3);
+  color: var(--color-text-2);
+  font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.ac-chip:hover:not(:disabled) { border-color: var(--color-brand); color: var(--color-text); }
+.ac-chip.on {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+}
+.ac-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.ac-chip-idx { display: none; }
+.ac-chips-atalhos { display: flex; gap: 4px; margin-top: 6px; }
+
+/* ── Switch ── */
+.ac-switch-row {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-2);
+  cursor: pointer;
+}
+.ac-switch-row.is-disabled { opacity: 0.6; cursor: not-allowed; }
+.ac-switch { position: relative; display: inline-flex; flex-shrink: 0; margin-top: 2px; }
+.ac-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ac-switch-track {
+  width: 40px; height: 22px; border-radius: 999px;
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  display: inline-block; position: relative;
+  transition: var(--transition);
+}
+.ac-switch-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--color-text-2);
+  transition: var(--transition);
+}
+.ac-switch input:checked + .ac-switch-track { background: var(--color-brand); border-color: var(--color-brand); }
+.ac-switch input:checked + .ac-switch-track .ac-switch-thumb { left: 20px; background: #fff; }
+.ac-switch input:focus-visible + .ac-switch-track { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+.ac-switch-texto { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.ac-switch-texto small { color: var(--color-text-2); font-size: 12px; line-height: 1.4; }
+.ac-switch-lista { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* ── Estados fora de tabela ── */
+.ac-bloco-skeleton { display: flex; flex-direction: column; gap: 10px; padding: 1rem 0; }
+
+/* ── Token único ── */
+.ac-token-box {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px dashed var(--color-brand);
+  border-radius: var(--radius-md);
+  background: var(--color-brand-dim);
+}
+.ac-token-valor {
+  flex: 1; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 12.5px; word-break: break-all; color: var(--color-text);
+}
+
+/* ── Grade de calendário ── */
+.ac-cal-topo {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.9rem;
+}
+.ac-cal-mes { font-size: 16px; font-weight: 700; text-transform: capitalize; }
+.ac-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.ac-cal-dow {
+  text-align: center; font-size: 11px; font-weight: 700;
+  color: var(--color-text-2); text-transform: uppercase; padding-bottom: 4px;
+}
+.ac-cal-cell {
+  min-height: 78px; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-2);
+  padding: 6px; text-align: left;
+  display: flex; flex-direction: column; gap: 4px;
+  transition: var(--transition);
+}
+.ac-cal-cell:hover { border-color: var(--color-brand); }
+.ac-cal-cell.vazio { background: transparent; border-color: transparent; cursor: default; }
+.ac-cal-cell.hoje { box-shadow: inset 0 0 0 2px var(--color-brand); }
+.ac-cal-cell.selecionado { box-shadow: inset 0 0 0 2px var(--color-primary); }
+.ac-cal-num { font-size: 13px; font-weight: 700; color: var(--color-text); }
+.ac-cal-tag {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 2px 5px; border-radius: 4px; align-self: flex-start;
+  text-transform: uppercase;
+}
+.ac-cal-desc { font-size: 11px; color: var(--color-text-2); line-height: 1.3; }
+.ac-legenda { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 0.9rem; }
+.ac-legenda-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-2); }
+.ac-legenda-cor { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+.ac-tipo-LETIVO        { background: var(--color-info-dim);    color: var(--color-info); }
+.ac-tipo-FERIADO       { background: var(--color-danger-dim);  color: var(--color-danger); }
+.ac-tipo-RECESSO       { background: var(--color-warning-dim); color: var(--color-warning); }
+.ac-tipo-FACULTATIVO   { background: var(--color-bg-3);        color: var(--color-text-2); }
+.ac-tipo-SABADO_LETIVO { background: var(--color-success-dim); color: var(--color-success); }
+.ac-tipo-EVENTO        { background: var(--color-brand-dim);   color: var(--color-brand); }
+
+/* ── Cartão de apuração de permanência ── */
+.ac-apuracao {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-2);
+  overflow: hidden;
+}
+.ac-apuracao-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-border);
+}
+.ac-apuracao-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px; background: var(--color-border);
+}
+.ac-apuracao-item { background: var(--color-bg-2); padding: 0.9rem 1rem; }
+.ac-apuracao-rot { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-2); }
+.ac-apuracao-val { font-size: 21px; font-weight: 700; margin-top: 3px; color: var(--color-text); }
+.ac-faixa-excedente {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: var(--color-warning-dim);
+  border-top: 1px solid var(--color-warning);
+  color: var(--color-warning);
+  font-weight: 700; font-size: 13.5px;
+}
+.ac-faixa-ok {
+  background: var(--color-success-dim);
+  border-top-color: var(--color-success);
+  color: var(--color-success);
+}
+.ac-faixa-inconsistente {
+  background: var(--color-danger-dim);
+  border-top-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.ac-linha-inconsistente td { background: var(--color-danger-dim); }
+.ac-fora-totais { text-decoration: line-through; color: var(--color-text-2); }
+
+/* ── Barra de progresso ── */
+.ac-progress {
+  height: 10px; border-radius: 999px;
+  background: var(--color-bg-3);
+  overflow: hidden; border: 1px solid var(--color-border);
+}
+.ac-progress-bar { height: 100%; background: var(--color-brand); transition: width 0.4s ease; }
+.ac-progress-bar.excedeu { background: var(--color-warning); }
+.ac-progress-legenda {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--color-text-2); margin-top: 5px;
+}
+
+/* ── Blocos auxiliares ── */
+.ac-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; }
+.ac-kv-item { font-size: 13px; }
+.ac-kv-rot { display: block; font-size: 11.5px; color: var(--color-text-2); text-transform: uppercase; letter-spacing: 0.03em; }
+.ac-kv-val { font-weight: 600; color: var(--color-text); }
+
+.ac-subcard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-2);
+  padding: 0.85rem 1rem;
+}
+.ac-subcard + .ac-subcard { margin-top: 0.75rem; }
+.ac-subcard-titulo { font-size: 13px; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+
+.ac-ocupacao-lista { display: flex; flex-direction: column; gap: 6px; }
+.ac-ocupacao-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  padding: 6px 8px; border-radius: var(--radius-sm);
+  background: var(--color-bg-3); font-size: 12.5px;
+}
+.ac-ocupacao-item.conflito { background: var(--color-danger-dim); color: var(--color-danger); }
+
+.ac-grade-jornada { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ac-grade-jornada th, .ac-grade-jornada td {
+  padding: 6px 8px; border-bottom: 1px solid var(--color-border); text-align: left;
+}
+.ac-grade-jornada th { font-size: 11.5px; text-transform: uppercase; color: var(--color-text-2); letter-spacing: 0.03em; }
+.ac-grade-jornada input.form-input { padding: 5px 7px; font-size: 13px; }
+.ac-grade-jornada tr.nao-frequenta td:not(:first-child) { opacity: 0.45; }
+
+.ac-hist-lista { display: flex; flex-direction: column; gap: 0; }
+.ac-hist-item {
+  display: flex; gap: 0.7rem; padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border); font-size: 12.5px;
+}
+.ac-hist-item:last-child { border-bottom: none; }
+.ac-hist-quando { color: var(--color-text-2); white-space: nowrap; min-width: 118px; }
+
+.ac-linha-acoes { display: flex; gap: 4px; flex-wrap: wrap; }
+.ac-meta { font-size: 12px; color: var(--color-text-2); }
+.ac-mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 12.5px; }
+.ac-url-painel {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--color-bg-3); border-radius: var(--radius-sm);
+  padding: 5px 8px; font-size: 12px;
+}
+
+/* ── Portal da família ── */
+.ac-portal-shell { min-height: 100vh; background: var(--color-bg); color: var(--color-text); }
+.ac-portal-topo {
+  background: var(--color-bg-2);
+  border-bottom: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-brand);
+  position: sticky; top: 0; z-index: 50;
+}
+.ac-portal-topo-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: 0.8rem 1rem;
+}
+.ac-portal-marca { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.ac-portal-marca span { color: var(--color-brand); }
+.ac-portal-user { display: flex; align-items: center; gap: 0.6rem; font-size: 13px; }
+.ac-portal-nav {
+  max-width: 900px; margin: 0 auto;
+  display: flex; gap: 2px; padding: 0 1rem; overflow-x: auto;
+}
+.ac-portal-nav a {
+  padding: 0.6rem 0.9rem; font-size: 13.5px; font-weight: 600;
+  color: var(--color-text-2); border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.ac-portal-nav a.ativo { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+.ac-portal-main { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.ac-portal-titulo { font-size: 20px; font-weight: 700; margin-bottom: 0.25rem; }
+.ac-portal-sub { font-size: 13.5px; color: var(--color-text-2); margin-bottom: 1rem; }
+
+.ac-filho-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-2);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.ac-filho-head {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.9rem 1rem; border-bottom: 1px solid var(--color-border);
+}
+.ac-filho-nome { font-size: 15.5px; font-weight: 700; }
+.ac-filho-turma { font-size: 12.5px; color: var(--color-text-2); }
+.ac-filho-selo { margin-left: auto; }
+.ac-filho-body { padding: 0.9rem 1rem; }
+.ac-filho-sec-titulo {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--color-text-2); margin-bottom: 0.5rem;
+}
+.ac-eventos { display: flex; flex-direction: column; gap: 0.45rem; }
+.ac-evento {
+  display: flex; align-items: center; gap: 0.6rem; font-size: 13px;
+  padding: 0.4rem 0; border-bottom: 1px dashed var(--color-border);
+}
+.ac-evento:last-child { border-bottom: none; }
+.ac-evento-hora { font-weight: 700; min-width: 48px; }
+
+@media (max-width: 640px) {
+  .ac-apuracao-val { font-size: 18px; }
+  .ac-cal-cell { min-height: 58px; }
+  .ac-cal-desc { display: none; }
+}
+
+/* ── Impressão (lista de presentes na emergência) ── */
+@media print {
+  .sidebar, .header, .ac-no-print, .table-pagination, .filter-bar { display: none !important; }
+  .content-area, .page { padding: 0 !important; margin: 0 !important; }
+  .app-shell { display: block !important; }
+  .card, .table-wrapper { border: none !important; box-shadow: none !important; }
+  .data-table { font-size: 11px; }
+  body { background: #fff !important; color: #000 !important; }
+  .ac-print-cabecalho { display: block !important; margin-bottom: 8px; }
+}
+.ac-print-cabecalho { display: none; }
