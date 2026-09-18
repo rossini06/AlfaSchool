@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -246,7 +247,13 @@ public class NotificacaoWorker {
      * Varredura a cada 60s. Existe porque {@code @Async} nao sobrevive a um
      * restart: o que ficou PENDENTE em memoria volta por aqui.
      */
+    // A varredura roda em thread de scheduler, sem request e sem transacao.
+    // O TenantRepositoryAspect aplica o filtro de tenant do Hibernate e
+    // precisa de um EntityManager transacional: sem @Transactional aqui, a
+    // fila inteira falhava a cada 60s com "No EntityManager with actual
+    // transaction available".
     @Scheduled(fixedDelayString = "${app.access.notificacao.varredura-ms:60000}")
+    @Transactional
     public void varrer() {
         try {
             Instant agora = Instant.now();

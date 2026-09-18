@@ -7,6 +7,8 @@ import br.com.alfaschool.backend.domain.access.shared.TitularTipo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -27,7 +29,18 @@ public class RetiradaAcessoListener {
         this.retiradaService = retiradaService;
     }
 
+    /**
+     * REQUIRES_NEW e' obrigatorio aqui, nao e' preferencia.
+     *
+     * Um listener de AFTER_COMMIT roda quando a transacao que gravou o
+     * evento JA foi encerrada. Um @Transactional comum chamado deste ponto
+     * tenta aderir aquela transacao morta: o codigo executa, os logs dizem
+     * que deu certo e NADA e' persistido, em silencio. Foi assim que a
+     * permanencia e a fila de retirada calculavam tudo e nao gravavam
+     * linha nenhuma.
+     */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void aoRegistrarAcesso(AcessoRegistradoEvent evento) {
         try {
             if (evento.chegadaDeResponsavel()) {

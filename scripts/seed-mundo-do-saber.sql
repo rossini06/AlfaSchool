@@ -204,6 +204,52 @@ VALUES
  ('b1000000-0000-0000-0000-000000021003', @tenant, 'b1000000-0000-0000-0000-000000020003', 'TURMA',   'b1000000-0000-0000-0000-000000006002', @agora, @agora)
 ON DUPLICATE KEY UPDATE updated_at = @agora;
 
+-- ------------------------------------------------------- usuario da escola
+-- Sem um usuario no tenant da escola, nao ha como operar o cenario: o
+-- superadmin vive no tenant Master. A senha e' a mesma do superadmin
+-- (o hash e' copiado de la), entao NAO use este seed em producao.
+INSERT INTO roles (id, tenant_id, name, description, created_at, updated_at, deleted)
+VALUES ('b1000000-0000-0000-0000-000000023001', @tenant, 'SUPER_ADMIN', 'Administrador da escola (cenario de demonstracao)', @agora, @agora, FALSE)
+ON DUPLICATE KEY UPDATE name = VALUES(name), updated_at = @agora;
+
+INSERT INTO users (id, tenant_id, unit_id, name, email, password, active, locked, failed_attempts, must_change_password, created_at, updated_at, deleted)
+SELECT 'b1000000-0000-0000-0000-000000024001', @tenant, @unidade, 'Coordenacao Mundo do Saber',
+       'coordenacao@mundodosaber.com', u.password, TRUE, FALSE, 0, FALSE, @agora, @agora, FALSE
+FROM users u WHERE u.email = 'superadmin@alfaschool.com' LIMIT 1
+ON DUPLICATE KEY UPDATE name = VALUES(name), updated_at = @agora;
+
+INSERT IGNORE INTO user_roles (user_id, role_id)
+VALUES ('b1000000-0000-0000-0000-000000024001', 'b1000000-0000-0000-0000-000000023001');
+
+-- ------------------------------------------------------------ biometria
+-- O leitor facial identifica a pessoa por um id NUMERICO proprio
+-- (device_user_id), nao pelo UUID do sistema. Sem face cadastrada o
+-- equipamento nao tem como reconhecer ninguem, e o simulador recusa a
+-- simulacao — de proposito, porque e' exatamente o que aconteceria em campo.
+--
+-- A sequencia e' POR TENANT: usar o id global da pessoa faria duas escolas
+-- que compartilhassem um leitor corromperem os dados uma da outra.
+--
+-- base_legal e consentimento sao obrigatorios para exportar a face ao
+-- equipamento. Dado biometrico de crianca e' sensivel com regime reforcado
+-- (LGPD Art. 11 e 14): aqui o consentimento e' ficticio, de laboratorio.
+INSERT INTO acc_device_user_seq (tenant_id, proximo_id)
+VALUES (@tenant, 101)
+ON DUPLICATE KEY UPDATE proximo_id = GREATEST(proximo_id, 101);
+
+INSERT INTO acc_faces (id, tenant_id, titular_tipo, titular_id, foto_key, device_user_id,
+                       base_legal, consentimento_obtido, consentimento_em, consentimento_versao,
+                       consentimento_origem, consentimento_por, ativo, created_at, updated_at, deleted)
+VALUES
+ ('b1000000-0000-0000-0000-000000025001', @tenant, 'ALUNO',      'b1000000-0000-0000-0000-000000012001', 'demo/aluno-pedro.jpg',  1, 'CONSENTIMENTO_RESPONSAVEL', TRUE, @agora, '1.0', 'SECRETARIA', 'Carlos Silva',     TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025002', @tenant, 'ALUNO',      'b1000000-0000-0000-0000-000000012002', 'demo/aluno-ana.jpg',    2, 'CONSENTIMENTO_RESPONSAVEL', TRUE, @agora, '1.0', 'SECRETARIA', 'Mariana Oliveira', TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025003', @tenant, 'ALUNO',      'b1000000-0000-0000-0000-000000012003', 'demo/aluno-lucas.jpg',  3, 'CONSENTIMENTO_RESPONSAVEL', TRUE, @agora, '1.0', 'SECRETARIA', 'Roberto Santos',   TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025011', @tenant, 'AUTORIZADA', 'b1000000-0000-0000-0000-000000017001', 'demo/resp-carlos.jpg',  11, 'CONSENTIMENTO', TRUE, @agora, '1.0', 'PORTARIA', 'Carlos Silva',     TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025012', @tenant, 'AUTORIZADA', 'b1000000-0000-0000-0000-000000017002', 'demo/resp-mariana.jpg', 12, 'CONSENTIMENTO', TRUE, @agora, '1.0', 'PORTARIA', 'Mariana Oliveira', TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025013', @tenant, 'AUTORIZADA', 'b1000000-0000-0000-0000-000000017003', 'demo/resp-roberto.jpg', 13, 'CONSENTIMENTO', TRUE, @agora, '1.0', 'PORTARIA', 'Roberto Santos',   TRUE, @agora, @agora, FALSE),
+ ('b1000000-0000-0000-0000-000000025014', @tenant, 'AUTORIZADA', 'b1000000-0000-0000-0000-000000017004', 'demo/resp-maria.jpg',   14, 'CONSENTIMENTO', TRUE, @agora, '1.0', 'PORTARIA', 'Maria Silva',      TRUE, @agora, @agora, FALSE)
+ON DUPLICATE KEY UPDATE foto_key = VALUES(foto_key), updated_at = @agora;
+
 SELECT 'Cenario Mundo do Saber carregado.' AS status;
 SELECT (SELECT COUNT(*) FROM acc_portarias WHERE tenant_id = @tenant) AS portarias,
        (SELECT COUNT(*) FROM dispositivos  WHERE tenant_id = @tenant) AS leitores,
