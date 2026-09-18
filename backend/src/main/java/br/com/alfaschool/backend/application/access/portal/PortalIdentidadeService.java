@@ -30,20 +30,19 @@ import java.util.UUID;
  * da escola — horario de entrada, horario de saida, quem busca. E' o pior
  * vazamento possivel neste produto.
  *
- * <h2>LIMITACAO CONHECIDA: nao existe vinculo user -> responsavel</h2>
- * O schema atual nao tem coluna ligando {@code users} a {@code responsaveis}
- * (nem {@code users.responsavel_id}, nem {@code responsaveis.user_id}). Enquanto
- * ela nao existir, casamos pelo E-MAIL do usuario autenticado contra
- * {@code responsaveis.email}. Consequencias, documentadas de proposito:
- * <ul>
- *   <li>Responsavel sem e-mail cadastrado nao ve aluno nenhum (falha fechada,
- *       que e' o lado certo de errar).</li>
- *   <li>Dois responsaveis com o MESMO e-mail no mesmo tenant enxergam os alunos
- *       um do outro. Na pratica acontece com casais que compartilham caixa —
- *       aceitavel, mas nao e' garantia forte.</li>
- *   <li>Trocar o e-mail do responsavel no cadastro muda o que ele enxerga.</li>
- * </ul>
- * A correcao definitiva e' uma FK {@code responsaveis.user_id}. Ver relatorio.
+ * <h2>Como o vinculo e' resolvido</h2>
+ * Por ordem, e a primeira que responder decide:
+ * <ol>
+ *   <li><b>{@code responsaveis.user_id}</b> (V44) — o vinculo real, por id.
+ *       Quando existe, NADA mais e' consultado.</li>
+ *   <li><b>E-mail</b>, apenas para a base ainda nao migrada, e somente
+ *       quando o e-mail aponta para UM unico responsavel.</li>
+ * </ol>
+ *
+ * <p>E-mail que casa com mais de um responsavel e' <b>recusado</b>, nao
+ * somado. Antes da V44 esse caso — casal que divide a mesma caixa — fazia
+ * cada um enxergar os filhos do outro. Somar era o comportamento errado:
+ * na duvida sobre quem e' a pessoa, o portal nao mostra crianca nenhuma.
  */
 @Service
 public class PortalIdentidadeService {
@@ -91,10 +90,32 @@ public class PortalIdentidadeService {
                     "Usuário sem e-mail cadastrado não pode acessar o portal da família");
         }
 
-        Set<UUID> responsavelIds = buscarResponsavelIdsPorEmail(tenantId, email);
+        // 1. Vinculo por id. Existindo, e' a palavra final.
+        Set<UUID> responsavelIds = buscarResponsavelIdsPorUsuario(tenantId, usuario.userId());
+
+        // 2. So' entao o e-mail, para a base ainda nao migrada.
+        if (responsavelIds.isEmpty()) {
+            Set<UUID> porEmail = buscarResponsavelIdsPorEmail(tenantId, email);
+            if (porEmail.size() > 1) {
+                // Ambiguo: mais de um responsavel com este e-mail. Somar os
+                // dois faria cada um enxergar os filhos do outro.
+                log.warn("E-mail {} casa com {} responsaveis no tenant {}. Portal recusado ate que "
+                        + "responsaveis.user_id seja preenchido para cada um.",
+                        email, porEmail.size(), tenantId);
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Este e-mail está cadastrado para mais de um responsável. "
+                      + "Peça à secretaria para vincular o seu acesso ao seu cadastro.");
+            }
+            responsavelIds = porEmail;
+            if (!responsavelIds.isEmpty()) {
+                log.info("Usuario {} entrou no portal pelo e-mail, sem vinculo por id. "
+                        + "Preencha responsaveis.user_id para tornar o vinculo estavel.", usuario.userId());
+            }
+        }
+
         if (responsavelIds.isEmpty()) {
             // Falha fechada: sem vinculo, sem portal.
-            log.info("Usuario {} sem responsavel correspondente por e-mail no tenant {}", usuario.userId(), tenantId);
+            log.info("Usuario {} sem responsavel correspondente no tenant {}", usuario.userId(), tenantId);
             return new PortalIdentidade(tenantId, usuario.userId(), email, Set.of(), Set.of());
         }
 
@@ -114,6 +135,22 @@ public class PortalIdentidadeService {
             log.warn("Acesso negado no portal: usuario {} tentou ver aluno {}", identidade.userId(), alunoId);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado para este responsável");
         }
+    }
+
+    /** O vinculo real (V44). Sem ambiguidade possivel: user_id e' unico. */
+    private Set<UUID> buscarResponsavelIdsPorUsuario(UUID tenantId, UUID userId) {
+        @SuppressWarnings("unchecked")
+        List<String> ids = entityManager.createNativeQuery("""
+                        SELECT CAST(r.id AS CHAR(36))
+                        FROM responsaveis r
+                        WHERE r.tenant_id = :tenantId
+                          AND r.user_id = :userId
+                          AND r.deleted = FALSE
+                        """)
+                .setParameter("tenantId", tenantId.toString())
+                .setParameter("userId", userId.toString())
+                .getResultList();
+        return paraUuids(ids);
     }
 
     private Set<UUID> buscarResponsavelIdsPorEmail(UUID tenantId, String email) {

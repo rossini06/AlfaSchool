@@ -71,6 +71,7 @@ api() {
     -e MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-alfaschool123}" \
     -e APP_SECRET_KEY="${APP_SECRET_KEY:-alfaschool-dev-secret-key-trocar-em-producao-32+}" \
     -e ACCESS_SIMULADOR="${ACCESS_SIMULADOR:-true}" \
+    -e CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:$PORTA_WEB,http://localhost:$PORTA,http://localhost:$PORTA_REMOTA,http://127.0.0.1:$PORTA_WEB,http://127.0.0.1:$PORTA_REMOTA}" \
     "$MAVEN_IMG" java -jar "$JAR" >/dev/null
 
   echo -n ">> aguardando a api"

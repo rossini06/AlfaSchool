@@ -9,6 +9,22 @@ import java.util.UUID;
 @Table(name = "responsaveis")
 public class Responsavel extends BaseEntity {
 
+    /**
+     * Usuario que representa este responsavel no portal da familia (V44).
+     *
+     * Nulo enquanto o acesso nao foi vinculado — nesse caso o portal ainda
+     * cai no casamento por e-mail, que so' vale quando o e-mail aponta para
+     * um unico responsavel. Preencher esta coluna e' o que torna o vinculo
+     * estavel: trocar o e-mail do cadastro deixa de mudar o que a pessoa
+     * enxerga.
+     */
+    @Column(name = "user_id")
+    private java.util.UUID userId;
+
+    public java.util.UUID getUserId() { return userId; }
+
+    public void setUserId(java.util.UUID userId) { this.userId = userId; }
+
     @Column(name = "aluno_id")
     private UUID alunoId;
 
