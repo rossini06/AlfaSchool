@@ -1,0 +1,46 @@
+{
+  "backend": {
+    "base_url": "https://SEU-DOMINIO-AQUI",
+    "client_id": "UUID-DA-UNIDADE-AQUI",
+    "username": "PREENCHER",
+    "password": "PREENCHER",
+    "verify_ssl": true
+  },
+  "devices": [
+    {
+      "id": "1",
+      "nome": "PORTARIA",
+      "host": "192.168.1.100",
+      "port": 80,
+      "username": "admin",
+      "password": "PREENCHER",
+      "modelo": "controlid_idface",
+      "door_id": 1
+    }
+  ],
+  "intervalos": {
+    "heartbeat_s": 5,
+    "eventos_s": 5,
+    "fila_s": 15,
+    "pessoas_s": 30,
+    "tarefas_s": 10
+  },
+  "fila": {
+    "lote": 50,
+    "retencao_horas": 72,
+    "backoff_base_s": 15,
+    "backoff_teto_s": 900
+  },
+  "timeouts": {
+    "backend_s": 30,
+    "dispositivo_s": 8
+  },
+  "dispositivo_sessao_ttl_s": 300,
+  "eventos_lote": 200,
+  "log": {
+    "nivel": "INFO",
+    "arquivo": "alfasync.log",
+    "max_bytes": 5242880,
+    "backups": 5
+  }
+}

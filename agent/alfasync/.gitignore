@@ -1,0 +1,9 @@
+# Credenciais e dados da maquina da escola: nunca versionados.
+config.json
+state.json
+event_queue.db
+event_queue.db-journal
+alfasync.log*
+__pycache__/
+*.pyc
+.pytest_cache/
