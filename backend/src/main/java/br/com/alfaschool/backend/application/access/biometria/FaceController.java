@@ -44,7 +44,8 @@ public class FaceController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
     public ResponseEntity<ApiResponse<FaceDto>> cadastrar(@Valid @RequestBody CadastroFaceRequest req) {
         AccFace face = service.cadastrar(tenant(), req);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -52,7 +53,8 @@ public class FaceController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
     public ResponseEntity<ApiResponse<List<FaceDto>>> listar(Pageable pageable) {
         List<FaceDto> lista = faces.findByTenantIdAndDeletedFalse(tenant(), pageable)
                 .getContent().stream().map(FaceDto::from).toList();
@@ -60,7 +62,8 @@ public class FaceController {
     }
 
     @GetMapping("/{id}/sincronizacoes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
     public ResponseEntity<ApiResponse<List<FaceSyncDto>>> sincronizacoes(@PathVariable UUID id) {
         List<FaceSyncDto> lista = sincronizacoes.findByTenantIdAndFaceId(tenant(), id)
                 .stream().map(FaceSyncDto::from).toList();
@@ -75,7 +78,8 @@ public class FaceController {
      * mostrar o motivo para a secretaria resolver.
      */
     @PostMapping("/{id}/sincronizar/{dispositivoId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
     public ResponseEntity<ApiResponse<FaceSyncDto>> sincronizar(@PathVariable UUID id,
                                                                 @PathVariable UUID dispositivoId) {
         try {
@@ -88,7 +92,8 @@ public class FaceController {
     }
 
     @DeleteMapping("/{id}/dispositivos/{dispositivoId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
     public ResponseEntity<ApiResponse<FaceSyncDto>> remover(@PathVariable UUID id,
                                                             @PathVariable UUID dispositivoId) {
         AccFaceSync sync = service.remover(tenant(), id, dispositivoId);

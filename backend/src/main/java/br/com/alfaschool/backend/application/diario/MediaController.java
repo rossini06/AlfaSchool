@@ -23,7 +23,7 @@ public class MediaController {
      * Calcula a média do aluno em uma disciplina específica.
      */
     @PostMapping("/calcular")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_LANCAR')")
     public ResponseEntity<ApiResponse<MediaResponse>> calcularMedia(
             @RequestParam UUID matriculaId,
             @RequestParam UUID disciplinaId,
@@ -36,7 +36,7 @@ public class MediaController {
      * Recalcula todas as médias de uma matrícula.
      */
     @PostMapping("/recalcular/{matriculaId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_LANCAR')")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> recalcularTodas(@PathVariable UUID matriculaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Médias recalculadas",
                 mediaService.recalcularTodasMedias(matriculaId)));
@@ -46,7 +46,7 @@ public class MediaController {
      * Lista médias de uma turma/disciplina.
      */
     @GetMapping("/turma")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> listByTurma(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId) {
@@ -58,7 +58,7 @@ public class MediaController {
      * Lista médias de uma matrícula.
      */
     @GetMapping("/matricula/{matriculaId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<List<MediaResponse>>> listByMatricula(@PathVariable UUID matriculaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Médias da matrícula",
                 mediaService.listByMatricula(matriculaId)));

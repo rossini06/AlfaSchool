@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +43,21 @@ public class GlobalExceptionHandler {
      * Spring deixava estourar como erro generico e a API devolvia 500 para
      * o que e' claramente erro do cliente.
      */
+    /**
+     * Permissao insuficiente vira 403, nao 500.
+     *
+     * O accessDeniedHandler do SecurityConfig so' cobre o que o FILTRO
+     * barra. O que o @PreAuthorize nega acontece depois, ja' dentro do
+     * controller, e sem este tratamento estourava como erro generico: a
+     * tela dizia "erro interno" para o que e', na verdade, uma resposta
+     * correta do sistema.
+     */
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity<ApiResponse<Object>> handleAcessoNegado(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                ApiResponse.of(403, "Seu perfil não tem permissão para esta ação.", null));
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Object>> handleTipoInvalido(MethodArgumentTypeMismatchException ex) {
         String nome = ex.getName();

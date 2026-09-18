@@ -6,6 +6,7 @@ import br.com.alfaschool.backend.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ public class RoleController {
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PERFIS_GERIR')")
     public ResponseEntity<ApiResponse<RoleResponse>> create(@Valid @RequestBody CreateRoleRequest request) {
         RoleResponse response = roleApplicationService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)

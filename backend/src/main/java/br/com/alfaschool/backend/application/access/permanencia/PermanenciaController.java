@@ -27,7 +27,8 @@ public class PermanenciaController {
 
     /** Quem esta na unidade agora. */
     @GetMapping("/hoje")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
     public ResponseEntity<ApiResponse<Page<PresencaResponse>>> hoje(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(required = false) UUID turmaId,
@@ -40,7 +41,8 @@ public class PermanenciaController {
 
     /** Extrato diario do aluno, com os totais do periodo inteiro. */
     @GetMapping("/aluno/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
     public ResponseEntity<ApiResponse<ExtratoAlunoResponse>> extrato(
             @PathVariable UUID id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
@@ -53,7 +55,8 @@ public class PermanenciaController {
     }
 
     @GetMapping("/excedentes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
     public ResponseEntity<ApiResponse<Page<TotaisAlunoResponse>>> excedentes(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
@@ -67,7 +70,8 @@ public class PermanenciaController {
     }
 
     @GetMapping("/resumo")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
     public ResponseEntity<ApiResponse<ResumoPermanenciaResponse>> resumo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
@@ -79,7 +83,8 @@ public class PermanenciaController {
 
     /** Ajuste manual de par. Exige motivo e grava quem ajustou. */
     @PostMapping("/ajustes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_AJUSTAR')")
     public ResponseEntity<ApiResponse<PresencaResponse>> ajustar(@Valid @RequestBody AjusteParRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Ajuste aplicado com sucesso",
                 permanenciaService.ajustarPar(request)));
@@ -88,7 +93,8 @@ public class PermanenciaController {
     // ------------------------------------------------------------- fechamento
 
     @GetMapping("/fechamentos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
     public ResponseEntity<ApiResponse<Page<FechamentoResponse>>> listarFechamentos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -99,7 +105,7 @@ public class PermanenciaController {
 
     @PostMapping("/fechamentos")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and (hasRole('ROLE_ADMIN') or hasRole('ROLE_SUPER_ADMIN'))")
+            + "and hasAuthority('PERM_ACESSO_FECHAMENTO_GERIR')")
     public ResponseEntity<ApiResponse<FechamentoResponse>> fechar(@Valid @RequestBody FechamentoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Competência fechada com sucesso",
                 permanenciaService.fechar(request)));
@@ -111,7 +117,7 @@ public class PermanenciaController {
      */
     @PostMapping("/fechamentos/{id}/reabrir")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and (hasRole('ROLE_ADMIN') or hasRole('ROLE_SUPER_ADMIN'))")
+            + "and hasAuthority('PERM_ACESSO_FECHAMENTO_GERIR')")
     public ResponseEntity<ApiResponse<FechamentoResponse>> reabrir(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Competência reaberta com sucesso",
                 permanenciaService.reabrir(id)));
@@ -122,7 +128,7 @@ public class PermanenciaController {
     /** Recalculo administrativo de um periodo. Dia congelado nao e' tocado. */
     @PostMapping("/recalcular")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and (hasRole('ROLE_ADMIN') or hasRole('ROLE_SUPER_ADMIN'))")
+            + "and hasAuthority('PERM_ACESSO_PERMANENCIA_AJUSTAR')")
     public ResponseEntity<ApiResponse<RecalculoResponse>> recalcular(@Valid @RequestBody RecalculoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Recálculo concluído",
                 permanenciaService.recalcularPeriodo(request)));

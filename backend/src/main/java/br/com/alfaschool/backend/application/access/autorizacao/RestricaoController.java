@@ -36,7 +36,8 @@ public class RestricaoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
     public ResponseEntity<ApiResponse<Page<RestricaoResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -46,14 +47,16 @@ public class RestricaoController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
     public ResponseEntity<ApiResponse<List<RestricaoResponse>>> listarPorAluno(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Restrições do aluno listadas com sucesso",
                 restricaoService.listarPorAluno(alunoId)));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
     public ResponseEntity<ApiResponse<RestricaoResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Restrição encontrada", restricaoService.findById(id)));
     }
@@ -65,7 +68,7 @@ public class RestricaoController {
      */
     @GetMapping("/{id}/documento")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
     public ResponseEntity<ApiResponse<RestricaoDocumentoResponse>> documento(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Documento da restrição recuperado",
                 restricaoService.documento(id)));
@@ -73,7 +76,7 @@ public class RestricaoController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_GERIR')")
     public ResponseEntity<ApiResponse<RestricaoResponse>> create(@Valid @RequestBody RestricaoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Restrição registrada com sucesso", restricaoService.create(request)));
@@ -81,7 +84,7 @@ public class RestricaoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_GERIR')")
     public ResponseEntity<ApiResponse<RestricaoResponse>> update(@PathVariable UUID id,
                                                                   @Valid @RequestBody RestricaoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Restrição atualizada com sucesso",
@@ -90,7 +93,7 @@ public class RestricaoController {
 
     @PostMapping("/{id}/encerrar")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_GERIR')")
     public ResponseEntity<ApiResponse<RestricaoResponse>> encerrar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Restrição encerrada com sucesso",
                 restricaoService.encerrar(id)));
@@ -98,7 +101,7 @@ public class RestricaoController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         restricaoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Restrição removida com sucesso", null));

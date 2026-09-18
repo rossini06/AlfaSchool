@@ -27,7 +27,7 @@ public class TurmaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<?> list(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) UUID cursoId,
@@ -43,27 +43,27 @@ public class TurmaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<TurmaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Turma encontrada", turmaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_GERIR')")
     public ResponseEntity<ApiResponse<TurmaResponse>> create(@Valid @RequestBody TurmaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Turma criada com sucesso", turmaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_GERIR')")
     public ResponseEntity<ApiResponse<TurmaResponse>> update(@PathVariable UUID id,
                                                               @Valid @RequestBody TurmaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Turma atualizada com sucesso", turmaService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         turmaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Turma removida com sucesso", null));

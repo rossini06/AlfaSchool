@@ -32,19 +32,22 @@ public class NotificacaoTemplateController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<List<NotificacaoTemplateResponse>>> listar() {
         return ResponseEntity.ok(ApiResponse.of(200, "Templates listados com sucesso", service.listar()));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoTemplateResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Template encontrado", service.buscar(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoTemplateResponse>> criar(
             @Valid @RequestBody NotificacaoTemplateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,7 +55,8 @@ public class NotificacaoTemplateController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoTemplateResponse>> atualizar(
             @PathVariable UUID id, @Valid @RequestBody NotificacaoTemplateRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Template atualizado com sucesso",
@@ -60,7 +64,8 @@ public class NotificacaoTemplateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         service.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Template removido com sucesso", null));
@@ -68,7 +73,8 @@ public class NotificacaoTemplateController {
 
     /** Preview renderizado: mostra ao operador exatamente o que a familia vai ler. */
     @PostMapping("/preview")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<TemplatePreviewResponse>> preview(
             @RequestBody TemplatePreviewRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Preview gerado com sucesso", service.preview(request)));

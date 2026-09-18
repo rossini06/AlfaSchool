@@ -31,20 +31,23 @@ public class NotificacaoPreferenciaController {
     }
 
     @GetMapping("/titular/{titularId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_VER')")
     public ResponseEntity<ApiResponse<List<PreferenciaResponse>>> listarPorTitular(@PathVariable UUID titularId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Preferências listadas com sucesso",
                 service.listarPorTitular(titularId)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<PreferenciaResponse>> salvar(@Valid @RequestBody PreferenciaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Preferência salva com sucesso", service.salvar(request)));
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<PreferenciaResponse>> alternar(@PathVariable UUID id,
                                                                      @RequestParam boolean habilitado) {
         return ResponseEntity.ok(ApiResponse.of(200,
@@ -53,7 +56,8 @@ public class NotificacaoPreferenciaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         service.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Preferência removida com sucesso", null));

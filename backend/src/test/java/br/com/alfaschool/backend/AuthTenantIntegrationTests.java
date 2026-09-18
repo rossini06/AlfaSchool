@@ -90,12 +90,29 @@ class AuthTenantIntegrationTests {
         roleB.setDescription("Administrador");
         roleB = roleRepository.save(roleB);
 
+        // Os endpoints de usuario e de perfil exigem PERM_USUARIOS_* e
+        // PERM_PERFIS_GERIR. "ADMIN" e' um papel legado que nao esta no
+        // catalogo de perfis e por isso nao carrega permissao nenhuma: o
+        // admin do tenant e' o DIRETOR, e e' esse perfil que da o acesso.
+        Role diretorA = new Role();
+        diretorA.setTenantId(tenantA.getTenantId());
+        diretorA.setName("DIRETOR");
+        diretorA.setDescription("Diretor");
+        diretorA = roleRepository.save(diretorA);
+
+        Role diretorB = new Role();
+        diretorB.setTenantId(tenantB.getTenantId());
+        diretorB.setName("DIRETOR");
+        diretorB.setDescription("Diretor");
+        diretorB = roleRepository.save(diretorB);
+
         adminA = new UserAccount();
         adminA.setTenantId(tenantA.getTenantId());
         adminA.setName("Admin A");
         adminA.setEmail("admin@tenant.com");
         adminA.setPassword(passwordEncoder.encode("123456"));
         adminA.getRoles().add(roleA);
+        adminA.getRoles().add(diretorA);
         adminA = userRepository.save(adminA);
 
         adminB = new UserAccount();
@@ -104,6 +121,7 @@ class AuthTenantIntegrationTests {
         adminB.setEmail("admin@tenant.com");
         adminB.setPassword(passwordEncoder.encode("123456"));
         adminB.getRoles().add(roleB);
+        adminB.getRoles().add(diretorB);
         adminB = userRepository.save(adminB);
     }
 

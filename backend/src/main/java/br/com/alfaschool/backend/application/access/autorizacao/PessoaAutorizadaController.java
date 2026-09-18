@@ -34,7 +34,8 @@ public class PessoaAutorizadaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<Page<PessoaAutorizadaResponse>>> list(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -45,14 +46,16 @@ public class PessoaAutorizadaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<PessoaAutorizadaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Pessoa autorizada encontrada",
                 pessoaAutorizadaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_GERIR')")
     public ResponseEntity<ApiResponse<PessoaAutorizadaResponse>> create(
             @Valid @RequestBody PessoaAutorizadaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -61,7 +64,8 @@ public class PessoaAutorizadaController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_GERIR')")
     public ResponseEntity<ApiResponse<PessoaAutorizadaResponse>> update(
             @PathVariable UUID id, @Valid @RequestBody PessoaAutorizadaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Pessoa autorizada atualizada com sucesso",
@@ -69,7 +73,8 @@ public class PessoaAutorizadaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         pessoaAutorizadaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Pessoa autorizada removida com sucesso", null));

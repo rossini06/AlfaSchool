@@ -33,7 +33,8 @@ public class AutorizacaoConsultaController {
 
     /** Verificacao pontual: esta pessoa pode retirar este aluno agora? */
     @GetMapping("/verificar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<AutorizacaoPort.Veredito>> verificar(
             @RequestParam UUID alunoId,
             @RequestParam UUID pessoaAutorizadaId,
@@ -45,7 +46,8 @@ public class AutorizacaoConsultaController {
 
     /** Tela do aluno: quem pode busca-lo neste momento. */
     @GetMapping("/aluno/{alunoId}/quem-pode-retirar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<List<PessoaAutorizadaResponse>>> quemPodeRetirarAgora(
             @PathVariable UUID alunoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant momento) {
@@ -59,7 +61,8 @@ public class AutorizacaoConsultaController {
      * quais alunos ela pode retirar neste momento.
      */
     @GetMapping("/pessoa/{pessoaAutorizadaId}/alunos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<List<AlunoAutorizadoResponse>>> alunosQuePodeRetirar(
             @PathVariable UUID pessoaAutorizadaId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant momento) {

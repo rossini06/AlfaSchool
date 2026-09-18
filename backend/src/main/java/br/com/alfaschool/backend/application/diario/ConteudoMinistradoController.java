@@ -27,7 +27,7 @@ public class ConteudoMinistradoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<Page<ConteudoMinistradoResponse>>> list(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId,
@@ -39,7 +39,7 @@ public class ConteudoMinistradoController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<List<ConteudoMinistradoResponse>>> listAll(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId) {
@@ -48,14 +48,14 @@ public class ConteudoMinistradoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<ConteudoMinistradoResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Conteúdo ministrado",
                 conteudoMinistradoService.getById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<ConteudoMinistradoResponse>> create(
             @Valid @RequestBody ConteudoMinistradoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -64,7 +64,7 @@ public class ConteudoMinistradoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<ConteudoMinistradoResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody ConteudoMinistradoRequest request) {
@@ -73,7 +73,7 @@ public class ConteudoMinistradoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         conteudoMinistradoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Conteúdo removido", null));

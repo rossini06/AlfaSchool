@@ -26,7 +26,7 @@ public class UnitController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_VER')")
     public ResponseEntity<ApiResponse<Page<UnitResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -35,27 +35,27 @@ public class UnitController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_VER')")
     public ResponseEntity<ApiResponse<UnitResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Escola encontrada", unitService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_GERIR')")
     public ResponseEntity<ApiResponse<UnitResponse>> create(@Valid @RequestBody UnitRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Escola criada com sucesso", unitService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_GERIR')")
     public ResponseEntity<ApiResponse<UnitResponse>> update(@PathVariable UUID id,
                                                              @Valid @RequestBody UnitRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Escola atualizada com sucesso", unitService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         unitService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Escola removida com sucesso", null));

@@ -33,7 +33,8 @@ public class PortalVinculoController {
 
     /** Responsaveis do tenant que ainda nao tem acesso vinculado. */
     @GetMapping("/pendentes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_USUARIOS_GERIR')")
     public ResponseEntity<ApiResponse<Object>> pendentes() {
         return ResponseEntity.ok(ApiResponse.of(200, "Responsáveis sem acesso vinculado",
                 service.pendentes()));
@@ -41,7 +42,7 @@ public class PortalVinculoController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','SECRETARIA','COORDENACAO')")
+            + "and hasAuthority('PERM_USUARIOS_GERIR')")
     public ResponseEntity<ApiResponse<Object>> vincular(@Valid @RequestBody VincularRequest req) {
         service.vincular(req.responsavelId(), req.userId());
         return ResponseEntity.ok(ApiResponse.of(200, "Acesso vinculado ao responsável", null));
@@ -49,7 +50,7 @@ public class PortalVinculoController {
 
     @DeleteMapping("/{responsavelId}")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','SECRETARIA','COORDENACAO')")
+            + "and hasAuthority('PERM_USUARIOS_GERIR')")
     public ResponseEntity<ApiResponse<Object>> desvincular(@PathVariable UUID responsavelId) {
         service.desvincular(responsavelId);
         return ResponseEntity.ok(ApiResponse.of(200, "Acesso desvinculado", null));

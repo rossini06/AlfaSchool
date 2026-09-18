@@ -34,7 +34,8 @@ public class PortariaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Page<PortariaResponse>>> list(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "0") int page,
@@ -45,20 +46,23 @@ public class PortariaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PortariaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Portaria encontrada", portariaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PortariaResponse>> create(@Valid @RequestBody PortariaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Portaria criada com sucesso", portariaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PortariaResponse>> update(@PathVariable UUID id,
                                                                 @Valid @RequestBody PortariaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Portaria atualizada com sucesso",
@@ -66,7 +70,8 @@ public class PortariaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         portariaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Portaria removida com sucesso", null));

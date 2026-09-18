@@ -52,7 +52,8 @@ public class CalendarioController {
     // ---------------------------- calendarios ----------------------------
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<Page<CalendarioResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -62,27 +63,31 @@ public class CalendarioController {
     }
 
     @GetMapping("/ano/{ano}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<List<CalendarioResponse>>> listByAno(@PathVariable Integer ano) {
         return ResponseEntity.ok(ApiResponse.of(200, "Calendarios do ano listados com sucesso",
                 calendarioService.listByAno(ano)));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Calendario encontrado", calendarioService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioResponse>> create(@Valid @RequestBody CalendarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Calendario criado com sucesso", calendarioService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioResponse>> update(@PathVariable UUID id,
                                                                   @Valid @RequestBody CalendarioRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Calendario atualizado com sucesso",
@@ -90,7 +95,8 @@ public class CalendarioController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         calendarioService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Calendario removido com sucesso", null));
@@ -99,14 +105,16 @@ public class CalendarioController {
     // ------------------------------- dias --------------------------------
 
     @GetMapping("/{id}/dias")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<List<CalendarioDiaResponse>>> listDias(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dias do calendario listados com sucesso",
                 calendarioDiaService.listDias(id)));
     }
 
     @PostMapping("/{id}/dias")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioDiaResponse>> criarDia(@PathVariable UUID id,
                                                                        @Valid @RequestBody CalendarioDiaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -115,7 +123,8 @@ public class CalendarioController {
 
     /** Lancamento em lote: recesso, semana de provas, ponte de feriado. */
     @PostMapping("/{id}/dias/intervalo")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<List<CalendarioDiaResponse>>> lancarIntervalo(
             @PathVariable UUID id, @Valid @RequestBody IntervaloDiasRequest request) {
         List<CalendarioDiaResponse> dias = calendarioDiaService.lancarIntervalo(id, request);
@@ -125,7 +134,8 @@ public class CalendarioController {
 
     /** Grade do mes para a tela, com os dias nao lancados ja resolvidos. */
     @GetMapping("/{id}/mes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioMesResponse>> mes(@PathVariable UUID id,
                                                                   @RequestParam int ano,
                                                                   @RequestParam int mes) {
@@ -134,13 +144,15 @@ public class CalendarioController {
     }
 
     @GetMapping("/dias/{diaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioDiaResponse>> findDia(@PathVariable UUID diaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dia encontrado", calendarioDiaService.findDia(diaId)));
     }
 
     @PutMapping("/dias/{diaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<CalendarioDiaResponse>> updateDia(@PathVariable UUID diaId,
                                                                         @Valid @RequestBody CalendarioDiaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dia atualizado com sucesso",
@@ -148,7 +160,8 @@ public class CalendarioController {
     }
 
     @DeleteMapping("/dias/{diaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<Void>> deleteDia(@PathVariable UUID diaId) {
         calendarioDiaService.deleteDia(diaId);
         return ResponseEntity.ok(ApiResponse.of(200, "Dia removido com sucesso", null));
@@ -158,7 +171,8 @@ public class CalendarioController {
 
     /** Mesma regra que a apuracao de permanencia usa, exposta para a tela. */
     @GetMapping("/dia-letivo")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_CALENDARIO_GERIR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> ehDiaLetivo(
             @RequestParam(required = false) UUID unitId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {

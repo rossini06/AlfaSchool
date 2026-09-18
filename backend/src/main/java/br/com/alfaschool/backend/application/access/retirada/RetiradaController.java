@@ -44,7 +44,8 @@ public class RetiradaController {
     // ---------------------------------------------------------------
 
     @GetMapping("/fila")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<List<RetiradaFilaItem>>> fila(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(required = false) UUID turmaId,
@@ -59,7 +60,8 @@ public class RetiradaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<RetiradaDetalheResponse>> detalhe(@PathVariable UUID id) {
         UUID tenantId = ContextoAcesso.tenantObrigatorio();
         return ResponseEntity.ok(ApiResponse.of(200, "Retirada encontrada",
@@ -67,7 +69,8 @@ public class RetiradaController {
     }
 
     @GetMapping("/historico")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<List<RetiradaFilaItem>>> historico(
             @RequestParam(required = false) UUID alunoId,
             @RequestParam(required = false) Instant inicio,
@@ -82,7 +85,8 @@ public class RetiradaController {
     // ---------------------------------------------------------------
 
     @PostMapping("/manual")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_MANUAL')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> abrirManual(
             @Valid @RequestBody RetiradaManualRequest request,
             HttpServletRequest http) {
@@ -93,14 +97,16 @@ public class RetiradaController {
     }
 
     @PostMapping("/{id}/preparar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_OPERAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> preparar(@PathVariable UUID id, HttpServletRequest http) {
         return ResponseEntity.ok(ApiResponse.of(200, "Retirada em preparo",
                 RetiradaResponse.from(retiradaService.preparar(id, ContextoAcesso.ipDaRequisicao(http)))));
     }
 
     @PostMapping("/{id}/pronto")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_OPERAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> pronto(@PathVariable UUID id, HttpServletRequest http) {
         return ResponseEntity.ok(ApiResponse.of(200, "Aluno pronto para retirada",
                 RetiradaResponse.from(retiradaService.pronto(id, ContextoAcesso.ipDaRequisicao(http)))));
@@ -113,7 +119,8 @@ public class RetiradaController {
      * POST /{id}/registrar-saida.
      */
     @PostMapping("/{id}/entregar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_ENTREGAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> entregar(@PathVariable UUID id,
                                                                   @RequestBody(required = false) EntregaRequest request,
                                                                   HttpServletRequest http) {
@@ -122,7 +129,8 @@ public class RetiradaController {
     }
 
     @PostMapping("/{id}/cancelar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_OPERAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> cancelar(@PathVariable UUID id,
                                                                    @Valid @RequestBody MotivoRequest request,
                                                                    HttpServletRequest http) {
@@ -131,7 +139,8 @@ public class RetiradaController {
     }
 
     @PostMapping("/{id}/negar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_OPERAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> negar(@PathVariable UUID id,
                                                                 @Valid @RequestBody MotivoRequest request,
                                                                 HttpServletRequest http) {
@@ -147,7 +156,8 @@ public class RetiradaController {
      * fechamento de permanencia para o mesmo aluno.
      */
     @PostMapping("/{id}/registrar-saida")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_RETIRADA_OPERAR')")
     public ResponseEntity<ApiResponse<RetiradaResponse>> registrarSaida(
             @PathVariable UUID id,
             @RequestBody(required = false) RegistrarSaidaRequest request,

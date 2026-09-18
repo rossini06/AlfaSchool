@@ -26,7 +26,7 @@ public class DispositivoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Page<DispositivoResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -35,40 +35,40 @@ public class DispositivoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<DispositivoResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivo encontrado", dispositivoService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<DispositivoResponse>> create(@Valid @RequestBody DispositivoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Dispositivo criado com sucesso", dispositivoService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<DispositivoResponse>> update(@PathVariable UUID id,
                                                                     @Valid @RequestBody DispositivoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivo atualizado com sucesso", dispositivoService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         dispositivoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivo removido com sucesso", null));
     }
 
     @PostMapping("/{id}/ping")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<DispositivoResponse>> ping(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Ping registrado com sucesso", dispositivoService.ping(id)));
     }
 
     @PostMapping("/{id}/toggle")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<DispositivoResponse>> toggle(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Status do dispositivo alterado com sucesso", dispositivoService.toggle(id)));
     }

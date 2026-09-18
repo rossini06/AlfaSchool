@@ -31,7 +31,7 @@ public class AuditController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_AUDITORIA_VER')")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> list(
             @RequestParam(required = false) String modulo,
             @RequestParam(required = false) String acao,

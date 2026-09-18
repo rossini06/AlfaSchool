@@ -37,7 +37,8 @@ public class OcorrenciaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_VER')")
     public ResponseEntity<ApiResponse<Page<OcorrenciaResponse>>> listar(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(required = false) TipoOcorrencia tipo,
@@ -51,20 +52,23 @@ public class OcorrenciaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_VER')")
     public ResponseEntity<ApiResponse<OcorrenciaResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencia encontrada", ocorrenciaService.buscar(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_TRATAR')")
     public ResponseEntity<ApiResponse<OcorrenciaResponse>> criar(@Valid @RequestBody OcorrenciaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Ocorrencia registrada com sucesso", ocorrenciaService.criar(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_TRATAR')")
     public ResponseEntity<ApiResponse<OcorrenciaResponse>> atualizar(@PathVariable UUID id,
                                                                       @Valid @RequestBody OcorrenciaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencia atualizada com sucesso",
@@ -72,7 +76,8 @@ public class OcorrenciaController {
     }
 
     @PostMapping("/{id}/tratar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_TRATAR')")
     public ResponseEntity<ApiResponse<OcorrenciaResponse>> tratar(@PathVariable UUID id,
                                                                    @Valid @RequestBody TratativaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Tratativa registrada com sucesso",
@@ -80,13 +85,15 @@ public class OcorrenciaController {
     }
 
     @PostMapping("/{id}/fechar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_TRATAR')")
     public ResponseEntity<ApiResponse<OcorrenciaResponse>> fechar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencia fechada com sucesso", ocorrenciaService.fechar(id)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_OCORRENCIAS_TRATAR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         ocorrenciaService.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencia removida com sucesso", null));

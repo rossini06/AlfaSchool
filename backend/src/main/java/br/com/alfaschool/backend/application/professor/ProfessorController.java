@@ -25,7 +25,7 @@ public class ProfessorController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PROFESSORES_VER')")
     public ResponseEntity<ApiResponse<Page<ProfessorResponse>>> list(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -35,27 +35,27 @@ public class ProfessorController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PROFESSORES_VER')")
     public ResponseEntity<ApiResponse<ProfessorResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Professor encontrado", professorService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PROFESSORES_GERIR')")
     public ResponseEntity<ApiResponse<ProfessorResponse>> create(@Valid @RequestBody ProfessorRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Professor criado com sucesso", professorService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PROFESSORES_GERIR')")
     public ResponseEntity<ApiResponse<ProfessorResponse>> update(@PathVariable UUID id,
             @Valid @RequestBody ProfessorRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Professor atualizado", professorService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PROFESSORES_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         professorService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Professor removido", null));

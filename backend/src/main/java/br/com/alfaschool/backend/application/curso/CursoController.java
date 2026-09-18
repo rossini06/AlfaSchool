@@ -26,7 +26,7 @@ public class CursoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<Page<CursoResponse>>> list(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -36,27 +36,27 @@ public class CursoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<CursoResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Curso encontrado", cursoService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<CursoResponse>> create(@Valid @RequestBody CursoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Curso criado com sucesso", cursoService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<CursoResponse>> update(@PathVariable UUID id,
                                                               @Valid @RequestBody CursoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Curso atualizado com sucesso", cursoService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         cursoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Curso removido com sucesso", null));

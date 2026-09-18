@@ -29,7 +29,7 @@ public class FinanceiroController {
     // ─── Planos ───────────────────────────────────────────────────────────────
 
     @GetMapping("/planos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_VER')")
     public ResponseEntity<ApiResponse<Page<PlanoFinanceiroResponse>>> listPlanos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -38,13 +38,16 @@ public class FinanceiroController {
     }
 
     @GetMapping("/planos/ativos")
-    @PreAuthorize("isAuthenticated()")
+    // Quem matricula precisa escolher o plano, e secretaria nao tem
+    // FINANCEIRO_VER — sem esta segunda via a tela de matricula tomaria 403.
+    @PreAuthorize("isAuthenticated() and (hasAuthority('PERM_FINANCEIRO_VER')"
+            + " or hasAuthority('PERM_MATRICULAS_GERIR'))")
     public ResponseEntity<ApiResponse<List<PlanoFinanceiroResponse>>> listPlanosAtivos() {
         return ResponseEntity.ok(ApiResponse.of(200, "Planos ativos", financeiroService.listPlanosAtivos()));
     }
 
     @PostMapping("/planos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<PlanoFinanceiroResponse>> createPlano(
             @Valid @RequestBody PlanoFinanceiroRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,14 +55,14 @@ public class FinanceiroController {
     }
 
     @PutMapping("/planos/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<PlanoFinanceiroResponse>> updatePlano(@PathVariable UUID id,
             @Valid @RequestBody PlanoFinanceiroRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Plano atualizado", financeiroService.updatePlano(id, request)));
     }
 
     @DeleteMapping("/planos/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<Void>> deletePlano(@PathVariable UUID id) {
         financeiroService.deletePlano(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Plano removido", null));
@@ -68,7 +71,7 @@ public class FinanceiroController {
     // ─── Contratos ────────────────────────────────────────────────────────────
 
     @GetMapping("/contratos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_VER')")
     public ResponseEntity<ApiResponse<Page<ContratoResponse>>> listContratos(
             @RequestParam(required = false) UUID alunoId,
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +86,7 @@ public class FinanceiroController {
     }
 
     @PostMapping("/contratos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<ContratoResponse>> createContrato(
             @Valid @RequestBody ContratoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -91,7 +94,7 @@ public class FinanceiroController {
     }
 
     @PatchMapping("/contratos/{id}/encerrar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<ContratoResponse>> encerrarContrato(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Contrato encerrado", financeiroService.encerrarContrato(id)));
     }
@@ -99,7 +102,7 @@ public class FinanceiroController {
     // ─── Cobranças ────────────────────────────────────────────────────────────
 
     @GetMapping("/cobrancas")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_VER')")
     public ResponseEntity<ApiResponse<Page<CobrancaResponse>>> listCobrancas(
             @RequestParam(required = false) UUID alunoId,
             @RequestParam(defaultValue = "0") int page,
@@ -114,7 +117,7 @@ public class FinanceiroController {
     }
 
     @PatchMapping("/cobrancas/{id}/pagar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_FINANCEIRO_GERIR')")
     public ResponseEntity<ApiResponse<CobrancaResponse>> registrarPagamento(
             @PathVariable UUID id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataPagamento) {

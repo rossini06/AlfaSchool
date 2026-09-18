@@ -26,13 +26,13 @@ public class FrequenciaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<List<FrequenciaResponse>>> listByAluno(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Frequências do aluno", frequenciaService.listByAluno(alunoId)));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<List<FrequenciaResponse>>> listByTurma(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId,
@@ -43,7 +43,7 @@ public class FrequenciaController {
     }
 
     @GetMapping("/diario")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<List<FrequenciaResponse>>> listByDia(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId,
@@ -53,14 +53,14 @@ public class FrequenciaController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<FrequenciaResponse>> registrar(@Valid @RequestBody FrequenciaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Frequência registrada", frequenciaService.registrar(request)));
     }
 
     @PostMapping("/lote")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<List<FrequenciaResponse>>> registrarLote(
             @Valid @RequestBody FrequenciaLoteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -68,7 +68,7 @@ public class FrequenciaController {
     }
 
     @PostMapping("/marcar-todos-presentes")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<List<FrequenciaResponse>>> marcarTodosPresentes(
             @RequestParam UUID turmaId,
             @RequestParam UUID disciplinaId,
@@ -79,14 +79,14 @@ public class FrequenciaController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<FrequenciaResponse>> atualizar(@PathVariable UUID id,
             @Valid @RequestBody FrequenciaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Frequência atualizada", frequenciaService.atualizar(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         frequenciaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Frequência removida", null));

@@ -33,14 +33,16 @@ public class AutorizacaoRetiradaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<List<AutorizacaoRetiradaResponse>>> listarPorAluno(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorizações do aluno listadas com sucesso",
                 autorizacaoRetiradaService.listarPorAluno(alunoId)));
     }
 
     @GetMapping("/pessoa/{pessoaAutorizadaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<List<AutorizacaoRetiradaResponse>>> listarPorPessoa(
             @PathVariable UUID pessoaAutorizadaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorizações da pessoa listadas com sucesso",
@@ -48,21 +50,24 @@ public class AutorizacaoRetiradaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorização encontrada",
                 autorizacaoRetiradaService.findById(id)));
     }
 
     @GetMapping("/{id}/historico")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<List<AutorizacaoHistoricoResponse>>> historico(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Histórico da autorização listado com sucesso",
                 autorizacaoRetiradaService.historico(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_GERIR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> criar(
             @Valid @RequestBody AutorizacaoRetiradaRequest request, HttpServletRequest http) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -71,7 +76,8 @@ public class AutorizacaoRetiradaController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_GERIR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> atualizar(
             @PathVariable UUID id, @Valid @RequestBody AutorizacaoRetiradaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorização atualizada com sucesso",
@@ -84,7 +90,7 @@ public class AutorizacaoRetiradaController {
      */
     @PostMapping("/{id}/aprovar")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO','SECRETARIA')")
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_APROVAR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> aprovar(
             @PathVariable UUID id,
             @RequestBody(required = false) MotivoOpcionalRequest request,
@@ -95,7 +101,8 @@ public class AutorizacaoRetiradaController {
     }
 
     @PostMapping("/{id}/suspender")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_APROVAR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> suspender(
             @PathVariable UUID id, @Valid @RequestBody MotivoRequest request, HttpServletRequest http) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorização suspensa com sucesso",
@@ -104,7 +111,7 @@ public class AutorizacaoRetiradaController {
 
     @PostMapping("/{id}/reativar")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAnyRole('ADMIN','SUPER_ADMIN','COORDENACAO','SECRETARIA')")
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_APROVAR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> reativar(
             @PathVariable UUID id,
             @RequestBody(required = false) MotivoOpcionalRequest request,
@@ -115,7 +122,8 @@ public class AutorizacaoRetiradaController {
     }
 
     @PostMapping("/{id}/revogar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_APROVAR')")
     public ResponseEntity<ApiResponse<AutorizacaoRetiradaResponse>> revogar(
             @PathVariable UUID id, @Valid @RequestBody MotivoRequest request, HttpServletRequest http) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorização revogada com sucesso",

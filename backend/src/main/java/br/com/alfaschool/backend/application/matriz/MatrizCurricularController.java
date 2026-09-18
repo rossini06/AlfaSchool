@@ -23,20 +23,20 @@ public class MatrizCurricularController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<List<MatrizResponse>>> listByCurso(@RequestParam UUID cursoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matriz curricular", matrizService.listByCurso(cursoId)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<MatrizResponse>> create(@Valid @RequestBody MatrizRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Disciplina vinculada ao curso", matrizService.create(request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         matrizService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Vínculo removido", null));

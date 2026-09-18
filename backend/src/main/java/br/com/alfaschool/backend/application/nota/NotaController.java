@@ -24,32 +24,32 @@ public class NotaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<List<NotaResponse>>> listByAluno(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Notas do aluno", notaService.listByAluno(alunoId)));
     }
 
     @GetMapping("/matricula/{matriculaId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<List<NotaResponse>>> listByMatricula(@PathVariable UUID matriculaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Notas da matrícula", notaService.listByMatricula(matriculaId)));
     }
 
     @GetMapping("/avaliacao/{avaliacaoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<List<NotaResponse>>> listByAvaliacao(@PathVariable UUID avaliacaoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Notas da avaliação", notaService.listByAvaliacao(avaliacaoId)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_LANCAR')")
     public ResponseEntity<ApiResponse<NotaResponse>> lancar(@Valid @RequestBody NotaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Nota lançada", notaService.lancar(request)));
     }
 
     @PatchMapping("/{id}/recuperacao")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_LANCAR')")
     public ResponseEntity<ApiResponse<NotaResponse>> lancarRecuperacao(
             @PathVariable UUID id,
             @RequestParam BigDecimal notaRecuperacao) {
@@ -58,7 +58,7 @@ public class NotaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_LANCAR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         notaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Nota removida", null));

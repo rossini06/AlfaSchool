@@ -30,7 +30,8 @@ public class JornadaController {
     // ---------------------------------------------------------------- jornadas
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Page<JornadaResponse>>> listar(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -41,20 +42,23 @@ public class JornadaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<JornadaResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Jornada encontrada", jornadaService.buscar(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<JornadaResponse>> criar(@Valid @RequestBody JornadaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Jornada criada com sucesso", jornadaService.criar(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<JornadaResponse>> atualizar(@PathVariable UUID id,
                                                                   @Valid @RequestBody JornadaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Jornada atualizada com sucesso",
@@ -62,7 +66,8 @@ public class JornadaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         jornadaService.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Jornada removida com sucesso", null));
@@ -71,7 +76,8 @@ public class JornadaController {
     // ---------------------------------------------------------------- vinculos
 
     @GetMapping("/vinculos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Page<AlunoJornadaResponse>>> listarVinculos(
             @RequestParam UUID alunoId,
             @RequestParam(defaultValue = "0") int page,
@@ -83,7 +89,8 @@ public class JornadaController {
 
     /** Qual jornada valia para o aluno naquela data — a base da apuracao. */
     @GetMapping("/vigente")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoJornadaResponse>> vigente(
             @RequestParam UUID alunoId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -94,7 +101,8 @@ public class JornadaController {
     }
 
     @PostMapping("/vinculos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoJornadaResponse>> vincular(
             @Valid @RequestBody AlunoJornadaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -102,7 +110,8 @@ public class JornadaController {
     }
 
     @PutMapping("/vinculos/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoJornadaResponse>> atualizarVinculo(
             @PathVariable UUID id, @Valid @RequestBody AlunoJornadaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Vínculo atualizado com sucesso",
@@ -110,7 +119,8 @@ public class JornadaController {
     }
 
     @DeleteMapping("/vinculos/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> removerVinculo(@PathVariable UUID id) {
         jornadaService.removerVinculo(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Vínculo removido com sucesso", null));
@@ -118,7 +128,8 @@ public class JornadaController {
 
     /** Matricular varios alunos no mesmo plano — "a turma toda no plano de 5h". */
     @PostMapping("/aplicar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<AplicarJornadaResponse>> aplicarEmLote(
             @Valid @RequestBody AplicarJornadaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Jornada aplicada aos alunos",
@@ -127,7 +138,8 @@ public class JornadaController {
 
     /** Alunos de uma turma, para montar o lote no front sem adivinhacao. */
     @GetMapping("/alunos-da-turma")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<List<UUID>>> alunosDaTurma(@RequestParam UUID turmaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Alunos da turma listados",
                 jornadaService.alunosDaTurma(turmaId)));
@@ -136,7 +148,8 @@ public class JornadaController {
     // ---------------------------------------------------------------- excecoes
 
     @GetMapping("/excecoes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<List<JornadaExcecaoResponse>>> listarExcecoes(
             @RequestParam UUID alunoId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
@@ -146,7 +159,8 @@ public class JornadaController {
     }
 
     @PostMapping("/excecoes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<JornadaExcecaoResponse>> salvarExcecao(
             @Valid @RequestBody JornadaExcecaoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Exceção registrada com sucesso",
@@ -154,7 +168,8 @@ public class JornadaController {
     }
 
     @DeleteMapping("/excecoes/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> removerExcecao(@PathVariable UUID id) {
         jornadaService.removerExcecao(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Exceção removida com sucesso", null));

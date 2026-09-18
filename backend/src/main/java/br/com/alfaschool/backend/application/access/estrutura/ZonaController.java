@@ -34,7 +34,8 @@ public class ZonaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Page<ZonaResponse>>> list(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "0") int page,
@@ -45,27 +46,31 @@ public class ZonaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<ZonaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Zona encontrada", zonaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<ZonaResponse>> create(@Valid @RequestBody ZonaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Zona criada com sucesso", zonaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<ZonaResponse>> update(@PathVariable UUID id,
                                                             @Valid @RequestBody ZonaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Zona atualizada com sucesso", zonaService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         zonaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Zona removida com sucesso", null));

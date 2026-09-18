@@ -22,7 +22,7 @@ public class BoletimController {
      * Gera o boletim completo de uma matrícula.
      */
     @GetMapping("/{matriculaId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_NOTAS_VER')")
     public ResponseEntity<ApiResponse<BoletimResponse>> gerarBoletim(
             @PathVariable UUID matriculaId,
             @RequestParam(required = false) String periodo) {

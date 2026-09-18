@@ -38,7 +38,8 @@ public class TurmaSalaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Page<TurmaSalaResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -48,14 +49,16 @@ public class TurmaSalaController {
     }
 
     @GetMapping("/turma/{turmaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<List<TurmaSalaResponse>>> listByTurma(@PathVariable UUID turmaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculos da turma listados com sucesso",
                 turmaSalaService.listByTurma(turmaId)));
     }
 
     @GetMapping("/sala/{salaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<List<TurmaSalaResponse>>> listBySala(@PathVariable UUID salaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculos da sala listados com sucesso",
                 turmaSalaService.listBySala(salaId)));
@@ -63,7 +66,8 @@ public class TurmaSalaController {
 
     /** Onde a turma esta no instante informado (ou agora, se nao informado). */
     @GetMapping("/turma/{turmaId}/sala-vigente")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<SalaVigenteResponse>> salaVigente(
             @PathVariable UUID turmaId,
             @RequestParam(required = false)
@@ -74,7 +78,8 @@ public class TurmaSalaController {
     }
 
     @GetMapping("/sala/{salaId}/turmas-no-momento")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<List<TurmaSalaResponse>>> turmasNaSala(
             @PathVariable UUID salaId,
             @RequestParam(required = false)
@@ -85,20 +90,23 @@ public class TurmaSalaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<TurmaSalaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculo encontrado", turmaSalaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<TurmaSalaResponse>> create(@Valid @RequestBody TurmaSalaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Vinculo turma-sala criado com sucesso", turmaSalaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<TurmaSalaResponse>> update(@PathVariable UUID id,
                                                                  @Valid @RequestBody TurmaSalaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculo turma-sala atualizado com sucesso",
@@ -106,7 +114,8 @@ public class TurmaSalaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         turmaSalaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculo turma-sala removido com sucesso", null));

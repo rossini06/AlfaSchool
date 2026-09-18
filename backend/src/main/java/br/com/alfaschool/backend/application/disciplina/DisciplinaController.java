@@ -26,7 +26,7 @@ public class DisciplinaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<Page<DisciplinaResponse>>> list(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -36,33 +36,33 @@ public class DisciplinaController {
     }
 
     @GetMapping("/ativas")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<List<DisciplinaResponse>>> listAtivas() {
         return ResponseEntity.ok(ApiResponse.of(200, "Disciplinas ativas", disciplinaService.listAtivas()));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_TURMAS_VER')")
     public ResponseEntity<ApiResponse<DisciplinaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Disciplina encontrada", disciplinaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<DisciplinaResponse>> create(@Valid @RequestBody DisciplinaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Disciplina criada", disciplinaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<DisciplinaResponse>> update(@PathVariable UUID id,
             @Valid @RequestBody DisciplinaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Disciplina atualizada", disciplinaService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_CURSOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         disciplinaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Disciplina removida", null));

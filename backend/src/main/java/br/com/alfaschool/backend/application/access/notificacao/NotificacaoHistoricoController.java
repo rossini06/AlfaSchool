@@ -36,7 +36,8 @@ public class NotificacaoHistoricoController {
     }
 
     @GetMapping("/historico")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_VER')")
     public ResponseEntity<ApiResponse<Page<EnvioResponse>>> historico(
             @RequestParam(required = false) CanalNotificacao canal,
             @RequestParam(required = false) EventoNotificacao evento,
@@ -52,19 +53,22 @@ public class NotificacaoHistoricoController {
     }
 
     @GetMapping("/historico/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_VER')")
     public ResponseEntity<ApiResponse<EnvioResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Envio encontrado", service.buscar(id)));
     }
 
     @PostMapping("/historico/{id}/reenviar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<EnvioResponse>> reenviar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Reenvio enfileirado com sucesso", service.reenviar(id)));
     }
 
     @PostMapping("/teste")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<EnvioResponse>> teste(@Valid @RequestBody TesteNotificacaoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Mensagem de teste enfileirada com sucesso",
                 service.teste(request)));

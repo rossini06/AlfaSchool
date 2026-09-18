@@ -27,7 +27,7 @@ public class AvaliacaoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<Page<AvaliacaoResponse>>> list(
             @RequestParam(required = false) UUID turmaId,
             @RequestParam(required = false) UUID disciplinaId,
@@ -54,27 +54,27 @@ public class AvaliacaoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_VER')")
     public ResponseEntity<ApiResponse<AvaliacaoResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Avaliação", avaliacaoService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<AvaliacaoResponse>> create(@Valid @RequestBody AvaliacaoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Avaliação criada", avaliacaoService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<AvaliacaoResponse>> update(@PathVariable UUID id,
             @Valid @RequestBody AvaliacaoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Avaliação atualizada", avaliacaoService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_DIARIO_LANCAR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         avaliacaoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Avaliação removida", null));

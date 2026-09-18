@@ -23,7 +23,7 @@ public class VinculoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_VER')")
     public ResponseEntity<ApiResponse<List<VinculoResponse>>> list(
             @RequestParam(required = false) UUID turmaId,
             @RequestParam(required = false) UUID professorId) {
@@ -34,14 +34,14 @@ public class VinculoController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<VinculoResponse>> create(@Valid @RequestBody VinculoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Vínculo criado", vinculoService.create(request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         vinculoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Vínculo removido", null));

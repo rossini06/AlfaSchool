@@ -31,19 +31,22 @@ public class NotificacaoConfigController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<List<NotificacaoConfigResponse>>> listar() {
         return ResponseEntity.ok(ApiResponse.of(200, "Configurações listadas com sucesso", service.listar()));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoConfigResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Configuração encontrada", service.buscar(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoConfigResponse>> criar(
             @Valid @RequestBody NotificacaoConfigRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -51,7 +54,8 @@ public class NotificacaoConfigController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<NotificacaoConfigResponse>> atualizar(
             @PathVariable UUID id, @Valid @RequestBody NotificacaoConfigRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Configuração atualizada com sucesso",
@@ -59,7 +63,8 @@ public class NotificacaoConfigController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_NOTIFICACOES_CONFIGURAR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         service.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Configuração removida com sucesso", null));

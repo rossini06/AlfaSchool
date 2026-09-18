@@ -53,7 +53,8 @@ public class PainelController {
     // ---------------------------------------------------------------
 
     @GetMapping("/coordenacao/resumo")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<ResumoCoordenacaoResponse>> resumoCoordenacao(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(required = false) Integer limiteEsperaMinutos) {
@@ -67,7 +68,8 @@ public class PainelController {
     // ---------------------------------------------------------------
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<Page<PainelResponse>>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -77,20 +79,23 @@ public class PainelController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<PainelResponse>> buscar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Painel encontrado", painelService.buscar(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PainelResponse>> criar(@Valid @RequestBody PainelRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Painel criado com sucesso", painelService.criar(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PainelResponse>> atualizar(@PathVariable UUID id,
                                                                   @Valid @RequestBody PainelRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Painel atualizado com sucesso",
@@ -98,7 +103,8 @@ public class PainelController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> remover(@PathVariable UUID id) {
         painelService.remover(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Painel removido com sucesso", null));
@@ -109,13 +115,15 @@ public class PainelController {
     // ---------------------------------------------------------------
 
     @GetMapping("/{id}/fontes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<List<PainelFonteResponse>>> fontes(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Fontes listadas com sucesso", painelService.fontes(id)));
     }
 
     @PostMapping("/{id}/fontes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PainelFonteResponse>> adicionarFonte(
             @PathVariable UUID id, @Valid @RequestBody PainelFonteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -124,7 +132,8 @@ public class PainelController {
     }
 
     @DeleteMapping("/{id}/fontes/{fonteId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> removerFonte(@PathVariable UUID id, @PathVariable UUID fonteId) {
         painelService.removerFonte(id, fonteId);
         return ResponseEntity.ok(ApiResponse.of(200, "Fonte removida com sucesso", null));
@@ -135,7 +144,8 @@ public class PainelController {
     // ---------------------------------------------------------------
 
     @GetMapping("/{id}/dispositivos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_PAINEL_VER')")
     public ResponseEntity<ApiResponse<List<PainelDispositivoResponse>>> dispositivos(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivos listados com sucesso",
                 painelService.dispositivos(id)));
@@ -143,7 +153,8 @@ public class PainelController {
 
     /** O token so' aparece nesta resposta. Nao ha' como recupera-lo depois. */
     @PostMapping("/{id}/dispositivos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PainelDispositivoCriadoResponse>> criarDispositivo(
             @PathVariable UUID id, @Valid @RequestBody PainelDispositivoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -152,7 +163,8 @@ public class PainelController {
     }
 
     @PostMapping("/{id}/dispositivos/{dispositivoId}/revogar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<PainelDispositivoResponse>> revogarDispositivo(
             @PathVariable UUID id, @PathVariable UUID dispositivoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivo revogado com sucesso",

@@ -23,8 +23,13 @@ public class SaasController {
         this.saasService = saasService;
     }
 
+    /**
+     * Catalogo comercial da Alfa: preco, limite e o que cada plano inclui.
+     * Nao e' assunto de escola. Estava aberto a qualquer usuario logado de
+     * qualquer tenant — um porteiro lia a tabela de precos inteira.
+     */
     @GetMapping("/plans")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<List<SaasPlanResponse>>> listPlans() {
         return ResponseEntity.ok(ApiResponse.of(200, "Planos listados com sucesso", saasService.listPlans()));
     }

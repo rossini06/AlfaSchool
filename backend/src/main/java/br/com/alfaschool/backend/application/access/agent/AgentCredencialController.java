@@ -43,7 +43,8 @@ public class AgentCredencialController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<AgentDtos.CredencialCriadaDto>> criar(
             @Valid @RequestBody AgentDtos.NovaCredencialRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -53,7 +54,8 @@ public class AgentCredencialController {
 
     /** Lista sem hash nem senha: nada aqui permite reconstruir a credencial. */
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> listar() {
         List<Map<String, Object>> lista = repository.findByTenantIdAndDeletedFalse(tenant())
                 .stream()
@@ -72,7 +74,8 @@ public class AgentCredencialController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> desativar(@PathVariable UUID id) {
         AccAgentCredencial c = repository.findByIdAndTenantIdAndDeletedFalse(id, tenant())
                 .orElseThrow(() -> new ResponseStatusException(

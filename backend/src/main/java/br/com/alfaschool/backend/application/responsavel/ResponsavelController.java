@@ -23,7 +23,7 @@ public class ResponsavelController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_VER')")
     public ResponseEntity<?> list(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -33,27 +33,27 @@ public class ResponsavelController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_VER')")
     public ResponseEntity<ApiResponse<ResponsavelResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Responsável encontrado", responsavelService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<ResponsavelResponse>> create(@Valid @RequestBody ResponsavelRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Responsável criado", responsavelService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<ResponsavelResponse>> update(@PathVariable UUID id,
             @Valid @RequestBody ResponsavelRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Responsável atualizado", responsavelService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         responsavelService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Responsável removido", null));

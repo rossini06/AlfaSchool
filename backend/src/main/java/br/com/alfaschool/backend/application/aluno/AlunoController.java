@@ -26,7 +26,7 @@ public class AlunoController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ALUNOS_VER')")
     public ResponseEntity<ApiResponse<Page<AlunoResponse>>> list(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -36,27 +36,27 @@ public class AlunoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ALUNOS_VER')")
     public ResponseEntity<ApiResponse<AlunoResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Aluno encontrado", alunoService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ALUNOS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoResponse>> create(@Valid @RequestBody AlunoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Aluno criado com sucesso", alunoService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ALUNOS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoResponse>> update(@PathVariable UUID id,
                                                               @Valid @RequestBody AlunoRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Aluno atualizado com sucesso", alunoService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ALUNOS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         alunoService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Aluno removido com sucesso", null));

@@ -40,7 +40,8 @@ public class SalaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Page<SalaResponse>>> list(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "0") int page,
@@ -51,21 +52,24 @@ public class SalaController {
     }
 
     @GetMapping("/zona/{zonaId}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<List<SalaResponse>>> listByZona(@PathVariable UUID zonaId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Salas da zona listadas com sucesso",
                 salaService.listByZona(zonaId)));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<SalaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Sala encontrada", salaService.findById(id)));
     }
 
     /** Quem esta nesta sala agora. Sem "momento", assume o instante da chamada. */
     @GetMapping("/{id}/turmas")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<List<TurmaSalaResponse>>> turmasNaSala(
             @PathVariable UUID id,
             @RequestParam(required = false)
@@ -76,21 +80,24 @@ public class SalaController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<SalaResponse>> create(@Valid @RequestBody SalaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Sala criada com sucesso", salaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<SalaResponse>> update(@PathVariable UUID id,
                                                             @Valid @RequestBody SalaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Sala atualizada com sucesso", salaService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         salaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Sala removida com sucesso", null));

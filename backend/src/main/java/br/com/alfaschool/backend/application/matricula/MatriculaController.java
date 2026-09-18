@@ -27,7 +27,7 @@ public class MatriculaController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_VER')")
     public ResponseEntity<ApiResponse<Page<MatriculaResponse>>> list(
             @RequestParam(required = false) UUID alunoId,
             @RequestParam(required = false) UUID turmaId,
@@ -39,58 +39,58 @@ public class MatriculaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_VER')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula encontrada", matriculaService.findById(id)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> create(@Valid @RequestBody MatriculaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.of(201, "Matrícula criada com sucesso", matriculaService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> update(@PathVariable UUID id,
                                                                   @Valid @RequestBody MatriculaRequest request) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula atualizada com sucesso", matriculaService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         matriculaService.delete(id);
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula removida com sucesso", null));
     }
 
     @PostMapping("/{id}/cancelar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> cancelar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula cancelada com sucesso", matriculaService.cancelar(id)));
     }
 
     @PostMapping("/{id}/trancar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> trancar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula trancada com sucesso", matriculaService.trancar(id)));
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> reativar(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula reativada com sucesso", matriculaService.reativar(id)));
     }
 
     @PostMapping("/{id}/concluir")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> concluir(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Matrícula concluída com sucesso", matriculaService.concluir(id)));
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_MATRICULAS_GERIR')")
     public ResponseEntity<ApiResponse<MatriculaResponse>> updateStatus(
             @PathVariable UUID id, @RequestBody Map<String, String> body) {
         String status = body.get("status");

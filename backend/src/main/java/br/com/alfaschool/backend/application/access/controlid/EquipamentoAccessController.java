@@ -51,7 +51,8 @@ public class EquipamentoAccessController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<List<EquipamentoDto>>> listar(Pageable pageable) {
         UUID tenantId = tenant();
         Page<Dispositivo> page = dispositivos.findByTenantIdAndDeletedFalse(tenantId, pageable);
@@ -68,7 +69,8 @@ public class EquipamentoAccessController {
      * troca o equipamento vai tomar 401, e isso e' o comportamento certo.
      */
     @PostMapping("/{id}/webhook-token")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> rotacionarToken(@PathVariable UUID id) {
         UUID tenantId = tenant();
         String token = webhookTokens.rotacionar(tenantId, id);
@@ -83,7 +85,8 @@ public class EquipamentoAccessController {
 
     /** Grava login e senha do leitor. A senha e' cifrada antes de tocar o banco. */
     @PutMapping("/{id}/credenciais")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<EquipamentoDto>> definirCredenciais(
             @PathVariable UUID id,
             @Valid @RequestBody CredenciaisEquipamentoRequest req) {
@@ -103,7 +106,8 @@ public class EquipamentoAccessController {
      * AQUI, nunca chegam ao equipamento.
      */
     @PostMapping("/{id}/acionar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> acionar(
             @PathVariable UUID id,
             @Valid @RequestBody AcionamentoRequest req) {

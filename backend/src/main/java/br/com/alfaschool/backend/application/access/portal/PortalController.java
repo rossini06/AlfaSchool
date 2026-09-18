@@ -46,20 +46,23 @@ public class PortalController {
     }
 
     @GetMapping("/meus-alunos")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<List<PortalAlunoResumo>>> meusAlunos() {
         return ResponseEntity.ok(ApiResponse.of(200, "Alunos listados com sucesso", portalService.meusAlunos()));
     }
 
     @GetMapping("/aluno/{alunoId}/hoje")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<PortalResumoDia>> hoje(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Resumo do dia carregado com sucesso",
                 portalService.hoje(alunoId)));
     }
 
     @GetMapping("/aluno/{alunoId}/historico")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<List<PortalPermanenciaDia>>> historico(
             @PathVariable UUID alunoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
@@ -69,7 +72,8 @@ public class PortalController {
     }
 
     @GetMapping("/aluno/{alunoId}/autorizacoes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<List<PortalAutorizacaoResumo>>> autorizacoes(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Autorizações listadas com sucesso",
                 portalService.autorizacoes(alunoId)));
@@ -80,7 +84,8 @@ public class PortalController {
      * para analise, nao concedido. A escola aprova.
      */
     @PostMapping("/aluno/{alunoId}/autorizacoes/solicitar")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> solicitarAutorizacao(
             @PathVariable UUID alunoId,
             @Valid @RequestBody PortalSolicitacaoAutorizacaoRequest request) {
@@ -91,7 +96,8 @@ public class PortalController {
     }
 
     @GetMapping("/notificacoes")
-    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS')")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<Page<EnvioResponse>>> notificacoes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

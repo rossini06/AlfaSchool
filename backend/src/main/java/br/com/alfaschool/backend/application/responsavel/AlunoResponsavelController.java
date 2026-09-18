@@ -23,14 +23,14 @@ public class AlunoResponsavelController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_VER')")
     public ResponseEntity<ApiResponse<List<AlunoResponsavelResponse>>> list(@PathVariable UUID alunoId) {
         return ResponseEntity.ok(ApiResponse.of(200, "Responsáveis do aluno listados",
                 alunoResponsavelService.listByAluno(alunoId)));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoResponsavelResponse>> add(
             @PathVariable UUID alunoId,
             @Valid @RequestBody AlunoResponsavelRequest request) {
@@ -40,7 +40,7 @@ public class AlunoResponsavelController {
     }
 
     @PutMapping("/{linkId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<AlunoResponsavelResponse>> update(
             @PathVariable UUID alunoId,
             @PathVariable UUID linkId,
@@ -50,7 +50,7 @@ public class AlunoResponsavelController {
     }
 
     @DeleteMapping("/{linkId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_GERIR')")
     public ResponseEntity<ApiResponse<Void>> remove(
             @PathVariable UUID alunoId,
             @PathVariable UUID linkId) {
