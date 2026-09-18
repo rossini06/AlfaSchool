@@ -1,0 +1,610 @@
+/* ==========================================================================
+   Controle de Acesso — Painel de sala (Smart TV) e Central de Coordenação.
+   Os tokens --pn-* são locais do painel de TV: ele tem fundo escuro fixo,
+   independente do tema claro/escuro do app administrativo.
+   ========================================================================== */
+
+:root {
+  --pn-bg:         #0f2430;
+  --pn-bg-2:       #16303d;
+  --pn-bg-3:       #1d3d4d;
+  --pn-border:     #27505f;
+  --pn-text:       #f2f7f9;
+  --pn-text-2:     #9bb4c0;
+  --pn-accent:     #f08a24;
+  --pn-accent-2:   #d9741a;
+  --pn-live:       #35d07f;
+  --pn-dead:       #ff5b52;
+  --pn-radius:     18px;
+}
+
+/* ============================ Indicador de conexão ======================= */
+
+.ac-conexao {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.ac-conexao-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-text-2);
+}
+
+.ac-conexao.is-live .ac-conexao-dot {
+  background: var(--pn-live);
+  box-shadow: 0 0 0 0 rgba(53, 208, 127, 0.55);
+  animation: acPulse 2s infinite;
+}
+
+.ac-conexao.is-down .ac-conexao-dot { background: var(--pn-dead); }
+.ac-conexao.is-wait .ac-conexao-dot { background: var(--pn-accent); }
+
+.ac-conexao-label { font-weight: 700; letter-spacing: 0.02em; }
+.ac-conexao.is-live .ac-conexao-label { color: var(--pn-live); }
+.ac-conexao.is-down .ac-conexao-label { color: var(--pn-dead); }
+.ac-conexao.is-wait .ac-conexao-label { color: var(--pn-accent); }
+
+.ac-conexao-hora {
+  font-size: 0.78em;
+  color: var(--color-text-2);
+  font-weight: 500;
+}
+
+.ac-conexao-tv .ac-conexao-hora { color: var(--pn-text-2); }
+
+@keyframes acPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(53, 208, 127, 0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(53, 208, 127, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(53, 208, 127, 0); }
+}
+
+/* ================================ Foto ================================== */
+
+.ac-foto {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-2);
+}
+
+.ac-foto-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ac-foto-quadrada { border-radius: var(--radius-md); }
+.ac-foto-tv { background: var(--pn-bg-3); color: var(--pn-text-2); }
+
+/* ============================ Contador (KPI) ============================ */
+
+.ac-contadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.ac-contador {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ac-contador::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--color-brand);
+}
+
+.ac-contador.tom-warning::before { background: var(--color-warning); }
+.ac-contador.tom-danger::before  { background: var(--color-danger); }
+.ac-contador.tom-success::before { background: var(--color-success); }
+
+.ac-contador-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ac-contador-valor {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ac-contador.tom-warning .ac-contador-valor { color: var(--color-warning); }
+.ac-contador.tom-danger  .ac-contador-valor { color: var(--color-danger); }
+.ac-contador.tom-success .ac-contador-valor { color: var(--color-success); }
+
+.ac-contador-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ac-contador-icone {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand-dim);
+  color: var(--color-brand);
+}
+
+.ac-contador.tom-warning .ac-contador-icone { background: var(--color-warning-dim); color: var(--color-warning); }
+.ac-contador.tom-danger  .ac-contador-icone { background: var(--color-danger-dim);  color: var(--color-danger); }
+.ac-contador.tom-success .ac-contador-icone { background: var(--color-success-dim); color: var(--color-success); }
+
+/* ========================= Central de Coordenação ======================= */
+
+.ac-fila-lista { display: flex; flex-direction: column; }
+
+.ac-fila-linha {
+  display: grid;
+  grid-template-columns: 52px minmax(180px, 1.6fr) 120px 84px minmax(130px, 1fr) minmax(300px, auto);
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ac-fila-linha:last-child { border-bottom: none; }
+.ac-fila-linha:hover { background: var(--color-bg-3); }
+
+.ac-fila-nome {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ac-fila-sub {
+  font-size: 12.5px;
+  color: var(--color-text-2);
+  margin-top: 2px;
+}
+
+.ac-fila-meta {
+  font-size: 12.5px;
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ac-espera {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xl);
+}
+
+.ac-espera.is-excedido {
+  background: var(--color-danger-dim);
+  color: var(--color-danger);
+}
+
+.ac-fila-acoes {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.ac-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  line-height: 1.45;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-2);
+  color: var(--color-text);
+}
+
+.ac-aviso.tom-erro   { border-color: var(--color-danger);  background: var(--color-danger-dim);  color: var(--color-danger); }
+.ac-aviso.tom-alerta { border-color: var(--color-warning); background: var(--color-warning-dim); color: var(--color-warning); }
+.ac-aviso.tom-info   { border-color: var(--color-info);    background: var(--color-info-dim);    color: var(--color-info); }
+
+.ac-confirmar-dados {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+}
+
+/* Em telas estreitas a linha vira uma pilha que quebra sozinha, em vez de
+   grid: nomes longos e muitos botões não cabem em seis colunas. */
+@media (max-width: 1100px) {
+  .ac-fila-linha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 10px;
+  }
+  .ac-fila-col-ident { flex: 1 1 220px; min-width: 0; }
+  .ac-fila-acoes { flex: 1 1 100%; justify-content: flex-start; }
+}
+
+/* =========================== Painel de sala (TV) ======================== */
+
+.painel-tv {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--pn-bg);
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+  /* ~16px no notebook, cresce até a TV de 1920px */
+  font-size: clamp(16px, 0.95vw, 21px);
+  -webkit-font-smoothing: antialiased;
+}
+
+.painel-tv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.6rem 2.4rem;
+  border-bottom: 2px solid var(--pn-border);
+  background: var(--pn-bg-2);
+  flex-shrink: 0;
+}
+
+.painel-tv-turma {
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.painel-tv-local {
+  font-size: 1.05rem;
+  color: var(--pn-text-2);
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.painel-tv-relogio {
+  font-size: 1.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.painel-tv-header-dir {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.painel-tv-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  padding: 2rem 2.4rem 1.2rem;
+  min-height: 0;
+}
+
+.painel-tv-secao-titulo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pn-accent);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.painel-tv-destaque {
+  background: var(--pn-bg-2);
+  border: 2px solid var(--pn-border);
+  border-radius: var(--pn-radius);
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.painel-tv-cartoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.painel-tv-cartao {
+  background: var(--pn-bg-3);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.painel-tv-cartao-papel {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pn-text-2);
+}
+
+.painel-tv-cartao-nome {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 0.4rem;
+  overflow-wrap: anywhere;
+}
+
+.painel-tv-cartao-info {
+  font-size: 1.15rem;
+  color: var(--pn-text-2);
+  margin-top: 0.4rem;
+  font-weight: 600;
+}
+
+.painel-tv-cartao-txt { min-width: 0; }
+
+.painel-tv-botao {
+  width: 100%;
+  border: none;
+  border-radius: var(--pn-radius);
+  background: var(--pn-accent);
+  color: #2a1602;
+  font-size: 1.9rem;
+  font-weight: 800;
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background 0.15s ease, transform 0.08s ease;
+  font-family: inherit;
+}
+
+.painel-tv-botao:hover:not(:disabled) { background: var(--pn-accent-2); }
+.painel-tv-botao:active:not(:disabled) { transform: translateY(1px); }
+.painel-tv-botao:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.painel-tv-botao:focus-visible {
+  outline: 4px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.painel-tv-botao-legenda {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.painel-tv-botao.is-feito {
+  background: var(--pn-live);
+  color: #062616;
+}
+
+.painel-tv-fila-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pn-text-2);
+  margin-bottom: 0.9rem;
+}
+
+.painel-tv-fila-contador {
+  color: var(--pn-text);
+  background: var(--pn-bg-3);
+  border: 1px solid var(--pn-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+}
+
+.painel-tv-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.painel-tv-fila-item {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: var(--pn-bg-2);
+  border: 1px solid var(--pn-border);
+  border-radius: 14px;
+  padding: 0.9rem 1.2rem;
+}
+
+.painel-tv-fila-nome {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.painel-tv-fila-sub {
+  font-size: 1rem;
+  color: var(--pn-text-2);
+  margin-top: 0.15rem;
+}
+
+.painel-tv-fila-dir { margin-left: auto; text-align: right; }
+
+.painel-tv-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.painel-tv-vazio {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--pn-text-2);
+}
+
+.painel-tv-vazio-icone {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: var(--pn-bg-2);
+  border: 2px solid var(--pn-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pn-text-2);
+}
+
+.painel-tv-vazio h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--pn-text);
+}
+
+.painel-tv-vazio p { font-size: 1.15rem; max-width: 34rem; line-height: 1.5; }
+
+.painel-tv-rodape {
+  flex-shrink: 0;
+  padding: 0.9rem 2.4rem 1.2rem;
+  font-size: 0.85rem;
+  color: var(--pn-text-2);
+  text-align: center;
+  border-top: 1px solid var(--pn-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.painel-tv-erro {
+  margin: 0 2.4rem;
+  padding: 1rem 1.3rem;
+  border-radius: 14px;
+  background: rgba(255, 91, 82, 0.14);
+  border: 1px solid var(--pn-dead);
+  color: #ffd2cf;
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.painel-tv-centro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: 3rem;
+  text-align: center;
+}
+
+.painel-tv-centro h1 { font-size: 2.2rem; font-weight: 800; }
+.painel-tv-centro p  { font-size: 1.2rem; color: var(--pn-text-2); max-width: 40rem; line-height: 1.55; }
+
+.painel-tv-token-form {
+  display: flex;
+  gap: 0.75rem;
+  width: min(30rem, 100%);
+  margin-top: 0.5rem;
+}
+
+.painel-tv-token-form input {
+  flex: 1;
+  background: var(--pn-bg-2);
+  border: 1px solid var(--pn-border);
+  border-radius: 12px;
+  color: var(--pn-text);
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+}
+
+.painel-tv-token-form input:focus { outline: 2px solid var(--pn-accent); }
+
+.painel-tv-token-form button {
+  background: var(--pn-accent);
+  border: none;
+  border-radius: 12px;
+  color: #2a1602;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0.85rem 1.4rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@media (max-width: 900px) {
+  .painel-tv-cartoes { grid-template-columns: 1fr; }
+  .painel-tv-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .painel-tv-header-dir { align-items: flex-start; }
+  .painel-tv-main { padding: 1.4rem 1.2rem; }
+  .painel-tv-rodape, .painel-tv-erro { margin: 0; padding-left: 1.2rem; padding-right: 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-conexao.is-live .ac-conexao-dot { animation: none; }
+}

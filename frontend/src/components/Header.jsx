@@ -18,6 +18,7 @@ const PAGE_TITLES = {
   "/responsaveis": "Responsáveis",
   "/matriculas":   "Matrículas",
   "/dispositivos": "Dispositivos",
+  "/access/coordenacao": "Central de Coordenação",
   "/usuarios":     "Usuários",
   "/auditoria":    "Auditoria",
 };

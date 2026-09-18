@@ -11,7 +11,9 @@ contratam separadamente:
 ## Stack
 
 Backend Spring Boot 3.5.6 / Java 21 / MySQL 8 / Flyway / JWT / Redis.
-Frontend React 18 + TypeScript + Vite.
+Frontend React 19 + **JSX puro** (sem TypeScript) + Vite 7, com `fetch`
+envelopado em `src/services/api.js`, `react-router-dom` e `lucide-react`.
+CSS proprio, sem biblioteca de UI.
 Pacote raiz: `br.com.alfaschool.backend`.
 
 ## Arquitetura
@@ -71,6 +73,9 @@ buildar a imagem, confira o conteudo antes de confiar nela.
 - Erros: `ResponseStatusException` com mensagem em portugues.
 - Comentarios explicam o **porque** (regra de negocio, armadilha de
   producao), nao o obvio.
+- No frontend, nada de `alert()` nem `confirm()` nativos: use `Modal.jsx`
+  e mensagens na propria tela.
+- O JSON da API e' **camelCase** (nao ha PropertyNamingStrategy).
 - Migrations sequenciais `V<n>__<assunto>.sql`. Rode `./scripts/dev.sh
   reset-db` e confirme que aplicam do zero antes de commitar.
 

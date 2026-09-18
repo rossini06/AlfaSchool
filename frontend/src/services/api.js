@@ -40,7 +40,9 @@ async function request(endpoint, options = {}) {
       data?.message ||
       data?.error ||
       `Erro ${res.status}: ${res.statusText}`;
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = res.status;
+    throw error;
   }
 
   // Unwrap ApiResponse wrapper: { data: ..., message: ..., status: ... }

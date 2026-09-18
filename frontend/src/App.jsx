@@ -22,6 +22,8 @@ import { UsuariosPage } from "./pages/UsuariosPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
 import { ResponsaveisPage } from "./pages/ResponsaveisPage";
 import { AvaliacaoPage } from "./pages/AvaliacaoPage";
+import { CoordenacaoPage } from "./pages/access/CoordenacaoPage";
+import { PainelSalaPage } from "./pages/access/PainelSalaPage";
 
 function ProtectedRoute({ children, requiredRoles }) {
   const { isAuthenticated, user } = useAuth();
@@ -50,6 +52,11 @@ export default function App() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
+
+      {/* Painel de sala (Smart TV): fora do ProtectedRoute e fora do
+          AdminLayout. A TV não faz login — ela se identifica com o token do
+          dispositivo em `?token=`. */}
+      <Route path="/painel/:slug" element={<PainelSalaPage />} />
 
       {/* Protected — all under AdminLayout */}
       <Route
@@ -82,6 +89,8 @@ export default function App() {
         <Route path="financeiro" element={<FinanceiroPage />} />
         {/* Escola */}
         <Route path="dispositivos" element={<DispositivosPage />} />
+        {/* Controle de acesso */}
+        <Route path="access/coordenacao" element={<CoordenacaoPage />} />
         {/* Sistema */}
         <Route path="usuarios" element={<UsuariosPage />} />
         <Route path="auditoria" element={<AuditoriaPage />} />

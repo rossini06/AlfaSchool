@@ -13,6 +13,12 @@ export const menuItems = [
 
   // ESCOLA
   {
+    label: "Coordenação",
+    path: "/access/coordenacao",
+    icon: "UserCheck",
+    group: "escola",
+  },
+  {
     label: "Dispositivos",
     path: "/dispositivos",
     icon: "Cpu",
