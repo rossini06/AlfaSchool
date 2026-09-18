@@ -19,6 +19,7 @@ import { NotasPage } from "./pages/NotasPage";
 import { BoletimPage } from "./pages/BoletimPage";
 import { FinanceiroPage } from "./pages/FinanceiroPage";
 import { UsuariosPage } from "./pages/UsuariosPage";
+import { PerfisPermissoesPage } from "./pages/PerfisPermissoesPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
 import { ResponsaveisPage } from "./pages/ResponsaveisPage";
 import { AvaliacaoPage } from "./pages/AvaliacaoPage";
@@ -160,6 +161,7 @@ export default function App() {
 
         {/* Sistema */}
         <Route path="usuarios" element={<UsuariosPage />} />
+        <Route path="perfis" element={<PerfisPermissoesPage />} />
         <Route path="auditoria" element={<AuditoriaPage />} />
 
         {/* SUPER_ADMIN only */}

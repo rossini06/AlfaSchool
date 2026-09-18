@@ -19,6 +19,7 @@ const PAGE_TITLES = {
   "/matriculas":   "Matrículas",
   "/dispositivos": "Dispositivos",
   "/access/coordenacao": "Central de Coordenação",
+  "/perfis": "Perfis e Permissões",
   "/usuarios":     "Usuários",
   "/auditoria":    "Auditoria",
   // Controle de Acesso — fatia H

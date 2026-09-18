@@ -1307,3 +1307,33 @@ body {
 .mb-4   { margin-bottom: 16px; }
 .w-full { width: 100%; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------------------------------------------------- Perfis e Permissoes */
+/* Cards em grade: um perfil por cartao, com a contagem visivel. Ver "23
+   permissoes" de relance e' mais util do que abrir cada um para descobrir. */
+.perfis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.perfil-card { display: flex; flex-direction: column; gap: 0.5rem; }
+.perfil-card-topo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.perfil-card-topo h2 { font-size: 1rem; margin: 0; }
+.perfil-card-desc { font-size: 0.85rem; opacity: 0.75; margin: 0; min-height: 2.4em; }
+.perfil-card-contagem { font-size: 0.8rem; font-weight: 600; opacity: 0.9; margin: 0; }
+.perfil-card-travado {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; opacity: 0.6; margin: 0;
+}
+
+/* Agrupado por area: 46 checkboxes em lista unica seria ilegivel. */
+.perm-areas { display: flex; flex-direction: column; gap: 1.1rem; max-height: 60vh; overflow-y: auto; }
+.perm-area { border: 1px solid var(--color-border, rgba(255,255,255,0.1)); border-radius: 8px; padding: 0.75rem 0.9rem; }
+.perm-area-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
+.perm-area-topo h3 { font-size: 0.9rem; margin: 0; }
+.perm-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.35rem 1rem; }
+.perm-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; }
+.perm-item input { margin-top: 0.2rem; flex-shrink: 0; }
+.perm-item.fixa { opacity: 0.65; cursor: not-allowed; }
+.perm-item-nota { font-size: 0.72rem; opacity: 0.7; display: block; }
+.btn-link { background: none; border: 0; padding: 0; font-size: 0.78rem; color: var(--color-brand, #2f8f9d); cursor: pointer; }
