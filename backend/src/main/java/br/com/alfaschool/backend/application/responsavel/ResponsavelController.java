@@ -25,10 +25,13 @@ public class ResponsavelController {
     @GetMapping
     @PreAuthorize("isAuthenticated() and hasAuthority('PERM_RESPONSAVEIS_VER')")
     public ResponseEntity<?> list(
+            @RequestParam(required = false) String q,
+            /** Nome antigo do mesmo parametro. Aceito para nao quebrar link salvo. */
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Page<ResponsavelResponse> result = responsavelService.listAll(page, size, search);
+        String termo = (q == null || q.isBlank()) ? search : q;
+        Page<ResponsavelResponse> result = responsavelService.listAll(page, size, termo);
         return ResponseEntity.ok(ApiResponse.of(200, "Responsáveis listados", result));
     }
 

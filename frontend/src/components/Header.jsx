@@ -127,8 +127,8 @@ export function Header({ onMenuToggle }) {
       const safe = (promise) => promise.catch(() => ({ content: [] }));
       try {
         const [alunos, responsaveis, professores] = await Promise.all([
-          safe(api.get(`/alunos?search=${q}&page=0&size=5`)).then((r) => r.content || []),
-          safe(api.get(`/responsaveis?search=${q}&page=0&size=5`)).then((r) => r.content || []),
+          safe(api.get(`/alunos?q=${q}&page=0&size=5`)).then((r) => r.content || []),
+          safe(api.get(`/responsaveis?q=${q}&page=0&size=5`)).then((r) => r.content || []),
           safe(api.get(`/professores?q=${q}&page=0&size=5`)).then((r) => r.content || []),
         ]);
         setSearchResults({ alunos, responsaveis, professores });

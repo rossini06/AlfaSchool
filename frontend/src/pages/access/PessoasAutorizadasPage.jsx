@@ -24,11 +24,11 @@ const FORM_VAZIO = {
   parentesco: "",
   telefone: "",
   email: "",
-  fotoUrl: "",
+  fotoKey: "",
   observacoes: "",
-  autorizadaRetirar: true,
-  acessoPortal: false,
-  recebeNotificacoes: false,
+  podeRetirar: true,
+  podeAcessarPortal: false,
+  recebeNotificacao: false,
   ativo: true,
 };
 
@@ -86,7 +86,7 @@ export function PessoasAutorizadasPage() {
       setCarregando(true);
       setErro("");
       const r = await accessApi.get(
-        `/access/pessoas-autorizadas?${qs({ page: p, size: PAGE_SIZE, search: busca, permissao: filtroPermissao })}`
+        `/access/pessoas-autorizadas?${qs({ page: p, size: PAGE_SIZE, q: busca, permissao: filtroPermissao })}`
       );
       if (r.ok) {
         setItens(comoLista(r.data));
@@ -124,11 +124,11 @@ export function PessoasAutorizadasPage() {
       parentesco: item.parentesco || "",
       telefone: item.telefone || "",
       email: item.email || "",
-      fotoUrl: item.fotoUrl || "",
+      fotoKey: item.fotoKey || "",
       observacoes: item.observacoes || "",
-      autorizadaRetirar: !!item.autorizadaRetirar,
-      acessoPortal: !!item.acessoPortal,
-      recebeNotificacoes: !!item.recebeNotificacoes,
+      podeRetirar: !!item.podeRetirar,
+      podeAcessarPortal: !!item.podeAcessarPortal,
+      recebeNotificacao: !!item.recebeNotificacao,
       ativo: item.ativo !== false,
     });
     setErros({});
@@ -142,8 +142,8 @@ export function PessoasAutorizadasPage() {
     if (!form.cpf.trim()) e.cpf = "O CPF identifica a pessoa na portaria.";
     else if (!cpfValido(form.cpf)) e.cpf = "CPF inválido.";
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "E-mail inválido.";
-    if (form.acessoPortal && !form.email) e.email = "Para acessar o portal é preciso um e-mail — é o login dela.";
-    if (form.recebeNotificacoes && !form.email && !form.telefone)
+    if (form.podeAcessarPortal && !form.email) e.email = "Para acessar o portal é preciso um e-mail — é o login dela.";
+    if (form.recebeNotificacao && !form.email && !form.telefone)
       e.telefone = "Para receber notificações, informe telefone ou e-mail.";
     setErros(e);
     return Object.keys(e).length === 0;
@@ -160,11 +160,11 @@ export function PessoasAutorizadasPage() {
       parentesco: form.parentesco || null,
       telefone: form.telefone.trim() || null,
       email: form.email.trim() || null,
-      fotoUrl: form.fotoUrl.trim() || null,
+      fotoKey: form.fotoKey.trim() || null,
       observacoes: form.observacoes.trim() || null,
-      autorizadaRetirar: form.autorizadaRetirar,
-      acessoPortal: form.acessoPortal,
-      recebeNotificacoes: form.recebeNotificacoes,
+      podeRetirar: form.podeRetirar,
+      podeAcessarPortal: form.podeAcessarPortal,
+      recebeNotificacao: form.recebeNotificacao,
       ativo: form.ativo,
     };
     const r = editando
@@ -296,7 +296,7 @@ export function PessoasAutorizadasPage() {
                 <tr key={item.id}>
                   <td>
                     <div className="flex items-center gap-2">
-                      <Avatar foto={item.fotoUrl} nome={item.nome} />
+                      <Avatar foto={item.fotoKey} nome={item.nome} />
                       <strong>{item.nome}</strong>
                     </div>
                   </td>
@@ -308,9 +308,9 @@ export function PessoasAutorizadasPage() {
                   </td>
                   <td>
                     <div className="ac-linha-acoes">
-                      {pilulaPermissao(item.autorizadaRetirar, "Retira", "badge-success")}
-                      {pilulaPermissao(item.acessoPortal, "Portal", "badge-info")}
-                      {pilulaPermissao(item.recebeNotificacoes, "Avisos", "badge-brand")}
+                      {pilulaPermissao(item.podeRetirar, "Retira", "badge-success")}
+                      {pilulaPermissao(item.podeAcessarPortal, "Portal", "badge-info")}
+                      {pilulaPermissao(item.recebeNotificacao, "Avisos", "badge-brand")}
                     </div>
                   </td>
                   <td>
@@ -439,8 +439,8 @@ export function PessoasAutorizadasPage() {
               <label className="form-label">Foto (URL)</label>
               <input
                 className="form-input"
-                value={form.fotoUrl}
-                onChange={campo("fotoUrl")}
+                value={form.fotoKey}
+                onChange={campo("fotoKey")}
                 placeholder="https://..."
               />
               <span className="form-hint">A portaria compara a foto com quem está na frente dela.</span>
@@ -455,20 +455,20 @@ export function PessoasAutorizadasPage() {
               <SwitchCampo
                 rotulo="Autorizada a retirar"
                 descricao="Pode buscar o aluno na portaria. Ainda depende de uma autorização ativa por aluno."
-                checked={form.autorizadaRetirar}
-                onChange={(v) => setForm((p) => ({ ...p, autorizadaRetirar: v }))}
+                checked={form.podeRetirar}
+                onChange={(v) => setForm((p) => ({ ...p, podeRetirar: v }))}
               />
               <SwitchCampo
                 rotulo="Pode acessar o portal"
                 descricao="Recebe login no portal da família para acompanhar entradas, saídas e permanência."
-                checked={form.acessoPortal}
-                onChange={(v) => setForm((p) => ({ ...p, acessoPortal: v }))}
+                checked={form.podeAcessarPortal}
+                onChange={(v) => setForm((p) => ({ ...p, podeAcessarPortal: v }))}
               />
               <SwitchCampo
                 rotulo="Recebe notificações"
                 descricao="Recebe os avisos automáticos de entrada, saída e ocorrências."
-                checked={form.recebeNotificacoes}
-                onChange={(v) => setForm((p) => ({ ...p, recebeNotificacoes: v }))}
+                checked={form.recebeNotificacao}
+                onChange={(v) => setForm((p) => ({ ...p, recebeNotificacao: v }))}
               />
             </div>
           </div>

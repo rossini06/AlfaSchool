@@ -9,7 +9,7 @@ import { ConfirmarModal } from "../../components/access/ConfirmarModal";
 import "../../styles/accessCadastros.css";
 
 const PAGE_SIZE = 20;
-const FORM_VAZIO = { unidadeId: "", nome: "", descricao: "" };
+const FORM_VAZIO = { unitId: "", nome: "", descricao: "" };
 
 export function ZonasPage() {
   const [itens, setItens] = useState([]);
@@ -38,7 +38,7 @@ export function ZonasPage() {
       setCarregando(true);
       setErro("");
       const r = await accessApi.get(
-        `/access/zonas?${qs({ page: p, size: PAGE_SIZE, search: busca, unidadeId: filtroUnidade })}`
+        `/access/zonas?${qs({ page: p, size: PAGE_SIZE, q: busca, unitId: filtroUnidade })}`
       );
       if (r.ok) {
         setItens(comoLista(r.data));
@@ -67,7 +67,7 @@ export function ZonasPage() {
 
   const abrirNovo = () => {
     setEditando(null);
-    setForm({ ...FORM_VAZIO, unidadeId: unidades.length === 1 ? unidades[0].id : "" });
+    setForm({ ...FORM_VAZIO, unitId: unidades.length === 1 ? unidades[0].id : "" });
     setErros({});
     setErroForm("");
     setModalAberto(true);
@@ -76,7 +76,7 @@ export function ZonasPage() {
   const abrirEdicao = (item) => {
     setEditando(item);
     setForm({
-      unidadeId: item.unidadeId || "",
+      unitId: item.unitId || "",
       nome: item.nome || "",
       descricao: item.descricao || "",
     });
@@ -87,7 +87,7 @@ export function ZonasPage() {
 
   const validar = () => {
     const e = {};
-    if (!form.unidadeId) e.unidadeId = "Selecione a unidade.";
+    if (!form.unitId) e.unitId = "Selecione a unidade.";
     if (!form.nome.trim()) e.nome = "Informe o nome da zona.";
     setErros(e);
     return Object.keys(e).length === 0;
@@ -98,7 +98,7 @@ export function ZonasPage() {
     setSalvando(true);
     setErroForm("");
     const corpo = {
-      unidadeId: form.unidadeId,
+      unitId: form.unitId,
       nome: form.nome.trim(),
       descricao: form.descricao.trim() || null,
     };
@@ -221,7 +221,7 @@ export function ZonasPage() {
                   <td>
                     <strong>{item.nome}</strong>
                   </td>
-                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unidadeId)}</td>
+                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unitId)}</td>
                   <td className="td-muted">{item.descricao || "—"}</td>
                   <td className="td-muted">{item.totalSalas ?? "—"}</td>
                   <td>
@@ -274,9 +274,9 @@ export function ZonasPage() {
           <div className="form-field">
             <label className="form-label required">Unidade</label>
             <select
-              className={`form-select ${erros.unidadeId ? "error" : ""}`}
-              value={form.unidadeId}
-              onChange={campo("unidadeId")}
+              className={`form-select ${erros.unitId ? "error" : ""}`}
+              value={form.unitId}
+              onChange={campo("unitId")}
             >
               <option value="">Selecione a unidade</option>
               {unidades.map((u) => (
@@ -285,7 +285,7 @@ export function ZonasPage() {
                 </option>
               ))}
             </select>
-            {erros.unidadeId && <span className="form-error">{erros.unidadeId}</span>}
+            {erros.unitId && <span className="form-error">{erros.unitId}</span>}
           </div>
           <div className="form-field">
             <label className="form-label required">Nome</label>

@@ -14,11 +14,13 @@ import java.util.UUID;
 public record PessoaAutorizadaRequest(
         UUID responsavelId,
         @NotBlank @Size(max = 120) String nome,
+        @Size(max = 40) String parentesco,
         @Size(max = 14) String cpf,
         @Size(max = 20) String rg,
         @Size(max = 20) String telefone,
         @Email @Size(max = 160) String email,
         @Size(max = 255) String fotoKey,
+        String observacoes,
         Boolean podeRetirar,
         Boolean podeAcessarPortal,
         Boolean recebeNotificacao,

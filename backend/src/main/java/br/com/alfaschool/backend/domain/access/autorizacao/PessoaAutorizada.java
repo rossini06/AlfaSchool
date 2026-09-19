@@ -34,6 +34,10 @@ public class PessoaAutorizada extends BaseEntity {
     @Column(nullable = false, length = 120)
     private String nome;
 
+    /** Como a portaria reconhece a pessoa: "Tia", "Vizinha", "Motorista". */
+    @Column(length = 40)
+    private String parentesco;
+
     /** Guardado so com digitos, para casar com o CPF solto de uma restricao. */
     @Column(length = 14)
     private String cpf;
@@ -49,6 +53,9 @@ public class PessoaAutorizada extends BaseEntity {
 
     @Column(name = "foto_key", length = 255)
     private String fotoKey;
+
+    @Column(columnDefinition = "TEXT")
+    private String observacoes;
 
     /** Permissao 1 de 3: apresentar-se na portaria para retirar aluno. */
     @Column(name = "pode_retirar", nullable = false)
@@ -77,6 +84,12 @@ public class PessoaAutorizada extends BaseEntity {
     public void setTelefone(String telefone) { this.telefone = telefone; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    public String getParentesco() { return parentesco; }
+    public void setParentesco(String parentesco) { this.parentesco = parentesco; }
+
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+
     public String getFotoKey() { return fotoKey; }
     public void setFotoKey(String fotoKey) { this.fotoKey = fotoKey; }
     public boolean isPodeRetirar() { return podeRetirar; }

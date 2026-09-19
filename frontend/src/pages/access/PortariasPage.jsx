@@ -15,7 +15,7 @@ const TIPOS = [
 ];
 
 const FORM_VAZIO = {
-  unidadeId: "",
+  unitId: "",
   nome: "",
   tipo: "PRINCIPAL",
   descricao: "",
@@ -53,8 +53,8 @@ export function PortariasPage() {
       const url = `/access/portarias?${qs({
         page: p,
         size: PAGE_SIZE,
-        search: busca,
-        unidadeId: filtroUnidade,
+        q: busca,
+        unitId: filtroUnidade,
         tipo: filtroTipo,
       })}`;
       const r = await accessApi.get(url);
@@ -85,7 +85,7 @@ export function PortariasPage() {
 
   const abrirNovo = () => {
     setEditando(null);
-    setForm({ ...FORM_VAZIO, unidadeId: unidades.length === 1 ? unidades[0].id : "" });
+    setForm({ ...FORM_VAZIO, unitId: unidades.length === 1 ? unidades[0].id : "" });
     setErros({});
     setErroForm("");
     setModalAberto(true);
@@ -94,7 +94,7 @@ export function PortariasPage() {
   const abrirEdicao = (item) => {
     setEditando(item);
     setForm({
-      unidadeId: item.unidadeId || "",
+      unitId: item.unitId || "",
       nome: item.nome || "",
       tipo: item.tipo || "PRINCIPAL",
       descricao: item.descricao || "",
@@ -107,7 +107,7 @@ export function PortariasPage() {
 
   const validar = () => {
     const e = {};
-    if (!form.unidadeId) e.unidadeId = "Selecione a unidade.";
+    if (!form.unitId) e.unitId = "Selecione a unidade.";
     if (!form.nome.trim()) e.nome = "Informe o nome da portaria.";
     else if (form.nome.trim().length < 3) e.nome = "Use ao menos 3 caracteres.";
     if (!form.tipo) e.tipo = "Selecione o tipo.";
@@ -120,7 +120,7 @@ export function PortariasPage() {
     setSalvando(true);
     setErroForm("");
     const corpo = {
-      unidadeId: form.unidadeId,
+      unitId: form.unitId,
       nome: form.nome.trim(),
       tipo: form.tipo,
       descricao: form.descricao.trim() || null,
@@ -256,7 +256,7 @@ export function PortariasPage() {
                   <td>
                     <strong>{item.nome}</strong>
                   </td>
-                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unidadeId)}</td>
+                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unitId)}</td>
                   <td>
                     <span className={`badge ${item.tipo === "PRINCIPAL" ? "badge-brand" : "badge-secondary"}`}>
                       {TIPOS.find((t) => t.valor === item.tipo)?.label || item.tipo}
@@ -318,9 +318,9 @@ export function PortariasPage() {
           <div className="form-field">
             <label className="form-label required">Unidade</label>
             <select
-              className={`form-select ${erros.unidadeId ? "error" : ""}`}
-              value={form.unidadeId}
-              onChange={campo("unidadeId")}
+              className={`form-select ${erros.unitId ? "error" : ""}`}
+              value={form.unitId}
+              onChange={campo("unitId")}
             >
               <option value="">Selecione a unidade</option>
               {unidades.map((u) => (
@@ -329,7 +329,7 @@ export function PortariasPage() {
                 </option>
               ))}
             </select>
-            {erros.unidadeId && <span className="form-error">{erros.unidadeId}</span>}
+            {erros.unitId && <span className="form-error">{erros.unitId}</span>}
           </div>
 
           <div className="form-grid-2">

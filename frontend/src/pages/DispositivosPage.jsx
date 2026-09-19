@@ -34,7 +34,7 @@ export function DispositivosPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
+      if (search) params.set("q", search);
       if (filterTipo) params.set("tipo", filterTipo);
       const data = await api.get(`/dispositivos?${params}`);
       setItems(data?.content || data || []);
@@ -94,7 +94,7 @@ export function DispositivosPage() {
 
   const toggleAtivo = async (item) => {
     try {
-      await api.patch(`/dispositivos/${item.id}`, { ativo: !item.ativo });
+      await api.post(`/dispositivos/${item.id}/toggle`);
       load(page);
     } catch (err) {
       alert(err.message);

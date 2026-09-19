@@ -33,12 +33,32 @@ public class PessoaAutorizadaService {
         this.responsavelRepository = responsavelRepository;
     }
 
-    public Page<PessoaAutorizadaResponse> list(String q, Pageable pageable) {
+    /**
+     * O filtro por permissao existe porque a pergunta que a coordenacao faz
+     * na tela e' "quem pode retirar?", nao "quem esta cadastrado?". Ele e'
+     * aplicado sobre a pagina ja carregada de proposito: a lista de pessoas
+     * autorizadas de uma escola tem dezenas de linhas, nao milhares, e uma
+     * query por combinacao de tres booleanos nao paga o custo.
+     */
+    public Page<PessoaAutorizadaResponse> list(String q, String permissao, Pageable pageable) {
         UUID tenantId = ContextoAtual.tenantObrigatorio();
         Page<PessoaAutorizada> pagina = (q == null || q.isBlank())
                 ? pessoaRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
                 : pessoaRepository.search(tenantId, q.trim(), pageable);
-        return pagina.map(PessoaAutorizadaResponse::from);
+
+        Page<PessoaAutorizadaResponse> resposta = pagina.map(PessoaAutorizadaResponse::from);
+        if (permissao == null || permissao.isBlank()) {
+            return resposta;
+        }
+        java.util.function.Predicate<PessoaAutorizadaResponse> filtro = switch (permissao) {
+            case "RETIRAR" -> PessoaAutorizadaResponse::podeRetirar;
+            case "PORTAL" -> PessoaAutorizadaResponse::podeAcessarPortal;
+            case "NOTIFICACAO" -> PessoaAutorizadaResponse::recebeNotificacao;
+            default -> p -> true;
+        };
+        java.util.List<PessoaAutorizadaResponse> filtradas =
+                resposta.getContent().stream().filter(filtro).toList();
+        return new org.springframework.data.domain.PageImpl<>(filtradas, pageable, filtradas.size());
     }
 
     public PessoaAutorizadaResponse findById(UUID id) {
@@ -85,6 +105,7 @@ public class PessoaAutorizadaService {
         }
         pessoa.setResponsavelId(request.responsavelId());
         pessoa.setNome(request.nome().trim());
+        pessoa.setParentesco(request.parentesco());
 
         String cpf = CpfUtils.normalizar(request.cpf());
         if (cpf != null) {
@@ -105,6 +126,7 @@ public class PessoaAutorizadaService {
         pessoa.setTelefone(request.telefone());
         pessoa.setEmail(request.email());
         pessoa.setFotoKey(request.fotoKey());
+        pessoa.setObservacoes(request.observacoes());
 
         // As tres permissoes sao lidas SEPARADAMENTE do request. Nao derive
         // uma da outra nem do vinculo com responsavel.

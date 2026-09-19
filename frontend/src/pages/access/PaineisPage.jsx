@@ -20,7 +20,7 @@ const TIPOS_PAINEL = [
 const FORM_VAZIO = {
   nome: "",
   tipo: "SALA",
-  unidadeId: "",
+  unitId: "",
   salaId: "",
   portariaId: "",
   segundosAtualizacao: "15",
@@ -70,7 +70,7 @@ export function PaineisPage() {
     async (p = 0) => {
       setCarregando(true);
       setErro("");
-      const r = await accessApi.get(`/access/paineis?${qs({ page: p, size: PAGE_SIZE, search: busca })}`);
+      const r = await accessApi.get(`/access/paineis?${qs({ page: p, size: PAGE_SIZE, q: busca })}`);
       if (r.ok) {
         setItens(comoLista(r.data));
         setTotal(comoTotal(r.data));
@@ -109,7 +109,7 @@ export function PaineisPage() {
     setForm({
       nome: item.nome || "",
       tipo: item.tipo || "SALA",
-      unidadeId: item.unidadeId || "",
+      unitId: item.unitId || "",
       salaId: item.salaId || "",
       portariaId: item.portariaId || "",
       segundosAtualizacao: String(item.segundosAtualizacao ?? 15),
@@ -123,7 +123,7 @@ export function PaineisPage() {
   const validar = () => {
     const e = {};
     if (!form.nome.trim()) e.nome = "Dê um nome ao painel.";
-    if (!form.unidadeId) e.unidadeId = "Selecione a unidade.";
+    if (!form.unitId) e.unitId = "Selecione a unidade.";
     if (form.tipo === "SALA" && !form.salaId) e.salaId = "Painel de sala precisa de uma sala.";
     if (form.tipo === "PORTARIA" && !form.portariaId) e.portariaId = "Painel de portaria precisa de uma portaria.";
     const seg = Number(form.segundosAtualizacao);
@@ -139,7 +139,7 @@ export function PaineisPage() {
     const corpo = {
       nome: form.nome.trim(),
       tipo: form.tipo,
-      unidadeId: form.unidadeId,
+      unitId: form.unitId,
       salaId: form.tipo === "SALA" ? form.salaId : null,
       portariaId: form.tipo === "PORTARIA" ? form.portariaId : null,
       segundosAtualizacao: Number(form.segundosAtualizacao),
@@ -414,9 +414,9 @@ export function PaineisPage() {
             <div className="form-field">
               <label className="form-label required">Unidade</label>
               <select
-                className={`form-select ${erros.unidadeId ? "error" : ""}`}
-                value={form.unidadeId}
-                onChange={campo("unidadeId")}
+                className={`form-select ${erros.unitId ? "error" : ""}`}
+                value={form.unitId}
+                onChange={campo("unitId")}
               >
                 <option value="">Selecione a unidade</option>
                 {unidades.map((u) => (
@@ -425,7 +425,7 @@ export function PaineisPage() {
                   </option>
                 ))}
               </select>
-              {erros.unidadeId && <span className="form-error">{erros.unidadeId}</span>}
+              {erros.unitId && <span className="form-error">{erros.unitId}</span>}
             </div>
           </div>
 

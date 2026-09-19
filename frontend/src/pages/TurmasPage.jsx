@@ -37,7 +37,7 @@ export function TurmasPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
+      if (search) params.set("q", search);
       if (filterCurso) params.set("cursoId", filterCurso);
       if (filterAno) params.set("anoLetivo", filterAno);
       const data = await api.get(`/turmas?${params}`);

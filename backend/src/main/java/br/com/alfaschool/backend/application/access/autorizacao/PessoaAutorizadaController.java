@@ -38,11 +38,12 @@ public class PessoaAutorizadaController {
             + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
     public ResponseEntity<ApiResponse<Page<PessoaAutorizadaResponse>>> list(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String permissao,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Pessoas autorizadas listadas com sucesso",
-                pessoaAutorizadaService.list(q, pageable)));
+                pessoaAutorizadaService.list(q, permissao, pageable)));
     }
 
     @GetMapping("/{id}")

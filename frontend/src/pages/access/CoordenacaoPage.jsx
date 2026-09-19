@@ -784,7 +784,7 @@ function ModalRetiradaManual({ aberto, onFechar, onRegistrada }) {
       setBuscando(true);
       try {
         const dados = await api.get(
-          `/alunos?page=0&size=8&search=${encodeURIComponent(texto.trim())}`
+          `/alunos?page=0&size=8&q=${encodeURIComponent(texto.trim())}`
         );
         setResultados(dados?.content || dados || []);
       } catch {

@@ -28,10 +28,12 @@ public class DispositivoController {
     @GetMapping
     @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
     public ResponseEntity<ApiResponse<Page<DispositivoResponse>>> list(
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
-        return ResponseEntity.ok(ApiResponse.of(200, "Dispositivos listados com sucesso", dispositivoService.list(pageable)));
+        return ResponseEntity.ok(ApiResponse.of(200, "Dispositivos listados com sucesso",
+                dispositivoService.list(q, pageable)));
     }
 
     @GetMapping("/{id}")

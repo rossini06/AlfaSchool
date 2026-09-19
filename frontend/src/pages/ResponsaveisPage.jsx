@@ -44,7 +44,7 @@ export function ResponsaveisPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
+      if (search) params.set("q", search);
       const data = await api.get(`/responsaveis?${params}`);
       setItems(data?.content || data || []);
       setTotal(data?.totalElements ?? (data?.content ?? data ?? []).length);

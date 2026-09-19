@@ -37,7 +37,7 @@ export function CursosPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
+      if (search) params.set("q", search);
       if (filterModalidade) params.set("modalidade", filterModalidade);
       const data = await api.get(`/cursos?${params}`);
       setItems(data?.content || data || []);

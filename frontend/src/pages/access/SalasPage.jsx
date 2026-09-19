@@ -10,7 +10,7 @@ import "../../styles/accessCadastros.css";
 
 const PAGE_SIZE = 20;
 const FORM_VAZIO = {
-  unidadeId: "",
+  unitId: "",
   zonaId: "",
   nome: "",
   codigo: "",
@@ -52,8 +52,8 @@ export function SalasPage() {
         `/access/salas?${qs({
           page: p,
           size: PAGE_SIZE,
-          search: busca,
-          unidadeId: filtroUnidade,
+          q: busca,
+          unitId: filtroUnidade,
           zonaId: filtroZona,
         })}`
       );
@@ -84,11 +84,11 @@ export function SalasPage() {
   };
   const nomeZona = (id) => zonas.find((z) => z.id === id)?.nome || "—";
 
-  const zonasDaUnidade = form.unidadeId ? zonas.filter((z) => !z.unidadeId || z.unidadeId === form.unidadeId) : zonas;
+  const zonasDaUnidade = form.unitId ? zonas.filter((z) => !z.unitId || z.unitId === form.unitId) : zonas;
 
   const abrirNovo = () => {
     setEditando(null);
-    setForm({ ...FORM_VAZIO, unidadeId: unidades.length === 1 ? unidades[0].id : "" });
+    setForm({ ...FORM_VAZIO, unitId: unidades.length === 1 ? unidades[0].id : "" });
     setErros({});
     setErroForm("");
     setModalAberto(true);
@@ -97,7 +97,7 @@ export function SalasPage() {
   const abrirEdicao = (item) => {
     setEditando(item);
     setForm({
-      unidadeId: item.unidadeId || "",
+      unitId: item.unitId || "",
       zonaId: item.zonaId || "",
       nome: item.nome || "",
       codigo: item.codigo || "",
@@ -112,7 +112,7 @@ export function SalasPage() {
 
   const validar = () => {
     const e = {};
-    if (!form.unidadeId) e.unidadeId = "Selecione a unidade.";
+    if (!form.unitId) e.unitId = "Selecione a unidade.";
     if (!form.zonaId) e.zonaId = "Selecione a zona.";
     if (!form.nome.trim()) e.nome = "Informe o nome da sala.";
     if (form.capacidade !== "" && (Number.isNaN(Number(form.capacidade)) || Number(form.capacidade) < 1)) {
@@ -127,7 +127,7 @@ export function SalasPage() {
     setSalvando(true);
     setErroForm("");
     const corpo = {
-      unidadeId: form.unidadeId,
+      unitId: form.unitId,
       zonaId: form.zonaId,
       nome: form.nome.trim(),
       codigo: form.codigo.trim() || null,
@@ -263,7 +263,7 @@ export function SalasPage() {
                     <strong>{item.nome}</strong>
                   </td>
                   <td className="td-muted ac-mono">{item.codigo || "—"}</td>
-                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unidadeId)}</td>
+                  <td className="td-muted">{item.unidadeNome || nomeUnidade(item.unitId)}</td>
                   <td className="td-muted">{item.zonaNome || nomeZona(item.zonaId)}</td>
                   <td className="td-muted">
                     {[item.bloco, item.andar !== null && item.andar !== undefined && item.andar !== "" ? `${item.andar}º andar` : null]
@@ -322,11 +322,11 @@ export function SalasPage() {
             <div className="form-field">
               <label className="form-label required">Unidade</label>
               <select
-                className={`form-select ${erros.unidadeId ? "error" : ""}`}
-                value={form.unidadeId}
+                className={`form-select ${erros.unitId ? "error" : ""}`}
+                value={form.unitId}
                 onChange={(e) => {
-                  setForm((p) => ({ ...p, unidadeId: e.target.value, zonaId: "" }));
-                  if (erros.unidadeId) setErros((p) => ({ ...p, unidadeId: "" }));
+                  setForm((p) => ({ ...p, unitId: e.target.value, zonaId: "" }));
+                  if (erros.unitId) setErros((p) => ({ ...p, unitId: "" }));
                 }}
               >
                 <option value="">Selecione a unidade</option>
@@ -336,7 +336,7 @@ export function SalasPage() {
                   </option>
                 ))}
               </select>
-              {erros.unidadeId && <span className="form-error">{erros.unidadeId}</span>}
+              {erros.unitId && <span className="form-error">{erros.unitId}</span>}
             </div>
             <div className="form-field">
               <label className="form-label required">Zona</label>
@@ -344,9 +344,9 @@ export function SalasPage() {
                 className={`form-select ${erros.zonaId ? "error" : ""}`}
                 value={form.zonaId}
                 onChange={campo("zonaId")}
-                disabled={!form.unidadeId}
+                disabled={!form.unitId}
               >
-                <option value="">{form.unidadeId ? "Selecione a zona" : "Escolha a unidade primeiro"}</option>
+                <option value="">{form.unitId ? "Selecione a zona" : "Escolha a unidade primeiro"}</option>
                 {zonasDaUnidade.map((z) => (
                   <option key={z.id} value={z.id}>
                     {z.nome}

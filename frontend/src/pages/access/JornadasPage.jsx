@@ -34,8 +34,8 @@ function diasVazios() {
   return DIAS_SEMANA.map((d) => ({
     diaSemana: d.valor,
     frequenta: d.valor <= 5,
-    horaEntrada: d.valor <= 5 ? "07:00" : "",
-    horaSaida: d.valor <= 5 ? "17:00" : "",
+    entradaPrevista: d.valor <= 5 ? "07:00" : "",
+    saidaPrevista: d.valor <= 5 ? "17:00" : "",
     cargaMinutos: d.valor <= 5 ? 600 : null,
   }));
 }
@@ -76,7 +76,7 @@ export function JornadasPage() {
       setCarregando(true);
       setErro("");
       const r = await accessApi.get(
-        `/access/jornadas?${qs({ page: p, size: PAGE_SIZE, search: busca, regraExcedente: filtroRegra })}`
+        `/access/jornadas?${qs({ page: p, size: PAGE_SIZE, q: busca, regraExcedente: filtroRegra })}`
       );
       if (r.ok) {
         setItens(comoLista(r.data));
@@ -108,12 +108,12 @@ export function JornadasPage() {
   const abrirEdicao = (item) => {
     const base = diasVazios().map((d) => {
       const vindo = (item.dias || []).find((x) => x.diaSemana === d.diaSemana);
-      if (!vindo) return { ...d, frequenta: false, horaEntrada: "", horaSaida: "", cargaMinutos: null };
+      if (!vindo) return { ...d, frequenta: false, entradaPrevista: "", saidaPrevista: "", cargaMinutos: null };
       return {
         diaSemana: d.diaSemana,
         frequenta: vindo.frequenta !== false,
-        horaEntrada: (vindo.horaEntrada || "").slice(0, 5),
-        horaSaida: (vindo.horaSaida || "").slice(0, 5),
+        entradaPrevista: (vindo.entradaPrevista || "").slice(0, 5),
+        saidaPrevista: (vindo.saidaPrevista || "").slice(0, 5),
         cargaMinutos: vindo.cargaMinutos ?? null,
       };
     });
@@ -140,12 +140,12 @@ export function JornadasPage() {
         if (d.diaSemana !== diaSemana) return d;
         const novo = { ...d, [campo]: valor };
         if (campo === "frequenta" && !valor) {
-          return { ...novo, horaEntrada: "", horaSaida: "", cargaMinutos: null };
+          return { ...novo, entradaPrevista: "", saidaPrevista: "", cargaMinutos: null };
         }
-        if (campo === "horaEntrada" || campo === "horaSaida") {
+        if (campo === "entradaPrevista" || campo === "saidaPrevista") {
           const carga = calcularCarga(
-            campo === "horaEntrada" ? valor : d.horaEntrada,
-            campo === "horaSaida" ? valor : d.horaSaida
+            campo === "entradaPrevista" ? valor : d.entradaPrevista,
+            campo === "saidaPrevista" ? valor : d.saidaPrevista
           );
           if (carga !== null) novo.cargaMinutos = carga;
         }
@@ -175,7 +175,7 @@ export function JornadasPage() {
       e.toleranciaSaidaMin = "Informe a tolerância em minutos (0 ou mais).";
     const frequentados = form.dias.filter((d) => d.frequenta);
     if (frequentados.length === 0) e.dias = "Marque ao menos um dia com frequência.";
-    else if (frequentados.some((d) => !d.horaEntrada || !d.horaSaida))
+    else if (frequentados.some((d) => !d.entradaPrevista || !d.saidaPrevista))
       e.dias = "Todo dia marcado precisa de entrada e saída.";
     else if (frequentados.some((d) => !d.cargaMinutos))
       e.dias = "Todo dia marcado precisa de uma carga maior que zero.";
@@ -197,8 +197,8 @@ export function JornadasPage() {
       dias: form.dias.map((d) => ({
         diaSemana: d.diaSemana,
         frequenta: d.frequenta,
-        horaEntrada: d.frequenta ? d.horaEntrada : null,
-        horaSaida: d.frequenta ? d.horaSaida : null,
+        entradaPrevista: d.frequenta ? d.entradaPrevista : null,
+        saidaPrevista: d.frequenta ? d.saidaPrevista : null,
         cargaMinutos: d.frequenta ? d.cargaMinutos : null,
       })),
     };
@@ -502,18 +502,18 @@ export function JornadasPage() {
                           <input
                             className="form-input"
                             type="time"
-                            value={d.horaEntrada || ""}
+                            value={d.entradaPrevista || ""}
                             disabled={!d.frequenta}
-                            onChange={(e) => mudarDia(d.diaSemana, "horaEntrada", e.target.value)}
+                            onChange={(e) => mudarDia(d.diaSemana, "entradaPrevista", e.target.value)}
                           />
                         </td>
                         <td>
                           <input
                             className="form-input"
                             type="time"
-                            value={d.horaSaida || ""}
+                            value={d.saidaPrevista || ""}
                             disabled={!d.frequenta}
-                            onChange={(e) => mudarDia(d.diaSemana, "horaSaida", e.target.value)}
+                            onChange={(e) => mudarDia(d.diaSemana, "saidaPrevista", e.target.value)}
                           />
                         </td>
                         <td>

@@ -70,7 +70,7 @@ export function MatriculasPage() {
     if (!q.trim()) { setAlunoResults([]); return; }
     setAlunoSearching(true);
     try {
-      const data = await api.get(`/alunos?search=${encodeURIComponent(q)}&size=10`);
+      const data = await api.get(`/alunos?q=${encodeURIComponent(q)}&size=10`);
       setAlunoResults(data?.content || data || []);
     } catch {
       setAlunoResults([]);

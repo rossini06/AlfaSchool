@@ -74,7 +74,7 @@ export function AlunosPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
+      if (search) params.set("q", search);
       const data = await api.get(`/alunos?${params}`);
       setItems(data?.content || data || []);
       setTotal(data?.totalElements ?? (data?.content ?? data ?? []).length);
@@ -207,7 +207,7 @@ export function AlunosPage() {
     if (!q.trim()) { setSearchRespResults([]); return; }
     setSearchRespLoading(true);
     try {
-      const data = await api.get(`/responsaveis?search=${encodeURIComponent(q)}&page=0&size=10`);
+      const data = await api.get(`/responsaveis?q=${encodeURIComponent(q)}&page=0&size=10`);
       setSearchRespResults(data?.content || data || []);
     } catch {
       setSearchRespResults([]);

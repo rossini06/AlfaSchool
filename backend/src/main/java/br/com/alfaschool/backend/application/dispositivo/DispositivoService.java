@@ -24,9 +24,12 @@ public class DispositivoService {
         this.dispositivoRepository = dispositivoRepository;
     }
 
-    public Page<DispositivoResponse> list(Pageable pageable) {
+    public Page<DispositivoResponse> list(String q, Pageable pageable) {
         UUID tenantId = requiredTenant();
-        return dispositivoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(DispositivoResponse::from);
+        Page<Dispositivo> pagina = (q == null || q.isBlank())
+                ? dispositivoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
+                : dispositivoRepository.buscar(tenantId, q.trim(), pageable);
+        return pagina.map(DispositivoResponse::from);
     }
 
     public DispositivoResponse findById(UUID id) {
