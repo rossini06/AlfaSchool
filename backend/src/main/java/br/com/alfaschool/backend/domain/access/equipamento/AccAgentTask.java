@@ -1,6 +1,8 @@
 package br.com.alfaschool.backend.domain.access.equipamento;
 
 import jakarta.persistence.Column;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -40,7 +42,9 @@ public class AccAgentTask {
     @Column(nullable = false, length = 40)
     private TipoAgentTask tipo;
 
-    @Lob
+    // @Lob sozinho faz o Hibernate 6 esperar TINYTEXT; a coluna e' TEXT.
+    // Sem isto o ddl-auto=validate recusa o boot por divergencia de tipo.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "parametros")
     private String parametros;
 
@@ -48,7 +52,9 @@ public class AccAgentTask {
     @Column(nullable = false, length = 20)
     private StatusAgentTask status = StatusAgentTask.PENDENTE;
 
-    @Lob
+    // @Lob sozinho faz o Hibernate 6 esperar TINYTEXT; a coluna e' TEXT.
+    // Sem isto o ddl-auto=validate recusa o boot por divergencia de tipo.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "resultado")
     private String resultado;
 

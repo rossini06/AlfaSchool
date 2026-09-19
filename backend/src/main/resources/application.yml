@@ -16,7 +16,21 @@ spring:
       max-lifetime: 1800000
   jpa:
     hibernate:
-      ddl-auto: none
+      # validate, nao none. O Hibernate confere no boot se cada entidade
+      # tem no banco as colunas que ela mapeia, e recusa subir se nao tem.
+      #
+      # Com 'none' ele nao conferia nada, e o resultado foi um defeito que
+      # sobreviveu meses: HistoricoNota mapeava created_at/updated_at/
+      # deleted (herdados de BaseEntity) que a tabela nao possuia. Todo
+      # INSERT falhava, o NotaService engolia a excecao num catch que so'
+      # logava WARN, e o historico de alteracao de nota ficou com ZERO
+      # linha — justamente o registro que a escola precisa quando um
+      # responsavel contesta uma nota.
+      #
+      # Os testes nao pegavam: eles usam create-drop, que gera a tabela a
+      # partir da entidade, entao ela sempre bate. So' o schema do Flyway
+      # divergia, isto e', desenvolvimento e producao.
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
     open-in-view: false
     show-sql: false
     properties:
