@@ -17,7 +17,10 @@ public record AutorizacaoRetiradaResponse(
         UUID id,
         UUID tenantId,
         UUID alunoId,
+        String alunoNome,
         UUID pessoaAutorizadaId,
+        String pessoaNome,
+        String pessoaParentesco,
         boolean permanente,
         LocalDate vigenciaInicio,
         LocalDate vigenciaFim,
@@ -34,8 +37,19 @@ public record AutorizacaoRetiradaResponse(
         Instant updatedAt
 ) {
     public static AutorizacaoRetiradaResponse from(AutorizacaoRetirada a) {
+        return from(a, null, null, null);
+    }
+
+    /**
+     * A fila de aprovacao mostra alunos e pessoas diferentes em cada linha.
+     * Sem os nomes resolvidos aqui, a tela exibiria ids — ou, como estava,
+     * colunas vazias.
+     */
+    public static AutorizacaoRetiradaResponse from(AutorizacaoRetirada a, String alunoNome,
+                                                   String pessoaNome, String pessoaParentesco) {
         return new AutorizacaoRetiradaResponse(
-                a.getId(), a.getTenantId(), a.getAlunoId(), a.getPessoaAutorizadaId(),
+                a.getId(), a.getTenantId(), a.getAlunoId(), alunoNome, a.getPessoaAutorizadaId(),
+                pessoaNome, pessoaParentesco,
                 a.isPermanente(), a.getVigenciaInicio(), a.getVigenciaFim(),
                 a.getDiasSemana(), a.getHoraInicio(), a.getHoraFim(),
                 a.getStatus(), a.getOrigem(), a.getMotivo(),

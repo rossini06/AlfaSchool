@@ -11,6 +11,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import br.com.alfaschool.backend.shared.web.Paginacao;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
+import br.com.alfaschool.backend.domain.access.shared.StatusAutorizacao;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +35,25 @@ public class AutorizacaoRetiradaController {
 
     public AutorizacaoRetiradaController(AutorizacaoRetiradaService autorizacaoRetiradaService) {
         this.autorizacaoRetiradaService = autorizacaoRetiradaService;
+    }
+
+    /**
+     * Listagem geral. Nao existia: so' havia busca por aluno e por pessoa,
+     * entao GET /access/autorizacoes respondia 405 e tanto a tabela
+     * principal quanto a fila de aprovacao ficavam permanentemente vazias.
+     */
+    @GetMapping
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_AUTORIZACOES_VER')")
+    public ResponseEntity<ApiResponse<Page<AutorizacaoRetiradaResponse>>> listar(
+            @RequestParam(required = false) UUID alunoId,
+            @RequestParam(required = false) StatusAutorizacao status,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = Paginacao.de(page, size);
+        return ResponseEntity.ok(ApiResponse.of(200, "Autorizações listadas com sucesso",
+                autorizacaoRetiradaService.listar(alunoId, status, q, pageable)));
     }
 
     @GetMapping("/aluno/{alunoId}")

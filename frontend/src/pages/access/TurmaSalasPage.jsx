@@ -7,7 +7,7 @@ import { LinhasEstado } from "../../components/access/EstadoLista";
 import { Feedback, Aviso } from "../../components/access/Feedback";
 import { ConfirmarModal } from "../../components/access/ConfirmarModal";
 import { DiasSemanaChips } from "../../components/access/DiasSemanaChips";
-import { nomesDosDias } from "../../utils/diasSemana";
+import { nomesDosDias, diasParaCsv, diasDeCsv } from "../../utils/diasSemana";
 import { horaParaMinutos, formatarData, formatarHora } from "../../utils/tempo";
 import "../../styles/accessCadastros.css";
 
@@ -110,7 +110,7 @@ export function TurmaSalasPage() {
       return;
     }
     setCarregandoOcupacao(true);
-    const r = await accessApi.get(`/access/turma-salas?${qs({ salaId, size: 200 })}`);
+    const r = await accessApi.get(`/access/turma-salas/sala/${salaId}`);
     setOcupacao(r.ok ? comoLista(r.data) : []);
     setCarregandoOcupacao(false);
   }, []);
@@ -128,7 +128,7 @@ export function TurmaSalasPage() {
     if (!form.salaId || !form.horaInicio || !form.horaFim) return [];
     return ocupacaoVisivel.filter(
       (o) =>
-        (o.diasSemana || []).some((d) => form.diasSemana.includes(d)) &&
+        diasDeCsv(o.diasSemanaResolvidos ?? o.diasSemana).some((d) => form.diasSemana.includes(d)) &&
         faixasSeCruzam(form.horaInicio, form.horaFim, o.horaInicio, o.horaFim) &&
         vigenciasSeCruzam(form.vigenciaInicio, form.vigenciaFim, o.vigenciaInicio, o.vigenciaFim)
     );
@@ -151,7 +151,7 @@ export function TurmaSalasPage() {
       vigenciaFim: item.vigenciaFim || "",
       horaInicio: (item.horaInicio || "").slice(0, 5),
       horaFim: (item.horaFim || "").slice(0, 5),
-      diasSemana: item.diasSemana || [],
+      diasSemana: diasDeCsv(item.diasSemana),
     });
     setErros({});
     setErroForm("");
@@ -187,7 +187,7 @@ export function TurmaSalasPage() {
       vigenciaFim: form.vigenciaFim || null,
       horaInicio: form.horaInicio,
       horaFim: form.horaFim,
-      diasSemana: form.diasSemana,
+      diasSemana: diasParaCsv(form.diasSemana),
     };
     const r = editando
       ? await accessApi.put(`/access/turma-salas/${editando.id}`, corpo)
@@ -218,7 +218,7 @@ export function TurmaSalasPage() {
 
   const abrirDetalheSala = async (salaId) => {
     setSalaDetalhe({ salaId, itens: [], carregando: true });
-    const r = await accessApi.get(`/access/turma-salas?${qs({ salaId, size: 200 })}`);
+    const r = await accessApi.get(`/access/turma-salas/sala/${salaId}`);
     setSalaDetalhe({ salaId, itens: r.ok ? comoLista(r.data) : [], carregando: false, erro: r.ok ? "" : r.erro });
   };
 

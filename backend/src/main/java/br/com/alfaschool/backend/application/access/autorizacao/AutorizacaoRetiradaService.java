@@ -13,6 +13,8 @@ import br.com.alfaschool.backend.infrastructure.persistence.repository.AccAutori
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AccAutorizacaoRetiradaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AccPessoaAutorizadaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,49 @@ public class AutorizacaoRetiradaService {
     // ------------------------------------------------------------------
     // Consultas
     // ------------------------------------------------------------------
+
+    /**
+     * Listagem geral, com nomes resolvidos em duas consultas por pagina e
+     * nao duas por linha. Sao poucos ids distintos: a fila de aprovacao de
+     * uma escola repete aluno e pessoa com frequencia.
+     */
+    public Page<AutorizacaoRetiradaResponse> listar(UUID alunoId, StatusAutorizacao status,
+                                                    String q, Pageable pageable) {
+        UUID tenantId = ContextoAtual.tenantObrigatorio();
+        Page<AutorizacaoRetirada> pagina = autorizacaoRepository.buscar(tenantId, alunoId, status, pageable);
+
+        var alunoIds = pagina.getContent().stream().map(AutorizacaoRetirada::getAlunoId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+        var pessoaIds = pagina.getContent().stream().map(AutorizacaoRetirada::getPessoaAutorizadaId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+
+        var alunos = alunoIds.isEmpty() ? java.util.Map.<UUID, String>of()
+                : alunoRepository.findAllById(alunoIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(a -> a.getId(), a -> a.getNome()));
+        var pessoas = pessoaIds.isEmpty() ? java.util.Map.<UUID, PessoaAutorizada>of()
+                : pessoaRepository.findAllById(pessoaIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(pa -> pa.getId(), pa -> pa));
+
+        var linhas = pagina.getContent().stream()
+                .map(a -> {
+                    PessoaAutorizada pa = pessoas.get(a.getPessoaAutorizadaId());
+                    return AutorizacaoRetiradaResponse.from(a, alunos.get(a.getAlunoId()),
+                            pa == null ? null : pa.getNome(),
+                            pa == null ? null : pa.getParentesco());
+                })
+                // A busca textual roda sobre os nomes ja resolvidos: procurar
+                // no banco exigiria join com duas tabelas de outras fatias.
+                .filter(r -> q == null || q.isBlank()
+                        || contem(r.alunoNome(), q) || contem(r.pessoaNome(), q))
+                .toList();
+
+        return new org.springframework.data.domain.PageImpl<>(linhas, pageable,
+                (q == null || q.isBlank()) ? pagina.getTotalElements() : linhas.size());
+    }
+
+    private static boolean contem(String valor, String termo) {
+        return valor != null && valor.toLowerCase().contains(termo.trim().toLowerCase());
+    }
 
     public List<AutorizacaoRetiradaResponse> listarPorAluno(UUID alunoId) {
         UUID tenantId = ContextoAtual.tenantObrigatorio();

@@ -7,7 +7,7 @@ import { LinhasEstado, BlocoEstado } from "../../components/access/EstadoLista";
 import { Feedback, Aviso } from "../../components/access/Feedback";
 import { ConfirmarModal } from "../../components/access/ConfirmarModal";
 import { DiasSemanaChips } from "../../components/access/DiasSemanaChips";
-import { nomesDosDias } from "../../utils/diasSemana";
+import { nomesDosDias, diasParaCsv, diasDeCsv } from "../../utils/diasSemana";
 import { StatusAutorizacaoBadge } from "../../components/access/StatusAutorizacaoBadge";
 import { STATUS_AUTORIZACAO } from "../../utils/statusAutorizacao";
 import { formatarData, formatarHora, formatarDataHora, hojeIso } from "../../utils/tempo";
@@ -71,7 +71,7 @@ export function AutorizacoesPage() {
           size: PAGE_SIZE,
           alunoId: filtroAluno,
           status: filtroStatus,
-          search: busca,
+          q: busca,
         })}`
       );
       if (r.ok) {
@@ -124,13 +124,13 @@ export function AutorizacoesPage() {
     setForm({
       alunoId: item.alunoId || "",
       pessoaAutorizadaId: item.pessoaAutorizadaId || "",
-      temporaria: !!item.temporaria,
+      temporaria: !item.permanente,
       vigenciaInicio: item.vigenciaInicio || hojeIso(),
       vigenciaFim: item.vigenciaFim || "",
-      diasSemana: item.diasSemana || [],
+      diasSemana: diasDeCsv(item.diasSemana),
       horaInicio: (item.horaInicio || "").slice(0, 5),
       horaFim: (item.horaFim || "").slice(0, 5),
-      observacoes: item.observacoes || "",
+      observacoes: item.observacao || "",
     });
     setErros({});
     setErroForm("");
@@ -161,13 +161,16 @@ export function AutorizacoesPage() {
     const corpo = {
       alunoId: form.alunoId,
       pessoaAutorizadaId: form.pessoaAutorizadaId,
-      temporaria: form.temporaria,
-      vigenciaInicio: form.vigenciaInicio,
-      vigenciaFim: form.vigenciaFim || null,
-      diasSemana: form.diasSemana,
+      // A API guarda `permanente`, que e' o INVERSO de `temporaria`.
+      // Mandar o campo errado dava 400 "permanente é obrigatório" em todo
+      // cadastro — nenhuma autorizacao podia ser criada pela tela.
+      permanente: !form.temporaria,
+      vigenciaInicio: form.vigenciaInicio || null,
+      vigenciaFim: form.temporaria ? form.vigenciaFim || null : null,
+      diasSemana: diasParaCsv(form.diasSemana),
       horaInicio: form.horaInicio || null,
       horaFim: form.horaFim || null,
-      observacoes: form.observacoes.trim() || null,
+      observacao: form.observacoes.trim() || null,
     };
     const r = editando
       ? await accessApi.put(`/access/autorizacoes/${editando.id}`, corpo)
@@ -477,7 +480,7 @@ export function AutorizacoesPage() {
                     <tr key={item.id}>
                       <td>
                         <strong>{item.pessoaNome || nomePessoa(item.pessoaAutorizadaId)}</strong>
-                        {item.temporaria && (
+                        {!item.permanente && (
                           <span className="badge badge-warning" style={{ marginLeft: 6 }}>
                             Temporária
                           </span>

@@ -41,11 +41,13 @@ public class TurmaSalaController {
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_ACESSO_ESTRUTURA_GERIR')")
     public ResponseEntity<ApiResponse<Page<TurmaSalaResponse>>> list(
+            @RequestParam(required = false) UUID turmaId,
+            @RequestParam(required = false) UUID salaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("vigenciaInicio").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculos turma-sala listados com sucesso",
-                turmaSalaService.list(pageable)));
+                turmaSalaService.list(turmaId, salaId, pageable)));
     }
 
     @GetMapping("/turma/{turmaId}")

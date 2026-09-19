@@ -16,6 +16,18 @@ import java.util.UUID;
 @Repository
 public interface AccTurmaSalaRepository extends JpaRepository<AccTurmaSala, UUID> {
 
+    /** Os dois filtros que a tela oferecia e que o controller ignorava. */
+    @org.springframework.data.jpa.repository.Query(
+        "select v from AccTurmaSala v where v.tenantId = :tenantId and v.deleted = false "
+      + "and (:turmaId is null or v.turmaId = :turmaId) "
+      + "and (:salaId is null or v.salaId = :salaId)")
+    org.springframework.data.domain.Page<AccTurmaSala> buscar(
+            @org.springframework.data.repository.query.Param("tenantId") UUID tenantId,
+            @org.springframework.data.repository.query.Param("turmaId") UUID turmaId,
+            @org.springframework.data.repository.query.Param("salaId") UUID salaId,
+            org.springframework.data.domain.Pageable pageable);
+
+
     Page<AccTurmaSala> findByTenantIdAndDeletedFalse(UUID tenantId, Pageable pageable);
 
     Optional<AccTurmaSala> findByIdAndTenantIdAndDeletedFalse(UUID id, UUID tenantId);

@@ -90,9 +90,13 @@ public class TurmaSalaService {
     // CRUD
     // ------------------------------------------------------------------
 
-    public Page<TurmaSalaResponse> list(Pageable pageable) {
+    public Page<TurmaSalaResponse> list(UUID turmaId, UUID salaId, Pageable pageable) {
         UUID tenantId = tenantObrigatorio();
-        return turmaSalaRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(TurmaSalaResponse::from);
+        if (turmaId == null && salaId == null) {
+            return turmaSalaRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
+                    .map(TurmaSalaResponse::from);
+        }
+        return turmaSalaRepository.buscar(tenantId, turmaId, salaId, pageable).map(TurmaSalaResponse::from);
     }
 
     public List<TurmaSalaResponse> listByTurma(UUID turmaId) {
