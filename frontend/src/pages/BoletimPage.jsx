@@ -212,7 +212,7 @@ export function BoletimPage() {
 
             {/* Botão */}
             <button
-              className="btn btn-primary"
+              className="btn btn-brand"
               disabled={!matriculaId || loading}
               onClick={gerarBoletim}
               style={{ flexShrink: 0 }}

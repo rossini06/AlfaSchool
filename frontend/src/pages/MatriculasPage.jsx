@@ -3,6 +3,8 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
+import { ConfirmarModal } from "../components/access/ConfirmarModal";
 
 const PAGE_SIZE = 20;
 
@@ -26,6 +28,11 @@ export function MatriculasPage() {
   const [filterTurma, setFilterTurma] = useState("");
   const [filterAno, setFilterAno] = useState("");
   const [turmas, setTurmas] = useState([]);
+  const [feedback, setFeedback] = useState(null);
+  // Cancelar matricula e' destrutivo e vinha com a mesma caixa neutra do
+  // sistema que "reativar" — o confirm() nativo nao distingue os dois.
+  const [mudandoStatus, setMudandoStatus] = useState(null);
+  const [processandoStatus, setProcessandoStatus] = useState(false);
 
   // New matricula modal (multi-step)
   const [modalOpen, setModalOpen] = useState(false);
@@ -110,25 +117,32 @@ export function MatriculasPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
   };
 
-  const updateStatus = async (id, novoStatus) => {
-    if (!confirm(`Alterar status para "${STATUS_MAP[novoStatus]?.label}"?`)) return;
+  const updateStatus = (item, novoStatus) => setMudandoStatus({ item, novoStatus });
+
+  const aplicarStatus = async () => {
+    const { item, novoStatus } = mudandoStatus;
+    setProcessandoStatus(true);
     try {
       const endpointMap = { ativa: "reativar", trancada: "trancar", cancelada: "cancelar", concluida: "concluir" };
       const endpoint = endpointMap[novoStatus];
       if (endpoint) {
-        await api.post(`/matriculas/${id}/${endpoint}`);
+        await api.post(`/matriculas/${item.id}/${endpoint}`);
       } else {
-        await api.patch(`/matriculas/${id}/status`, { status: novoStatus });
+        await api.patch(`/matriculas/${item.id}/status`, { status: novoStatus });
       }
+      setMudandoStatus(null);
+      setFeedback({ tipo: "sucesso", mensagem: `Matrícula ${STATUS_MAP[novoStatus]?.label.toLowerCase()}.` });
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
+    } finally {
+      setProcessandoStatus(false);
     }
   };
 
@@ -189,6 +203,33 @@ export function MatriculasPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
+
+      <ConfirmarModal
+        aberto={!!mudandoStatus}
+        titulo={
+          mudandoStatus?.novoStatus === "cancelada"
+            ? "Cancelar esta matrícula?"
+            : `Mudar a matrícula para "${STATUS_MAP[mudandoStatus?.novoStatus]?.label}"?`
+        }
+        textoConfirmar={STATUS_MAP[mudandoStatus?.novoStatus]?.label || "Confirmar"}
+        variante={mudandoStatus?.novoStatus === "cancelada" ? "btn-danger" : "btn-brand"}
+        processando={processandoStatus}
+        onCancelar={() => setMudandoStatus(null)}
+        onConfirmar={aplicarStatus}
+      >
+        <p>
+          {mudandoStatus?.novoStatus === "cancelada"
+            ? "O aluno deixa de constar na turma e sai das listas de frequência e de notas. Uma matrícula cancelada pode ser reativada depois, mas o período cancelado fica registrado."
+            : "A situação da matrícula muda para quem consulta a turma, a frequência e o boletim."}
+        </p>
+        {mudandoStatus?.item && (
+          <p className="ac-meta mt-2">
+            {mudandoStatus.item.alunoNome || mudandoStatus.item.numeroMatricula || "Matrícula"}
+            {mudandoStatus.item.turmaNome ? ` · ${mudandoStatus.item.turmaNome}` : ""}
+          </p>
+        )}
+      </ConfirmarModal>
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -235,19 +276,19 @@ export function MatriculasPage() {
                   <td>
                     <div className="td-actions">
                       {item.status !== "ativa" && (
-                        <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item.id, "ativa")} title="Reativar">
+                        <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item, "ativa")} title="Reativar" aria-label="Reativar matrícula">
                           <Icon name="Check" size={12} />
                         </button>
                       )}
                       {item.status === "ativa" && (
                         <>
-                          <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item.id, "trancada")} title="Trancar">
+                          <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item, "trancada")} title="Trancar" aria-label="Trancar matrícula">
                             <Icon name="Lock" size={12} />
                           </button>
-                          <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item.id, "concluida")} title="Concluir">
+                          <button className="btn btn-ghost btn-xs" onClick={() => updateStatus(item, "concluida")} title="Concluir" aria-label="Concluir matrícula">
                             <Icon name="CheckCircle" size={12} />
                           </button>
-                          <button className="btn btn-ghost btn-xs text-danger" onClick={() => updateStatus(item.id, "cancelada")} title="Cancelar">
+                          <button className="btn btn-ghost btn-xs text-danger" onClick={() => updateStatus(item, "cancelada")} title="Cancelar" aria-label="Cancelar matrícula">
                             <Icon name="X" size={12} />
                           </button>
                         </>

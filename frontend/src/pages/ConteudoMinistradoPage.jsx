@@ -203,7 +203,7 @@ export function ConteudoMinistradoPage() {
             </div>
 
             <button
-              className="btn btn-primary"
+              className="btn btn-brand"
               disabled={!turmaId || !disciplinaId}
               onClick={openNew}
               style={{ flexShrink: 0 }}
@@ -379,7 +379,7 @@ export function ConteudoMinistradoPage() {
             <button
               type="submit"
               form="conteudo-form"
-              className="btn btn-primary"
+              className="btn btn-brand"
               disabled={saving}
             >
               {saving ? "Salvando..." : "Salvar"}

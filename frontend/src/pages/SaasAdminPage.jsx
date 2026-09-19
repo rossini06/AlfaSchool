@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
+import { ConfirmarModal } from "../components/access/ConfirmarModal";
 
 const TABS = ["Dashboard", "Planos", "Redes de Ensino"];
 
@@ -9,6 +11,9 @@ export function SaasAdminPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [metricas, setMetricas] = useState(null);
   const [planos, setPlanos] = useState([]);
+  const [feedback, setFeedback] = useState(null);
+  const [excluindoPlano, setExcluindoPlano] = useState(null);
+  const [processandoExcluir, setProcessandoExcluir] = useState(false);
   const [redes, setRedes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -72,19 +77,23 @@ export function SaasAdminPage() {
       setPlanModal(false);
       loadAll();
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
   };
 
-  const deletePlan = async (id) => {
-    if (!confirm("Excluir este plano?")) return;
+  const confirmarExclusaoPlano = async () => {
+    setProcessandoExcluir(true);
     try {
-      await api.delete(`/saas/plans/${id}`);
+      await api.delete(`/saas/plans/${excluindoPlano.id}`);
+      setExcluindoPlano(null);
+      setFeedback({ tipo: "sucesso", mensagem: "Plano excluído." });
       loadAll();
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
+    } finally {
+      setProcessandoExcluir(false);
     }
   };
 
@@ -117,6 +126,22 @@ export function SaasAdminPage() {
           Atualizar
         </button>
       </div>
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
+
+      <ConfirmarModal
+        aberto={!!excluindoPlano}
+        titulo="Excluir este plano?"
+        textoConfirmar="Excluir plano"
+        processando={processandoExcluir}
+        onCancelar={() => setExcluindoPlano(null)}
+        onConfirmar={confirmarExclusaoPlano}
+      >
+        <p>
+          <strong>{excluindoPlano?.nome}</strong> deixa de ser oferecido às escolas. Quem já
+          está contratado neste plano não é afetado — o vínculo existente continua valendo.
+        </p>
+      </ConfirmarModal>
 
       {error && (
         <div className="login-error">
@@ -218,10 +243,10 @@ export function SaasAdminPage() {
                       </td>
                       <td>
                         <div className="td-actions">
-                          <button className="btn btn-ghost btn-sm" onClick={() => openEditPlan(plan)}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEditPlan(plan)} title="Editar" aria-label="Editar">
                             <Icon name="Edit" size={13} />
                           </button>
-                          <button className="btn btn-ghost btn-sm text-danger" onClick={() => deletePlan(plan.id)}>
+                          <button className="btn btn-ghost btn-sm text-danger" onClick={() => setExcluindoPlano(plan)} title="Excluir" aria-label="Excluir">
                             <Icon name="Trash" size={13} />
                           </button>
                         </div>

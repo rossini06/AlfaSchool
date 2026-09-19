@@ -156,7 +156,7 @@ export function PermissoesUsuarioModal({ usuario, onClose }) {
         <button className="btn btn-ghost" onClick={() => onClose(false)} disabled={salvando}>
           Cancelar
         </button>
-        <button className="btn btn-primary" onClick={salvar} disabled={salvando || carregando}>
+        <button className="btn btn-brand" onClick={salvar} disabled={salvando || carregando}>
           {salvando ? "Salvando…" : "Salvar permissões"}
         </button>
       </footer>

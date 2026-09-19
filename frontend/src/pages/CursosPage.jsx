@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +25,7 @@ export function CursosPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
   const [filterModalidade, setFilterModalidade] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,7 +78,7 @@ export function CursosPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     setSaving(true);
     try {
       const body = {
@@ -97,7 +99,7 @@ export function CursosPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
@@ -110,7 +112,7 @@ export function CursosPage() {
       setDeleteId(null);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     }
   };
 
@@ -150,7 +152,7 @@ export function CursosPage() {
               </select>
             </div>
             <button className="btn btn-brand" onClick={() => load(0)}>
-              <Icon name="Search" size={14} />
+              <Icon name="Filter" size={14} />
               Filtrar
             </button>
             <button className="btn btn-secondary" onClick={() => { setSearch(""); setFilterModalidade(""); load(0); }}>
@@ -161,6 +163,8 @@ export function CursosPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -205,10 +209,10 @@ export function CursosPage() {
                   </td>
                   <td>
                     <div className="td-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar" aria-label="Editar">
                         <Icon name="Edit" size={13} />
                       </button>
-                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir">
                         <Icon name="Trash" size={13} />
                       </button>
                     </div>

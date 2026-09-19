@@ -111,7 +111,7 @@ export function LoginPage() {
                   cursor: "pointer",
                   padding: 0,
                 }}
-              >
+               title="Ver detalhes" aria-label="Ver detalhes">
                 <Icon name="Eye" size={14} />
               </button>
             </div>

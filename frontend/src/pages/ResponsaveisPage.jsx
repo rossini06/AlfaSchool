@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 import { Avatar } from "../components/Avatar";
 import { useCepLookup } from "../hooks/useCepLookup";
 
@@ -30,6 +31,7 @@ export function ResponsaveisPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -98,7 +100,7 @@ export function ResponsaveisPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     setSaving(true);
     try {
       const payload = { ...form };
@@ -111,7 +113,7 @@ export function ResponsaveisPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
@@ -124,7 +126,7 @@ export function ResponsaveisPage() {
       setDeleteId(null);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     }
   };
 
@@ -157,6 +159,7 @@ export function ResponsaveisPage() {
 
   return (
     <div className="page">
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       <div className="page-header">
         <div>
           <h1 className="page-title">Responsáveis</h1>
@@ -250,10 +253,10 @@ export function ResponsaveisPage() {
                   </td>
                   <td>
                     <div className="td-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar" aria-label="Editar">
                         <Icon name="Edit" size={13} />
                       </button>
-                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir">
                         <Icon name="Trash" size={13} />
                       </button>
                     </div>

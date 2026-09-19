@@ -3,6 +3,8 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
+import { ConfirmarModal } from "../components/access/ConfirmarModal";
 import { Avatar } from "../components/Avatar";
 import { useCepLookup } from "../hooks/useCepLookup";
 
@@ -48,6 +50,10 @@ export function AlunosPage() {
   const [editItem, setEditItem] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [erroNome, setErroNome] = useState("");
+  // Desvincular responsavel apagava o vinculo no clique, sem pergunta.
+  const [desvinculando, setDesvinculando] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [activeTab, setActiveTab] = useState("pessoal");
 
@@ -143,7 +149,14 @@ export function AlunosPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!form.nome.trim()) {
+      // Erro no proprio campo, nao numa caixa do sistema que esconde o
+      // formulario e nao diz onde esta' o problema.
+      setErroNome("Informe o nome do aluno.");
+      setActiveTab("pessoal");
+      return;
+    }
+    setErroNome("");
     setSaving(true);
     try {
       let savedAluno;
@@ -177,7 +190,7 @@ export function AlunosPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
@@ -189,8 +202,9 @@ export function AlunosPage() {
       await api.delete(`/alunos/${deleteId}`);
       setDeleteId(null);
       load(page);
+      setFeedback({ tipo: "sucesso", mensagem: "Aluno excluído." });
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     }
   };
 
@@ -258,20 +272,22 @@ export function AlunosPage() {
     setLinkConfigOpen(true);
   };
 
+  /**
+   * Desvincular responsavel e' destrutivo: junto com o vinculo vai a
+   * autorizacao de retirada, o acesso ao portal e o recebimento de avisos
+   * daquela pessoa. Apagava no clique, sem pergunta e sem desfazer.
+   */
   const removeLink = async (idx) => {
     const link = form.responsaveis[idx];
     if (link._linkId && editItem) {
       try {
         await api.delete(`/alunos/${editItem.id}/responsaveis/${link._linkId}`);
       } catch (err) {
-        alert(err.message);
+        setFeedback({ tipo: "erro", mensagem: err.message });
         return;
       }
     }
-    setForm((prev) => {
-      const updated = prev.responsaveis.filter((_, i) => i !== idx);
-      return { ...prev, responsaveis: updated };
-    });
+    setForm((prev) => ({ ...prev, responsaveis: prev.responsaveis.filter((_, i) => i !== idx) }));
   };
 
   const lf = (k) => (e) => setLinkForm((prev) => ({
@@ -339,6 +355,25 @@ export function AlunosPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
+
+      <ConfirmarModal
+        aberto={!!desvinculando}
+        titulo="Desvincular este responsável?"
+        textoConfirmar="Desvincular"
+        onCancelar={() => setDesvinculando(null)}
+        onConfirmar={async () => {
+          const alvo = desvinculando;
+          setDesvinculando(null);
+          await removeLink(alvo.idx);
+        }}
+      >
+        <p>
+          <strong>{desvinculando?.link?.responsavel?.nome || "Esta pessoa"}</strong> deixa de
+          constar como responsável por este aluno. Com o vínculo vão junto a autorização de
+          retirada, o acesso ao portal da família e o recebimento de avisos.
+        </p>
+      </ConfirmarModal>
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -390,10 +425,10 @@ export function AlunosPage() {
                   </td>
                   <td>
                     <div className="td-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar" aria-label="Editar">
                         <Icon name="Edit" size={13} />
                       </button>
-                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir">
                         <Icon name="Trash" size={13} />
                       </button>
                     </div>
@@ -431,8 +466,16 @@ export function AlunosPage() {
             {activeTab === "pessoal" && (
               <div className="form-grid">
                 <div className="form-field">
-                  <label className="form-label required">Nome Completo</label>
-                  <input className="form-input" value={form.nome} onChange={f("nome")} placeholder="Nome completo do aluno" />
+                  <label className="form-label required" htmlFor="aluno-nome">Nome Completo</label>
+                  <input
+                    id="aluno-nome"
+                    className={`form-input ${erroNome ? "error" : ""}`}
+                    value={form.nome}
+                    onChange={(e) => { f("nome")(e); if (erroNome) setErroNome(""); }}
+                    placeholder="Nome completo do aluno"
+                    aria-invalid={erroNome ? "true" : undefined}
+                  />
+                  {erroNome && <span className="form-error">{erroNome}</span>}
                 </div>
                 <div className="form-grid-2">
                   <div className="form-field">
@@ -599,10 +642,15 @@ export function AlunosPage() {
                           </div>
                         </div>
                         <div className="td-actions">
-                          <button className="btn btn-ghost btn-sm" onClick={() => editLink(idx)}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => editLink(idx)} title="Editar" aria-label="Editar">
                             <Icon name="Edit" size={13} />
                           </button>
-                          <button className="btn btn-ghost btn-sm text-danger" onClick={() => removeLink(idx)}>
+                          <button
+                            className="btn btn-ghost btn-sm text-danger"
+                            title="Desvincular responsável"
+                            aria-label="Desvincular responsável"
+                            onClick={() => setDesvinculando({ idx, link })}
+                          >
                             <Icon name="Trash" size={13} />
                           </button>
                         </div>

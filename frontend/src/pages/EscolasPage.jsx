@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 const PAGE_SIZE = 20;
 
@@ -23,6 +24,7 @@ export function EscolasPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
   const [filterRede, setFilterRede] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -77,7 +79,7 @@ export function EscolasPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     setSaving(true);
     try {
       if (editItem) {
@@ -88,7 +90,7 @@ export function EscolasPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
@@ -101,7 +103,7 @@ export function EscolasPage() {
       setDeleteId(null);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     }
   };
 
@@ -152,6 +154,8 @@ export function EscolasPage() {
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
 
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
+
       <div className="table-wrapper">
         <table className="data-table">
           <thead>
@@ -195,10 +199,10 @@ export function EscolasPage() {
                   </td>
                   <td>
                     <div className="td-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar" aria-label="Editar">
                         <Icon name="Edit" size={13} />
                       </button>
-                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir">
                         <Icon name="Trash" size={13} />
                       </button>
                     </div>

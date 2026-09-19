@@ -4,6 +4,7 @@ import { Modal } from "../components/Modal";
 import { PermissoesUsuarioModal } from "../components/PermissoesUsuarioModal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 const PAGE_SIZE = 20;
 
@@ -19,6 +20,7 @@ export function UsuariosPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [permissoesDe, setPermissoesDe] = useState(null);
@@ -61,9 +63,9 @@ export function UsuariosPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
-    if (!form.email.trim()) { alert("E-mail é obrigatório"); return; }
-    if (!editItem && !form.senha.trim()) { alert("Senha é obrigatória para novos usuários"); return; }
+    if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
+    if (!form.email.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o e-mail." }); return; }
+    if (!editItem && !form.senha.trim()) { setFeedback({ tipo: "alerta", mensagem: "Defina uma senha para o novo usuário." }); return; }
     setSaving(true);
     try {
       const body = { ...form };
@@ -76,7 +78,7 @@ export function UsuariosPage() {
       setModalOpen(false);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     } finally {
       setSaving(false);
     }
@@ -89,7 +91,7 @@ export function UsuariosPage() {
       setDeleteId(null);
       load(page);
     } catch (err) {
-      alert(err.message);
+      setFeedback({ tipo: "erro", mensagem: err.message });
     }
   };
 
@@ -152,6 +154,8 @@ export function UsuariosPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -216,7 +220,7 @@ export function UsuariosPage() {
                       >
                         <Icon name="ShieldCheck" size={13} />
                       </button>
-                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir">
                         <Icon name="Trash" size={13} />
                       </button>
                     </div>

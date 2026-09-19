@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -15,6 +16,7 @@ export function FrequenciaPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function FrequenciaPage() {
   };
 
   const salvar = async () => {
-    if (!turmaId || !disciplinaId || !data) { alert("Selecione turma, disciplina e data"); return; }
+    if (!turmaId || !disciplinaId || !data) { setFeedback({ tipo: "alerta", mensagem: "Selecione a turma, a disciplina e a data." }); return; }
     setSaving(true); setSuccess(""); setError("");
     try {
       await Promise.all(alunos.map(aluno =>
@@ -120,6 +122,8 @@ export function FrequenciaPage() {
       )}
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       {success && <div className="login-error" style={{ background: "var(--color-success-bg)", color: "var(--color-success)", border: "1px solid var(--color-success)" }}>
         <Icon name="CheckCircle" size={14} /> {success}
       </div>}

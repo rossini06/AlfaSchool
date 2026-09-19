@@ -158,7 +158,7 @@ export function Header({ onMenuToggle }) {
   return (
     <header className="header">
       <div className="header-left">
-        <button className="hamburger-btn" onClick={onMenuToggle}>
+        <button className="hamburger-btn" onClick={onMenuToggle} title="Abrir menu" aria-label="Abrir menu">
           <Icon name="Menu" size={22} />
         </button>
         <span className="header-title">{pageTitle}</span>

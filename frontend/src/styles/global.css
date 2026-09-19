@@ -6,7 +6,7 @@
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; -webkit-text-size-adjust: 100%; }
-body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.5; transition: background-color 0.3s, color 0.3s; }
+body { font-family: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.5; transition: background-color 0.3s, color 0.3s; }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
@@ -21,8 +21,13 @@ ul, ol { list-style: none; }
   --color-border:    #2e3347;
   --color-text:      #e8eaf0;
   --color-text-2:    #9196a8;
-  --color-brand:     #1696a3;
-  --color-brand-dim: rgba(22, 150, 163, 0.12);
+  /* #1696a3 com texto branco dava 3,5:1 — abaixo do minimo de 4,5:1, e
+     este e' o botao primario de TODAS as telas ("Novo", "Salvar",
+     "Filtrar"). Clareado so' no tema escuro; no claro o tom original ja
+     passava. A cor de identidade continua sendo a mesma familia. */
+  --color-brand:     #1fb5c4;
+  --color-brand-dim: rgba(31, 181, 196, 0.14);
+  --color-brand-forte: #1696a3;
   --color-primary:   #3b7dd8;
   --color-success:   #27ae60;
   --color-danger:    #e74c3c;
@@ -43,6 +48,25 @@ ul, ol { list-style: none; }
   --header-height: 64px;
   --radius-xl: 20px;
   --transition: 0.2s ease;
+
+  /* ── Apelidos que o codigo ja' usava e que nao existiam ──
+     Quatro nomes aparecem em 20 lugares do projeto e nunca foram
+     declarados. Regra com variavel inexistente e' simplesmente
+     DESCARTADA pelo navegador, entao:
+       --color-text-muted   -> as abas do Financeiro ficavam com a ativa e
+                               a inativa quase identicas;
+       --color-bg-secondary -> caixas que deveriam ter fundo proprio saiam
+                               transparentes;
+       --color-success-bg   -> a faixa verde de "frequencia salva" herdava o
+                               fundo de ERRO com uma borda verde por cima.
+     O conjunto oficial usa o sufixo -dim e -text-2; estes quatro seguiram
+     outra convencao. Mantidos como apelidos para nao ter de reescrever os
+     20 pontos e arriscar esquecer um. */
+  --color-text-muted:   var(--color-text-2);
+  --color-bg-secondary: var(--color-bg-3);
+  --color-success-bg:   var(--color-success-dim);
+  --color-danger-bg:    var(--color-danger-dim);
+  --color-text-1:       var(--color-text);
 }
 
 [data-theme="light"] {
@@ -54,6 +78,7 @@ ul, ol { list-style: none; }
   --color-text-2:    #5a6178;
   --color-brand:     #0e7a85;
   --color-brand-dim: rgba(14, 122, 133, 0.10);
+  --color-brand-forte: #0b5f68;
   --color-primary:   #2563eb;
   --color-success:   #16a34a;
   --color-danger:    #dc2626;
@@ -228,8 +253,11 @@ body {
   padding: 0.4rem 0.5rem 0.4rem 1.85rem;
   font-size: 0.8rem;
   color: inherit;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Era rgba(255,255,255,...) fixo: no tema claro a sidebar e' branca, e o
+     campo "Buscar no menu" sumia — fundo branco, borda branca, sobrando so'
+     o placeholder a meia opacidade. Tokens funcionam nos dois temas. */
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   outline: none;
 }
@@ -630,7 +658,9 @@ body {
 }
 .data-table tbody tr:last-child { border-bottom: none; }
 .data-table tbody tr:hover { background: var(--color-bg-3); }
-.data-table tbody tr.striped:nth-child(even) { background: rgba(255,255,255,0.02); }
+/* Mesmo motivo da busca do menu: branco translucido sobre fundo branco
+   nao aparece. A listra zebrada sumia inteira no tema claro. */
+.data-table tbody tr.striped:nth-child(even) { background: var(--color-bg-3); }
 .data-table tbody td {
   padding: 11px 16px;
   color: var(--color-text);
@@ -712,7 +742,14 @@ body {
   color: #fff;
   border-color: var(--color-brand);
 }
-.btn-brand:hover:not(:disabled) { background: #127e8a; border-color: #127e8a; }
+/* Derivado do token, nao fixo: quando o tom da marca muda, o hover
+   acompanha. Antes era #127e8a cravado, e como a marca foi clareada para
+   passar no contraste o hover ficou mais escuro que o repouso — o botao
+   apagava ao passar o mouse. */
+.btn-brand:hover:not(:disabled) {
+  background: var(--color-brand-forte);
+  border-color: var(--color-brand-forte);
+}
 
 .btn-primary {
   background: var(--color-primary);
@@ -1038,7 +1075,7 @@ body {
   transition: background var(--transition);
   margin-top: 4px;
 }
-.login-btn:hover:not(:disabled) { background: #127e8a; }
+.login-btn:hover:not(:disabled) { background: var(--color-brand-forte); }
 .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .login-error {
   background: var(--color-danger-dim);
@@ -1337,3 +1374,48 @@ body {
 .perm-item.fixa { opacity: 0.65; cursor: not-allowed; }
 .perm-item-nota { font-size: 0.72rem; opacity: 0.7; display: block; }
 .btn-link { background: none; border: 0; padding: 0; font-size: 0.78rem; color: var(--color-brand, #2f8f9d); cursor: pointer; }
+
+
+/* =========================================================
+   Foco de teclado
+   
+   O projeto zerava `outline` em inputs, selects e textareas e sinalizava o
+   foco so' mudando a cor da BORDA de 1px. E' indicacao fraca demais para
+   quem navega por teclado, e no tema claro — onde o campo da busca do menu
+   ja era invisivel — nao sobrava indicacao nenhuma.
+
+   :focus-visible aparece no teclado e nao no clique do mouse, entao o anel
+   nao polui quem usa o ponteiro. O padrao ja existia num unico lugar do
+   projeto (o switch de accessCadastros.css); aqui ele vira regra geral.
+   ========================================================= */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.form-input:focus-visible,
+.form-select:focus-visible,
+.form-textarea:focus-visible,
+.sidebar-busca input:focus-visible,
+.header-search input:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 1px;
+}
+
+/* Girar: ConteudoMinistradoPage aplicava `animation: spin ...` inline e o
+   keyframe nao existia em lugar nenhum — o indicador de carregamento
+   ficava parado. */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Movimento reduzido: quem marca essa preferencia no sistema costuma ter
+   enxaqueca ou labirintite. Animacao decorativa nao vale o custo. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

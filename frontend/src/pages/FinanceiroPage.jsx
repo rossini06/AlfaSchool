@@ -3,6 +3,8 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
+import { ConfirmarModal } from "../components/access/ConfirmarModal";
 
 const PAGE_SIZE = 20;
 const TABS = ["Cobranças", "Contratos", "Planos"];
@@ -20,6 +22,11 @@ export function FinanceiroPage() {
   const [editItem, setEditItem] = useState(null);
   const [saving, setSaving] = useState(false);
   const [planos, setPlanos] = useState([]);
+  const [feedback, setFeedback] = useState(null);
+  // Encerrar contrato nao tem desfazer: sai do onClick direto e passa a
+  // exigir confirmacao com o nome do aluno na frente de quem clica.
+  const [encerrando, setEncerrando] = useState(null);
+  const [processandoEncerrar, setProcessandoEncerrar] = useState(false);
   const [alunos, setAlunos] = useState([]);
 
   // Forms
@@ -60,26 +67,26 @@ export function FinanceiroPage() {
   };
 
   const savePlano = async () => {
-    if (!planoForm.nome.trim() || !planoForm.valor) { alert("Nome e valor são obrigatórios"); return; }
+    if (!planoForm.nome.trim() || !planoForm.valor) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome e o valor do plano." }); return; }
     setSaving(true);
     try {
       const body = { ...planoForm, valor: Number(planoForm.valor) };
       if (editItem) await api.put(`/financeiro/planos/${editItem.id}`, body);
       else await api.post("/financeiro/planos", body);
       setModalOpen(false); load(page);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
     finally { setSaving(false); }
   };
 
   const saveContrato = async () => {
     if (!contratoForm.alunoId || !contratoForm.planoId || !contratoForm.dataInicio) {
-      alert("Aluno, plano e data de início são obrigatórios"); return;
+      setFeedback({ tipo: "alerta", mensagem: "Informe o aluno, o plano e a data de início." }); return;
     }
     setSaving(true);
     try {
       await api.post("/financeiro/contratos", contratoForm);
       setModalOpen(false); load(page);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
     finally { setSaving(false); }
   };
 
@@ -87,7 +94,7 @@ export function FinanceiroPage() {
     try {
       await api.patch(`/financeiro/cobrancas/${pagamentoId}/pagar?dataPagamento=${dataPagamento}`);
       setPagamentoId(null); load(page);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -129,6 +136,7 @@ export function FinanceiroPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -171,8 +179,9 @@ export function FinanceiroPage() {
                 <td>{statusBadge(item.status)}</td>
                 <td><div className="td-actions">
                   {item.status === "ativo" && (
-                    <button className="btn btn-ghost btn-sm text-danger" title="Encerrar"
-                      onClick={async () => { try { await api.patch(`/financeiro/contratos/${item.id}/encerrar`); load(page); } catch (err) { alert(err.message); } }}>
+                    <button className="btn btn-ghost btn-sm text-danger" title="Encerrar contrato"
+                      aria-label="Encerrar contrato"
+                      onClick={() => setEncerrando(item)}>
                       <Icon name="X" size={13} />
                     </button>
                   )}
@@ -185,7 +194,7 @@ export function FinanceiroPage() {
                 <td className="td-muted">{item.periodicidade}</td>
                 <td><span className={`badge ${item.ativo !== false ? "badge-success" : "badge-danger"}`}>{item.ativo !== false ? "Ativo" : "Inativo"}</span></td>
                 <td><div className="td-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={() => openEditPlano(item)}><Icon name="Edit" size={13} /></button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => openEditPlano(item)} title="Editar" aria-label="Editar"><Icon name="Edit" size={13} /></button>
                 </div></td>
               </tr>
             ))}
@@ -193,6 +202,38 @@ export function FinanceiroPage() {
         </table>
         <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onPageChange={p => load(p)} />
       </div>
+
+      <ConfirmarModal
+        aberto={!!encerrando}
+        titulo="Encerrar este contrato?"
+        textoConfirmar="Encerrar contrato"
+        processando={processandoEncerrar}
+        onCancelar={() => setEncerrando(null)}
+        onConfirmar={async () => {
+          setProcessandoEncerrar(true);
+          try {
+            await api.patch(`/financeiro/contratos/${encerrando.id}/encerrar`);
+            setEncerrando(null);
+            setFeedback({ tipo: "sucesso", mensagem: "Contrato encerrado." });
+            load(page);
+          } catch (err) {
+            setFeedback({ tipo: "erro", mensagem: err.message });
+          } finally {
+            setProcessandoEncerrar(false);
+          }
+        }}
+      >
+        <p>
+          O contrato deixa de gerar cobranças a partir de hoje. Não há como desfazer pela
+          tela — seria preciso lançar um contrato novo.
+        </p>
+        {encerrando && (
+          <p className="ac-meta mt-2">
+            Início em {encerrando.dataInicio}
+            {encerrando.dataFim ? ` · término previsto ${encerrando.dataFim}` : ""}
+          </p>
+        )}
+      </ConfirmarModal>
 
       {/* Modal Plano */}
       <Modal isOpen={modalOpen && tab === 2} onClose={() => setModalOpen(false)}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 export function NotasPage() {
   const [turmas, setTurmas] = useState([]);
@@ -15,6 +16,7 @@ export function NotasPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [success, setSuccess] = useState("");
   const [newAval, setNewAval] = useState({ nome: "", tipo: "prova", peso: "1", dataAvaliacao: "" });
   const [showNewAval, setShowNewAval] = useState(false);
@@ -48,7 +50,7 @@ export function NotasPage() {
   }, [turmaId, avaliacaoId]);
 
   const salvar = async () => {
-    if (!avaliacaoId) { alert("Selecione uma avaliação"); return; }
+    if (!avaliacaoId) { setFeedback({ tipo: "alerta", mensagem: "Selecione a avaliação antes de lançar as notas." }); return; }
     setSaving(true); setSuccess(""); setError("");
     try {
       await Promise.all(alunos.map(a =>
@@ -62,14 +64,14 @@ export function NotasPage() {
   };
 
   const criarAvaliacao = async () => {
-    if (!newAval.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!newAval.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     try {
       await api.post("/avaliacoes", { turmaId, disciplinaId, ...newAval, peso: Number(newAval.peso) });
       setShowNewAval(false);
       setNewAval({ nome: "", tipo: "prova", peso: "1", dataAvaliacao: "" });
       const updated = await api.get(`/avaliacoes?turmaId=${turmaId}&disciplinaId=${disciplinaId}`);
       setAvaliacoes(updated?.content || updated || []);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
   };
 
   const notaColor = (v) => {
@@ -149,6 +151,8 @@ export function NotasPage() {
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       {success && <div className="login-error" style={{ background: "var(--color-success-bg)", color: "var(--color-success)", border: "1px solid var(--color-success)" }}>
         <Icon name="CheckCircle" size={14} /> {success}
       </div>}

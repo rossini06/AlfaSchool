@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 
 const PAGE_SIZE = 20;
 const TIPOS = ["Teórica", "Prática", "Mista", "Laboratório", "Estágio"];
@@ -20,6 +21,7 @@ export function DisciplinasPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -61,7 +63,7 @@ export function DisciplinasPage() {
   };
 
   const save = async () => {
-    if (!form.nome.trim()) { alert("Nome é obrigatório"); return; }
+    if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     setSaving(true);
     try {
       const body = {
@@ -74,13 +76,13 @@ export function DisciplinasPage() {
       if (editItem) await api.put(`/disciplinas/${editItem.id}`, body);
       else await api.post("/disciplinas", body);
       setModalOpen(false); load(page);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
     finally { setSaving(false); }
   };
 
   const confirmDelete = async () => {
     try { await api.delete(`/disciplinas/${deleteId}`); setDeleteId(null); load(page); }
-    catch (err) { alert(err.message); }
+    catch (err) { setFeedback({ tipo: "erro", mensagem: err.message }); }
   };
 
   const f = (k) => (e) => setForm(prev => ({
@@ -107,13 +109,15 @@ export function DisciplinasPage() {
               <input className="form-input" placeholder="Buscar por nome..."
                 value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && load(0)} />
             </div>
-            <button className="btn btn-brand" onClick={() => load(0)}><Icon name="Search" size={14} /> Filtrar</button>
+            <button className="btn btn-brand" onClick={() => load(0)}><Icon name="Filter" size={14} /> Filtrar</button>
             <button className="btn btn-secondary" onClick={() => { setSearch(""); load(0); }}>Limpar</button>
           </div>
         </div>
       </div>
 
       {error && <div className="login-error"><Icon name="AlertCircle" size={14} /> {error}</div>}
+
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
 
       <div className="table-wrapper">
         <table className="data-table">
@@ -141,8 +145,8 @@ export function DisciplinasPage() {
                   {item.ativa !== false ? "Ativa" : "Inativa"}
                 </span></td>
                 <td><div className="td-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)}><Icon name="Edit" size={13} /></button>
-                  <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)}><Icon name="Trash" size={13} /></button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => openEdit(item)} title="Editar" aria-label="Editar"><Icon name="Edit" size={13} /></button>
+                  <button className="btn btn-ghost btn-sm text-danger" onClick={() => setDeleteId(item.id)} title="Excluir" aria-label="Excluir"><Icon name="Trash" size={13} /></button>
                 </div></td>
               </tr>
             ))}

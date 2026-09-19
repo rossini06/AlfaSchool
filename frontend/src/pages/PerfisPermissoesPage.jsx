@@ -196,7 +196,7 @@ export function PerfisPermissoesPage() {
           <button className="btn btn-ghost" onClick={() => setEditando(null)} disabled={salvando}>
             Cancelar
           </button>
-          <button className="btn btn-primary" onClick={salvar} disabled={salvando}>
+          <button className="btn btn-brand" onClick={salvar} disabled={salvando}>
             {salvando ? "Salvando…" : `Salvar ${marcadas.size} permissões`}
           </button>
         </footer>

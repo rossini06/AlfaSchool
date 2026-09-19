@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { api } from "../services/api";
 import { Icon } from "../components/Icon";
+import { Feedback } from "../components/access/Feedback";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../components/Pagination";
 import { Avatar } from "../components/Avatar";
@@ -124,6 +125,7 @@ function LancarNotasModal({ avaliacao, turmaLabel, disciplinaLabel, onClose, onS
   const [notas, setNotas]   = useState({});
   const [obsMap, setObsMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState(null);
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
 
@@ -650,7 +652,7 @@ function DeleteModal({ avaliacao, onClose, onDeleted }) {
       await api.delete(`/avaliacoes/${avaliacao.id}`);
       onDeleted?.();
       onClose();
-    } catch (e) { alert(e.message); }
+    } catch (e) { setFeedback({ tipo: "erro", mensagem: e.message }); }
     finally { setDeleting(false); }
   };
   return (
@@ -822,6 +824,7 @@ export function AvaliacaoPage() {
   return (
     <div className="page">
       {/* ── Page Header ── */}
+      <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       <div className="page-header">
         <div>
           <h1 className="page-title">Avaliações</h1>
