@@ -258,6 +258,15 @@ export function Header({ onMenuToggle }) {
               <button className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                 <Icon name="UserCog" size={16} /> Meu Perfil
               </button>
+              {/* Antes do Sair: e' onde a pessoa procura quando esta perdida,
+                  e o tutorial se recorta sozinho pelo perfil dela. */}
+              <Link
+                className="dropdown-item"
+                to="/ajuda"
+                onClick={() => setDropdownOpen(false)}
+              >
+                <Icon name="Info" size={16} /> Como usar o sistema
+              </Link>
               <div className="dropdown-divider" />
               <button
                 className="dropdown-item danger"
