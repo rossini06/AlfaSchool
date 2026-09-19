@@ -5,6 +5,7 @@ import br.com.alfaschool.backend.application.role.dto.RoleResponse;
 import br.com.alfaschool.backend.domain.role.Role;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
+import br.com.alfaschool.backend.security.permissao.NomesDePerfilReservados;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,15 @@ public class RoleApplicationService {
         UUID tenantId = TenantContext.getTenantId();
         if (tenantId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tenant não identificado");
+        }
+
+        // Nome reservado nao e' conflito de cadastro, e' tentativa de
+        // assumir um perfil que o sistema reconhece. Ver NomesDePerfilReservados.
+        if (NomesDePerfilReservados.reservado(request.name())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "'" + request.name().trim() + "' é um nome de perfil reservado do sistema. "
+                  + "Escolha outro nome. Para ajustar o que um perfil do sistema pode fazer, "
+                  + "use a tela de Perfis e Permissões.");
         }
 
         roleRepository.findByTenantIdAndNameIgnoreCase(tenantId, request.name())

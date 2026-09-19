@@ -51,3 +51,8 @@ app:
     dedup-window-seconds: 60
     heartbeat-timeout-seconds: 180
     simulador-habilitado: false
+
+  # Os segredos acima ja' sao proprios do teste, entao o SegredosDeBootGuard
+  # nao dispararia. A chave fica explicita para que trocar um deles pelo
+  # valor do repositorio um dia nao derrube a suite inteira no boot.
+  permitir-segredos-padrao: true

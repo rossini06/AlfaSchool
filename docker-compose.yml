@@ -67,6 +67,12 @@ services:
       APP_SUPERADMIN_EMAIL: ${APP_SUPERADMIN_EMAIL:-superadmin@alfaschool.com}
       APP_SUPERADMIN_NAME: ${APP_SUPERADMIN_NAME:-Super Admin}
       APP_SUPERADMIN_PASSWORD: ${APP_SUPERADMIN_PASSWORD:-100%Alfa@}
+      APP_SECRET_KEY: ${APP_SECRET_KEY:-alfaschool-dev-secret-key-trocar-em-producao-32+}
+      # Este compose e' de desenvolvimento e usa os segredos do repositorio.
+      # Num ambiente real, defina APP_JWT_SECRET, APP_SECRET_KEY e
+      # APP_SUPERADMIN_PASSWORD e REMOVA a linha abaixo: sem ela o sistema
+      # se recusa a subir com valor padrao, que e' o que se quer.
+      APP_PERMITIR_SEGREDOS_PADRAO: ${APP_PERMITIR_SEGREDOS_PADRAO:-true}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:5173}
     depends_on:
       mysql:

@@ -64,6 +64,11 @@ app:
   # PRODUCAO: o valor abaixo e' so' para laboratorio.
   secret-key: ${APP_SECRET_KEY:alfaschool-dev-secret-key-trocar-em-producao-32+}
 
+  # Os valores padrao acima sao de laboratorio e estao no repositorio. O
+  # SegredosDeBootGuard recusa o boot enquanto estiverem em uso, a menos
+  # que esta chave seja ligada de proposito. Ver a classe para o porque.
+  permitir-segredos-padrao: ${APP_PERMITIR_SEGREDOS_PADRAO:false}
+
   access:
     # Fuso dos equipamentos. O firmware Control iD reporta epoch calculado
     # no horario local, nao em UTC — a conversao depende disto.

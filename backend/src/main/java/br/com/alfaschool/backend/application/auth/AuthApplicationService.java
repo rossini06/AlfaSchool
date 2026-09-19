@@ -17,6 +17,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import br.com.alfaschool.backend.security.permissao.SuperAdminGuard;
+
 @Service
 public class AuthApplicationService {
 
@@ -28,13 +30,16 @@ public class AuthApplicationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuditService auditService;
+    private final SuperAdminGuard superAdminGuard;
 
     public AuthApplicationService(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder,
                                   JwtTokenProvider jwtTokenProvider,
                                   AuditService auditService,
-                                  br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService) {
+                                  br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService,
+                                  SuperAdminGuard superAdminGuard) {
         this.permissaoService = permissaoService;
+        this.superAdminGuard = superAdminGuard;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -63,7 +68,9 @@ public class AuthApplicationService {
         user.setLastLogin(Instant.now());
         userRepository.save(user);
 
-        List<String> roles = user.getRoles().stream().map(role -> role.getName().toUpperCase()).toList();
+        // Passa pelo guard: um perfil chamado SUPER_ADMIN fora do tenant
+        // mestre nao pode virar authority ROLE_SUPER_ADMIN no token.
+        List<String> roles = superAdminGuard.papeisParaToken(user);
         List<String> permissoes = permissaoService.nomesDe(user);
         String accessToken = jwtTokenProvider.generateAccessToken(
                 user.getId(), user.getTenantId(), user.getUnitId(), roles, permissoes);
@@ -95,7 +102,9 @@ public class AuthApplicationService {
                 .filter(it -> it.getTenantId().equals(tenantId))
                 .orElseThrow(this::credenciaisInvalidas);
 
-        List<String> roles = user.getRoles().stream().map(role -> role.getName().toUpperCase()).toList();
+        // Passa pelo guard: um perfil chamado SUPER_ADMIN fora do tenant
+        // mestre nao pode virar authority ROLE_SUPER_ADMIN no token.
+        List<String> roles = superAdminGuard.papeisParaToken(user);
         List<String> permissoes = permissaoService.nomesDe(user);
         String newAccessToken = jwtTokenProvider.generateAccessToken(
                 user.getId(), user.getTenantId(), user.getUnitId(), roles, permissoes);
@@ -166,9 +175,16 @@ public class AuthApplicationService {
         throw credenciaisInvalidas();
     }
 
+    /**
+     * Pelo guard, e nao pelo nome do perfil: senao um perfil "SUPER_ADMIN"
+     * criado dentro de uma escola ganharia a precedencia que existe para o
+     * administrador do sistema — e, de quebra, driblaria o 409 de e-mail
+     * repetido em mais de uma escola.
+     */
     private java.util.Optional<UserAccount> findSuperAdminByEmail(String email) {
         return userRepository.findAllByEmailIgnoreCase(email).stream()
-                .filter(user -> user.getRoles().stream().anyMatch(role -> "SUPER_ADMIN".equalsIgnoreCase(role.getName())))
+                .filter(user -> !Boolean.TRUE.equals(user.getDeleted()))
+                .filter(superAdminGuard::ehSuperAdmin)
                 .findFirst();
     }
 }

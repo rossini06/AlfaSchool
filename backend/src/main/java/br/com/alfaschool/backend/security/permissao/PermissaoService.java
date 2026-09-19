@@ -31,9 +31,12 @@ public class PermissaoService {
     private static final String SUPER_ADMIN = "SUPER_ADMIN";
 
     private final UsuarioPermissaoExtraRepository extraRepository;
+    private final SuperAdminGuard superAdminGuard;
 
-    public PermissaoService(UsuarioPermissaoExtraRepository extraRepository) {
+    public PermissaoService(UsuarioPermissaoExtraRepository extraRepository,
+                            SuperAdminGuard superAdminGuard) {
         this.extraRepository = extraRepository;
+        this.superAdminGuard = superAdminGuard;
     }
 
     @Transactional(readOnly = true)
@@ -42,9 +45,10 @@ public class PermissaoService {
             return Set.of();
         }
 
-        boolean superAdmin = usuario.getRoles().stream()
-                .anyMatch(r -> SUPER_ADMIN.equalsIgnoreCase(r.getName()));
-        if (superAdmin) {
+        // Nome de perfil nao concede nada sozinho: o SuperAdminGuard exige
+        // que a linha esteja no tenant mestre. Ver a classe para a escalada
+        // que isso fecha.
+        if (superAdminGuard.ehSuperAdmin(usuario)) {
             return Set.of(Permissao.values());
         }
 
