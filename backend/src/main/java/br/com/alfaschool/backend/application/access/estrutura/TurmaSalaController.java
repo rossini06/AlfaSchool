@@ -4,9 +4,9 @@ import br.com.alfaschool.backend.application.access.estrutura.dto.SalaVigenteRes
 import br.com.alfaschool.backend.application.access.estrutura.dto.TurmaSalaRequest;
 import br.com.alfaschool.backend.application.access.estrutura.dto.TurmaSalaResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,7 +43,7 @@ public class TurmaSalaController {
     public ResponseEntity<ApiResponse<Page<TurmaSalaResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("vigenciaInicio").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("vigenciaInicio").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Vinculos turma-sala listados com sucesso",
                 turmaSalaService.list(pageable)));
     }

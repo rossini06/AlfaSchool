@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.curso;
 import br.com.alfaschool.backend.application.curso.dto.CursoRequest;
 import br.com.alfaschool.backend.application.curso.dto.CursoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class CursoController {
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Cursos listados com sucesso", cursoService.list(q, pageable)));
     }
 

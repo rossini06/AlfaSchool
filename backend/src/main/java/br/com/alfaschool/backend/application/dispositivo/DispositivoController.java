@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.dispositivo;
 import br.com.alfaschool.backend.application.dispositivo.dto.DispositivoRequest;
 import br.com.alfaschool.backend.application.dispositivo.dto.DispositivoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,7 @@ public class DispositivoController {
     public ResponseEntity<ApiResponse<Page<DispositivoResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Dispositivos listados com sucesso", dispositivoService.list(pageable)));
     }
 

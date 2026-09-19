@@ -7,9 +7,9 @@ import br.com.alfaschool.backend.domain.access.retirada.GravidadeOcorrencia;
 import br.com.alfaschool.backend.domain.access.retirada.StatusOcorrencia;
 import br.com.alfaschool.backend.domain.access.shared.TipoOcorrencia;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +46,7 @@ public class OcorrenciaController {
             @RequestParam(required = false) StatusOcorrencia status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencias listadas com sucesso",
                 ocorrenciaService.listar(unitId, tipo, gravidade, status, pageable)));
     }

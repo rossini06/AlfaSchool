@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.tenant;
 import br.com.alfaschool.backend.application.tenant.dto.TenantResponse;
 import br.com.alfaschool.backend.application.tenant.dto.TenantStatusRequest;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class TenantController {
     public ResponseEntity<ApiResponse<Page<TenantResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("name").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Redes de ensino listadas com sucesso", tenantService.list(pageable)));
     }
 

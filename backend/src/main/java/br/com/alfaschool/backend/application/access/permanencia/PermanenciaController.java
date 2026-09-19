@@ -2,9 +2,9 @@ package br.com.alfaschool.backend.application.access.permanencia;
 
 import br.com.alfaschool.backend.application.access.permanencia.dto.*;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,7 +34,7 @@ public class PermanenciaController {
             @RequestParam(required = false) UUID turmaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Alunos presentes listados com sucesso",
                 permanenciaService.quemEstaNaUnidade(unitId, turmaId, pageable)));
     }
@@ -49,7 +49,7 @@ public class PermanenciaController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "31") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("data").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("data").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Extrato gerado com sucesso",
                 permanenciaService.extrato(id, inicio, fim, pageable)));
     }
@@ -64,7 +64,7 @@ public class PermanenciaController {
             @RequestParam(required = false) UUID turmaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Excedentes listados com sucesso",
                 permanenciaService.excedentes(inicio, fim, unitId, turmaId, pageable)));
     }
@@ -98,7 +98,7 @@ public class PermanenciaController {
     public ResponseEntity<ApiResponse<Page<FechamentoResponse>>> listarFechamentos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("competencia").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("competencia").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Fechamentos listados com sucesso",
                 permanenciaService.listarFechamentos(pageable)));
     }

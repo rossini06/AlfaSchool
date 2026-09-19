@@ -3,7 +3,9 @@ package br.com.alfaschool.backend.application.avaliacao;
 import br.com.alfaschool.backend.application.avaliacao.dto.AvaliacaoRequest;
 import br.com.alfaschool.backend.application.avaliacao.dto.AvaliacaoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,13 +46,13 @@ public class AvaliacaoController {
                 return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
                         new PageImpl<>(items, PageRequest.of(0, Math.max(items.size(), 1)), items.size())));
             }
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("dataAvaliacao").descending());
+            Pageable pageRequest = Paginacao.de(page, size, Sort.by("dataAvaliacao").descending());
             return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
                     avaliacaoService.search(turmaId, disciplinaId, periodo, status, pageRequest)));
         }
 
         return ResponseEntity.ok(ApiResponse.of(200, "Avaliações",
-                avaliacaoService.list(PageRequest.of(page, size, Sort.by("dataAvaliacao").descending()))));
+                avaliacaoService.list(Paginacao.de(page, size, Sort.by("dataAvaliacao").descending()))));
     }
 
     @GetMapping("/{id}")

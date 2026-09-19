@@ -8,9 +8,9 @@ import br.com.alfaschool.backend.application.access.calendario.dto.CalendarioRes
 import br.com.alfaschool.backend.application.access.calendario.dto.IntervaloDiasRequest;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -57,7 +57,7 @@ public class CalendarioController {
     public ResponseEntity<ApiResponse<Page<CalendarioResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("anoLetivo").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("anoLetivo").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Calendarios listados com sucesso",
                 calendarioService.list(pageable)));
     }

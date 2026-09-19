@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.diario;
 import br.com.alfaschool.backend.application.diario.dto.ConteudoMinistradoRequest;
 import br.com.alfaschool.backend.application.diario.dto.ConteudoMinistradoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ public class ConteudoMinistradoController {
             @RequestParam UUID disciplinaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("data").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("data").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Conteúdos ministrados",
                 conteudoMinistradoService.list(turmaId, disciplinaId, pageable)));
     }

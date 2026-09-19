@@ -4,9 +4,9 @@ import br.com.alfaschool.backend.application.access.autorizacao.dto.RestricaoDoc
 import br.com.alfaschool.backend.application.access.autorizacao.dto.RestricaoRequest;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.RestricaoResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -41,7 +41,7 @@ public class RestricaoController {
     public ResponseEntity<ApiResponse<Page<RestricaoResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Restrições listadas com sucesso",
                 restricaoService.list(pageable)));
     }

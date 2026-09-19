@@ -6,9 +6,9 @@ import br.com.alfaschool.backend.domain.access.shared.CanalNotificacao;
 import br.com.alfaschool.backend.domain.access.shared.EventoNotificacao;
 import br.com.alfaschool.backend.domain.access.shared.StatusEnvio;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -47,7 +47,7 @@ public class NotificacaoHistoricoController {
             @RequestParam(required = false) String destino,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Histórico listado com sucesso",
                 service.historico(canal, evento, status, inicio, fim, destino, pageable)));
     }

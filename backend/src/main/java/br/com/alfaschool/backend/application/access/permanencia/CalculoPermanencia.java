@@ -109,6 +109,49 @@ public final class CalculoPermanencia {
     }
 
     /**
+     * Janela de repique: duas leituras do mesmo aluno mais proximas que
+     * isto sao a MESMA passagem.
+     *
+     * Nao confundir com a deduplicacao da ingestao, que compara o
+     * device_log_id e so' reconhece o REENVIO do mesmo registro. Aqui o
+     * caso e' outro e e' rotineiro: a crianca encosta o crachao, nao ve a
+     * luz verde e encosta de novo. Sao duas linhas legitimas no
+     * equipamento, com ids diferentes, segundos de distancia.
+     */
+    public static final Duration JANELA_REPIQUE = Duration.ofSeconds(90);
+
+    /**
+     * Descarta o repique antes de parear.
+     *
+     * <h2>O estrago que isto evita</h2>
+     * O pareamento e' por POSICAO. Uma entrada lida duas vezes produz
+     * E,E,S,S, e a posicao pareia (E,E) e (S,S): dois intervalos de alguns
+     * segundos. Um dia inteiro de escola vira ZERO minuto — com status
+     * FECHADA, isto e', entrando nos totais e na cobranca como se a
+     * crianca nao tivesse ficado. Foi assim que um dia de 3h59 apurou 0.
+     *
+     * <h2>Por que o primeiro e nao o ultimo</h2>
+     * A primeira leitura e' a que tem o horario real da passagem; a
+     * segunda so' existe porque a primeira nao deu retorno visivel.
+     */
+    public static List<EventoAcesso> semRepique(List<EventoAcesso> eventos) {
+        if (eventos == null || eventos.size() < 2) {
+            return eventos == null ? List.of() : eventos;
+        }
+        List<EventoAcesso> limpos = new ArrayList<>(eventos.size());
+        Instant ultimoAceito = null;
+        for (EventoAcesso e : eventos) {
+            if (ultimoAceito != null
+                    && Duration.between(ultimoAceito, e.dataHora()).compareTo(JANELA_REPIQUE) < 0) {
+                continue;
+            }
+            limpos.add(e);
+            ultimoAceito = e.dataHora();
+        }
+        return limpos;
+    }
+
+    /**
      * Pareia os eventos por posicao. Numero impar deixa o ultimo par
      * aberto (saida nula) — e' ele que vira ABERTA hoje ou INCONSISTENTE
      * depois.
@@ -202,7 +245,7 @@ public final class CalculoPermanencia {
 
     /** Pareia, classifica e totaliza um dia inteiro a partir dos eventos. */
     public static ResultadoDia apurar(List<EventoAcesso> eventos, ParametrosDia p, LocalDate dia, LocalDate hoje) {
-        List<Intervalo> pares = parear(eventos);
+        List<Intervalo> pares = parear(semRepique(eventos));
         StatusPresenca status = statusDe(pares, dia, hoje);
         return new ResultadoDia(status, pares, totalizar(pares, p, status, dia));
     }

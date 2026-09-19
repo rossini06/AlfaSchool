@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.turma;
 import br.com.alfaschool.backend.application.turma.dto.TurmaRequest;
 import br.com.alfaschool.backend.application.turma.dto.TurmaResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -37,7 +37,7 @@ public class TurmaController {
             List<TurmaResponse> result = turmaService.listByCurso(cursoId);
             return ResponseEntity.ok(ApiResponse.of(200, "Turmas listadas com sucesso", result));
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         Page<TurmaResponse> result = turmaService.list(q, pageable);
         return ResponseEntity.ok(ApiResponse.of(200, "Turmas listadas com sucesso", result));
     }

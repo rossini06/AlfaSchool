@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.unit;
 import br.com.alfaschool.backend.application.unit.dto.UnitRequest;
 import br.com.alfaschool.backend.application.unit.dto.UnitResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,7 @@ public class UnitController {
     public ResponseEntity<ApiResponse<Page<UnitResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("name").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Escolas listadas com sucesso", unitService.list(pageable)));
     }
 

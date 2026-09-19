@@ -7,14 +7,17 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import jakarta.validation.constraints.Size;
+
 public record MatriculaRequest(
-    @NotNull UUID alunoId,
-    @NotNull UUID turmaId,
+    @NotNull(message = "Informe o aluno") UUID alunoId,
+    @NotNull(message = "Informe a turma") UUID turmaId,
     LocalDate dataMatricula,
     LocalDate dataConclusao,
     String obs,
-    String tipo,
-    String statusAcademico,
-    @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal desconto,
+    @Size(max = 30, message = "Tipo deve ter no máximo 30 caracteres") String tipo,
+    @Size(max = 30, message = "Status acadêmico deve ter no máximo 30 caracteres") String statusAcademico,
+    @DecimalMin(value = "0.0", message = "Desconto não pode ser negativo")
+    @DecimalMax(value = "100.0", message = "Desconto não pode passar de 100%") BigDecimal desconto,
     UUID unitId
 ) {}

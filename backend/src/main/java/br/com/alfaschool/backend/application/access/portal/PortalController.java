@@ -7,9 +7,9 @@ import br.com.alfaschool.backend.application.access.portal.dto.PortalPermanencia
 import br.com.alfaschool.backend.application.access.portal.dto.PortalResumoDia;
 import br.com.alfaschool.backend.application.access.portal.dto.PortalSolicitacaoAutorizacaoRequest;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -101,7 +101,7 @@ public class PortalController {
     public ResponseEntity<ApiResponse<Page<EnvioResponse>>> notificacoes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Notificações listadas com sucesso",
                 portalService.minhasNotificacoes(pageable)));
     }

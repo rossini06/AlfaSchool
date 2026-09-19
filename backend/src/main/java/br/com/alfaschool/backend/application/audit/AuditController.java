@@ -4,8 +4,8 @@ import br.com.alfaschool.backend.application.audit.dto.AuditLogResponse;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AuditLogRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,7 +45,7 @@ public class AuditController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tenant não identificado");
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("timestamp").descending());
 
         Instant from = dateFrom != null ? dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC) : null;
         Instant to = dateTo != null ? dateTo.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC) : null;

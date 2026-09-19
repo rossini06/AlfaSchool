@@ -5,6 +5,8 @@ import br.com.alfaschool.backend.application.responsavel.dto.ResponsavelResponse
 import br.com.alfaschool.backend.domain.responsavel.Responsavel;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.ResponsavelRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
+import br.com.alfaschool.backend.shared.web.Paginacao;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,7 +35,7 @@ public class ResponsavelService {
 
     public Page<ResponsavelResponse> listAll(int page, int size, String search) {
         UUID tenantId = requiredTenant();
-        PageRequest pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         if (search != null && !search.isBlank()) {
             return responsavelRepository.searchByNome(tenantId, search, pageable)
                     .map(ResponsavelResponse::from);

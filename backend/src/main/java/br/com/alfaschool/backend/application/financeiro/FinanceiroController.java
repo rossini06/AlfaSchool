@@ -2,9 +2,9 @@ package br.com.alfaschool.backend.application.financeiro;
 
 import br.com.alfaschool.backend.application.financeiro.dto.*;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -34,7 +34,7 @@ public class FinanceiroController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.of(200, "Planos listados",
-                financeiroService.listPlanos(PageRequest.of(page, size, Sort.by("nome").ascending()))));
+                financeiroService.listPlanos(Paginacao.de(page, size, Sort.by("nome").ascending()))));
     }
 
     @GetMapping("/planos/ativos")
@@ -82,7 +82,7 @@ public class FinanceiroController {
                     new org.springframework.data.domain.PageImpl<>(items)));
         }
         return ResponseEntity.ok(ApiResponse.of(200, "Contratos",
-                financeiroService.listContratos(PageRequest.of(page, size, Sort.by("dataInicio").descending()))));
+                financeiroService.listContratos(Paginacao.de(page, size, Sort.by("dataInicio").descending()))));
     }
 
     @PostMapping("/contratos")
@@ -113,7 +113,7 @@ public class FinanceiroController {
                     new org.springframework.data.domain.PageImpl<>(items)));
         }
         return ResponseEntity.ok(ApiResponse.of(200, "Cobranças",
-                financeiroService.listCobrancas(PageRequest.of(page, size, Sort.by("vencimento").ascending()))));
+                financeiroService.listCobrancas(Paginacao.de(page, size, Sort.by("vencimento").ascending()))));
     }
 
     @PatchMapping("/cobrancas/{id}/pagar")

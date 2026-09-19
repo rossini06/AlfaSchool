@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.access.estrutura;
 import br.com.alfaschool.backend.application.access.estrutura.dto.ZonaRequest;
 import br.com.alfaschool.backend.application.access.estrutura.dto.ZonaResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class ZonaController {
             @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        Pageable pageable = Paginacao.de(page, size, Sort.by("nome").ascending());
         return ResponseEntity.ok(ApiResponse.of(200, "Zonas listadas com sucesso",
                 zonaService.list(unitId, pageable)));
     }

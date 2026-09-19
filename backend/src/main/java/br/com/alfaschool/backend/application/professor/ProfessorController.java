@@ -3,9 +3,9 @@ package br.com.alfaschool.backend.application.professor;
 import br.com.alfaschool.backend.application.professor.dto.ProfessorRequest;
 import br.com.alfaschool.backend.application.professor.dto.ProfessorResponse;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
+import br.com.alfaschool.backend.shared.web.Paginacao;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ public class ProfessorController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.of(200, "Professores listados",
-                professorService.list(q, PageRequest.of(page, size, Sort.by("nome").ascending()))));
+                professorService.list(q, Paginacao.de(page, size, Sort.by("nome").ascending()))));
     }
 
     @GetMapping("/{id}")
