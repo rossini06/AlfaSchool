@@ -43,8 +43,17 @@ public class PerfilAdminController {
         return ResponseEntity.ok(ApiResponse.of(200, "Catálogo de permissões", service.catalogo()));
     }
 
+    /**
+     * Quem cadastra usuario precisa ver a lista de perfis para atribuir um —
+     * senao o formulario de Usuarios abre com a lista vazia e a pessoa e'
+     * cadastrada sem funcao nenhuma.
+     *
+     * Ver quais perfis existem nao e' o mesmo que poder edita-los: alterar
+     * permissao continua exigindo PERFIS_GERIR nos outros metodos.
+     */
     @GetMapping
-    @PreAuthorize("isAuthenticated() and hasAuthority('PERM_PERFIS_GERIR')")
+    @PreAuthorize("isAuthenticated() and hasAnyAuthority("
+            + "'PERM_PERFIS_GERIR','PERM_USUARIOS_GERIR','PERM_USUARIOS_VER')")
     public ResponseEntity<ApiResponse<Object>> listar() {
         return ResponseEntity.ok(ApiResponse.of(200, "Perfis da escola", service.listar()));
     }

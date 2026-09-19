@@ -193,9 +193,9 @@ class AuthTenantIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Novo Usuário",
+                                  "nome": "Novo Usuário",
                                   "email": "novo@tenant.com",
-                                  "password": "123456"
+                                  "senha": "SenhaForte@2026"
                                 }
                                 """))
                 .andExpect(status().isCreated());

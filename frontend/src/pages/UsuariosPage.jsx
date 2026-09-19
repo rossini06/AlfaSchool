@@ -8,10 +8,10 @@ import { Feedback } from "../components/access/Feedback";
 
 const PAGE_SIZE = 20;
 
-const ROLES = ["USER", "GESTOR", "SUPER_ADMIN"];
+
 
 const EMPTY_FORM = {
-  nome: "", email: "", roles: ["USER"], ativo: true, senha: "",
+  nome: "", email: "", perfis: [], ativo: true, senha: "",
 };
 
 export function UsuariosPage() {
@@ -28,6 +28,16 @@ export function UsuariosPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  // Os perfis sao por escola e a escola pode criar os seus. Buscar do
+  // backend e' a unica forma de a tela oferecer os que existem de verdade.
+  const [perfis, setPerfis] = useState([]);
+
+  useEffect(() => {
+    api
+      .get("/perfis")
+      .then((r) => setPerfis(Array.isArray(r) ? r : r?.content || []))
+      .catch(() => setPerfis([]));
+  }, []);
 
   const load = useCallback(async (p = 0) => {
     setLoading(true);
@@ -35,7 +45,7 @@ export function UsuariosPage() {
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
       if (search) params.set("search", search);
-      const data = await api.get(`/usuarios?${params}`);
+      const data = await api.get(`/users?${params}`);
       setItems(data?.content || data || []);
       setTotal(data?.totalElements ?? (data?.content ?? data ?? []).length);
       setPage(p);
@@ -53,10 +63,10 @@ export function UsuariosPage() {
   const openEdit = (item) => {
     setEditItem(item);
     setForm({
-      nome: item.nome || "",
+      nome: item.name || "",
       email: item.email || "",
-      roles: item.roles || ["USER"],
-      ativo: item.ativo !== false,
+      perfis: (item.perfis || []).map((p) => p.id),
+      ativo: item.active !== false,
       senha: "",
     });
     setModalOpen(true);
@@ -71,9 +81,9 @@ export function UsuariosPage() {
       const body = { ...form };
       if (!body.senha) delete body.senha;
       if (editItem) {
-        await api.put(`/usuarios/${editItem.id}`, body);
+        await api.put(`/users/${editItem.id}`, body);
       } else {
-        await api.post("/usuarios", body);
+        await api.post("/users", body);
       }
       setModalOpen(false);
       load(page);
@@ -87,7 +97,7 @@ export function UsuariosPage() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     try {
-      await api.delete(`/usuarios/${deleteId}`);
+      await api.delete(`/users/${deleteId}`);
       setDeleteId(null);
       load(page);
     } catch (err) {
@@ -95,27 +105,36 @@ export function UsuariosPage() {
     }
   };
 
-  const toggleRole = (role) => {
+  const togglePerfil = (id) => {
     setForm((prev) => ({
       ...prev,
-      roles: prev.roles.includes(role)
-        ? prev.roles.filter((r) => r !== role)
-        : [...prev.roles, role],
+      perfis: prev.perfis.includes(id)
+        ? prev.perfis.filter((p) => p !== id)
+        : [...prev.perfis, id],
     }));
   };
 
-  const getRoleLabel = (roles) => {
-    if (!roles || !roles.length) return "—";
-    if (roles.includes("SUPER_ADMIN")) return "Super Admin";
-    if (roles.includes("GESTOR")) return "Gestor";
-    return "Usuário";
-  };
-
-  const getRoleBadge = (roles) => {
-    if (!roles || !roles.length) return <span className="badge badge-secondary">—</span>;
-    if (roles.includes("SUPER_ADMIN")) return <span className="badge badge-danger">Super Admin</span>;
-    if (roles.includes("GESTOR")) return <span className="badge badge-brand">Gestor</span>;
-    return <span className="badge badge-info">Usuário</span>;
+  /**
+   * Mostra os perfis que o usuario realmente tem, com o rotulo que a escola
+   * ve. Antes havia um de-para fixo para "USER"/"GESTOR"/"SUPER_ADMIN", que
+   * nao existem: quem fosse COORDENACAO aparecia como "Usuário".
+   */
+  const badgesDePerfil = (item) => {
+    const lista = item.perfis || [];
+    if (lista.length === 0) {
+      return (
+        <span className="badge badge-secondary" title="Este usuário entra no sistema e não vê nenhuma tela">
+          Sem perfil
+        </span>
+      );
+    }
+    return (
+      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+        {lista.map((p) => (
+          <span key={p.id} className="badge badge-brand">{p.rotulo || p.nome}</span>
+        ))}
+      </div>
+    );
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -165,7 +184,7 @@ export function UsuariosPage() {
               <th>E-mail</th>
               <th>Perfil</th>
               <th>Status</th>
-              <th>Criado em</th>
+              <th>Último acesso</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -193,20 +212,30 @@ export function UsuariosPage() {
                         color: "#fff", display: "flex", alignItems: "center",
                         justifyContent: "center", fontWeight: 700, fontSize: 12, flexShrink: 0,
                       }}>
-                        {item.nome?.[0]?.toUpperCase() || "U"}
+                        {item.name?.[0]?.toUpperCase() || "U"}
                       </div>
-                      <strong>{item.nome}</strong>
+                      <strong>{item.name}</strong>
                     </div>
                   </td>
                   <td className="td-muted">{item.email}</td>
-                  <td>{getRoleBadge(item.roles)}</td>
+                  <td>{badgesDePerfil(item)}</td>
                   <td>
-                    <span className={`badge ${item.ativo !== false ? "badge-success" : "badge-danger"}`}>
-                      {item.ativo !== false ? "Ativo" : "Inativo"}
+                    <span className={`badge ${item.active !== false ? "badge-success" : "badge-secondary"}`}>
+                      {item.active !== false ? "Ativo" : "Inativo"}
                     </span>
+                    {item.locked && (
+                      <span className="badge badge-warning" title="Bloqueado por tentativas de login inválidas">
+                        Bloqueado
+                      </span>
+                    )}
                   </td>
                   <td className="td-muted">
-                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "—"}
+                    {item.lastLogin
+                      ? new Date(item.lastLogin).toLocaleString("pt-BR", {
+                          day: "2-digit", month: "2-digit", year: "numeric",
+                          hour: "2-digit", minute: "2-digit",
+                        })
+                      : "nunca entrou"}
                   </td>
                   <td>
                     <div className="td-actions">
@@ -269,15 +298,23 @@ export function UsuariosPage() {
           <div className="form-field">
             <label className="form-label">Perfis de Acesso</label>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
-              {ROLES.map((role) => (
-                <label key={role} className="form-checkbox">
-                  <input type="checkbox"
-                    checked={form.roles.includes(role)}
-                    onChange={() => toggleRole(role)} />
-                  <span>{role === "SUPER_ADMIN" ? "Super Admin" : role === "GESTOR" ? "Gestor" : "Usuário"}</span>
+              {perfis.length === 0 && (
+                <span className="form-hint">Nenhum perfil cadastrado nesta escola.</span>
+              )}
+              {perfis.map((perfil) => (
+                <label key={perfil.id} className="form-checkbox" title={perfil.descricao || ""}>
+                  <input
+                    type="checkbox"
+                    checked={form.perfis.includes(perfil.id)}
+                    onChange={() => togglePerfil(perfil.id)}
+                  />
+                  <span>{perfil.rotulo || perfil.nome}</span>
                 </label>
               ))}
             </div>
+            <span className="form-hint">
+              Sem nenhum perfil marcado, a pessoa entra no sistema e não vê nenhuma tela.
+            </span>
           </div>
           <label className="form-checkbox">
             <input type="checkbox" checked={form.ativo} onChange={f("ativo")} />
