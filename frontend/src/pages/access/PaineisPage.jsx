@@ -27,10 +27,15 @@ const FORM_VAZIO = {
   ativo: true,
 };
 
+/**
+ * A URL que vai para a TV é pelo SLUG, não pelo id: o painel público é
+ * servido por /access/paineis/{slug}/estado e /{slug}/stream. O link
+ * copiado apontava para o id e não abria nada.
+ */
 function urlDoPainel(item) {
   if (item.url) return item.url;
   const base = typeof window !== "undefined" ? window.location.origin : "";
-  return `${base}/painel/${item.id}`;
+  return `${base}/painel/${item.slug || item.id}`;
 }
 
 export function PaineisPage() {
@@ -162,7 +167,7 @@ export function PaineisPage() {
     setNovaTv("");
     setErroNovaTv("");
     setTvs({ painel, carregando: true, itens: [], erro: "" });
-    const r = await accessApi.get(`/access/paineis/${painel.id}/tvs`);
+    const r = await accessApi.get(`/access/paineis/${painel.id}/dispositivos`);
     setTvs({
       painel,
       carregando: false,
@@ -178,7 +183,7 @@ export function PaineisPage() {
     }
     setGerandoTv(true);
     setErroNovaTv("");
-    const r = await accessApi.post(`/access/paineis/${tvs.painel.id}/tvs`, { nome: novaTv.trim() });
+    const r = await accessApi.post(`/access/paineis/${tvs.painel.id}/dispositivos`, { nome: novaTv.trim() });
     setGerandoTv(false);
     if (!r.ok) {
       setErroNovaTv(r.erro);
@@ -198,7 +203,7 @@ export function PaineisPage() {
   const confirmarRevogacao = async () => {
     setRevogando(true);
     setErroRevogar("");
-    const r = await accessApi.delete(`/access/paineis/${tvs.painel.id}/tvs/${revogarTv.id}`);
+    const r = await accessApi.post(`/access/paineis/${tvs.painel.id}/dispositivos/${revogarTv.id}/revogar`, {});
     setRevogando(false);
     if (!r.ok) {
       setErroRevogar(r.erro);
