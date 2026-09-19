@@ -63,6 +63,19 @@ public class AccFace extends BaseEntity {
     @Column(name = "consentimento_por", length = 160)
     private String consentimentoPor;
 
+    /**
+     * Quando a familia retirou o consentimento. Preenchido = a face nao
+     * pode voltar para equipamento nenhum, e ja saiu dos que a tinham.
+     */
+    @Column(name = "consentimento_revogado_em")
+    private Instant consentimentoRevogadoEm;
+
+    @Column(name = "consentimento_revogado_por")
+    private UUID consentimentoRevogadoPor;
+
+    @Column(name = "consentimento_revogado_motivo", length = 255)
+    private String consentimentoRevogadoMotivo;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -97,6 +110,15 @@ public class AccFace extends BaseEntity {
     public void setConsentimentoVersao(String v) { this.consentimentoVersao = v; }
     public String getConsentimentoOrigem() { return consentimentoOrigem; }
     public void setConsentimentoOrigem(String v) { this.consentimentoOrigem = v; }
+    public Instant getConsentimentoRevogadoEm() { return consentimentoRevogadoEm; }
+    public void setConsentimentoRevogadoEm(Instant v) { this.consentimentoRevogadoEm = v; }
+
+    public UUID getConsentimentoRevogadoPor() { return consentimentoRevogadoPor; }
+    public void setConsentimentoRevogadoPor(UUID v) { this.consentimentoRevogadoPor = v; }
+
+    public String getConsentimentoRevogadoMotivo() { return consentimentoRevogadoMotivo; }
+    public void setConsentimentoRevogadoMotivo(String v) { this.consentimentoRevogadoMotivo = v; }
+
     public String getConsentimentoPor() { return consentimentoPor; }
     public void setConsentimentoPor(String v) { this.consentimentoPor = v; }
     public boolean isAtivo() { return ativo; }

@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import br.com.alfaschool.backend.application.access.retirada.ContextoAcesso;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,6 +100,40 @@ public class FaceController {
         AccFaceSync sync = service.remover(tenant(), id, dispositivoId);
         return ResponseEntity.ok(ApiResponse.of(200, "Biometria removida do equipamento.",
                 FaceSyncDto.from(sync)));
+    }
+
+    /**
+     * A familia retira o consentimento da biometria.
+     *
+     * LGPD Art. 8 par. 5: a revogacao e' um direito exercivel a qualquer
+     * momento, de forma gratuita e facilitada — por isso o motivo e'
+     * OPCIONAL. Pedir justificativa para exercer um direito e' criar
+     * atrito onde a lei manda facilitar.
+     *
+     * A resposta diz de quantos leitores o rosto saiu e quais NAO
+     * confirmaram: a revogacao vale de qualquer jeito, mas equipamento
+     * offline com o rosto dentro e' problema que alguem precisa resolver, e
+     * esconder isso seria pior do que a falha.
+     */
+    @PostMapping("/{id}/revogar-consentimento")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_BIOMETRIA_GERIR')")
+    public ResponseEntity<ApiResponse<FaceService.RevogacaoConsentimento>> revogarConsentimento(
+            @PathVariable UUID id,
+            @RequestBody(required = false) MotivoOpcional corpo) {
+        String motivo = corpo == null ? null : corpo.motivo();
+        FaceService.RevogacaoConsentimento r =
+                service.revogarConsentimento(tenant(), id, ContextoAcesso.userIdOuNulo(), motivo);
+
+        String mensagem = r.equipamentosComFalha().isEmpty()
+                ? "Consentimento revogado. A biometria foi removida de " + r.removidaDeEquipamentos()
+                  + " equipamento(s)."
+                : "Consentimento revogado, mas estes equipamentos não confirmaram a remoção: "
+                  + String.join(", ", r.equipamentosComFalha()) + ". Verifique-os.";
+        return ResponseEntity.ok(ApiResponse.of(200, mensagem, r));
+    }
+
+    public record MotivoOpcional(String motivo) {
     }
 
     private UUID tenant() {

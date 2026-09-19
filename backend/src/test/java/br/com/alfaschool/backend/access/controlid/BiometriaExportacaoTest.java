@@ -157,6 +157,76 @@ class BiometriaExportacaoTest {
         assertThat(salvos.get(0).getCodigoErro()).isEqualTo("SEM_CONSENTIMENTO");
     }
 
+    // =================================================================
+    // Revogacao do consentimento (LGPD Art. 8 par. 5)
+    //
+    // Revogar nao e' virar um booleano: o rosto ja' esta DENTRO dos
+    // leitores. Marcar "revogado" no banco e deixar a face no equipamento
+    // seria dizer que a familia retirou o consentimento enquanto a crianca
+    // continua entrando pela catraca com aquele dado.
+    // =================================================================
+
+    @Test
+    @DisplayName("revogar tira o rosto do leitor onde ele foi gravado")
+    void revogarRemoveDosEquipamentos() {
+        AccFace f = face("CONSENTIMENTO", true);
+        AccFaceSync gravada = new AccFaceSync();
+        gravada.setTenantId(tenantId);
+        gravada.setFaceId(f.getId());
+        gravada.setDispositivoId(dispositivoId);
+        gravada.setStatus(StatusFaceSync.ACEITA);
+        when(sincronizacoes.findByTenantIdAndFaceId(tenantId, f.getId())).thenReturn(List.of(gravada));
+
+        FaceService.RevogacaoConsentimento r =
+                service.revogarConsentimento(tenantId, f.getId(), UUID.randomUUID(), "familia pediu");
+
+        verify(client).removerFoto(any(), eq(f.getDeviceUserId()));
+        verify(client).revogarAcesso(any(), eq(f.getDeviceUserId()));
+        assertThat(r.removidaDeEquipamentos()).isEqualTo(1);
+        assertThat(r.equipamentosComFalha()).isEmpty();
+        assertThat(f.isConsentimentoObtido()).isFalse();
+        assertThat(f.getConsentimentoRevogadoEm()).isNotNull();
+        // Inativa tambem: senao o proximo sincronismo automatico reenviaria
+        // o rosto que acabou de sair.
+        assertThat(f.isAtivo()).isFalse();
+    }
+
+    @Test
+    @DisplayName("leitor que nao responde NAO desfaz a revogacao, mas e' devolvido para alguem ir atras")
+    void revogacaoNaoDependeDoEquipamentoEstarNoAr() {
+        AccFace f = face("CONSENTIMENTO", true);
+        AccFaceSync gravada = new AccFaceSync();
+        gravada.setTenantId(tenantId);
+        gravada.setFaceId(f.getId());
+        gravada.setDispositivoId(dispositivoId);
+        gravada.setStatus(StatusFaceSync.ACEITA);
+        when(sincronizacoes.findByTenantIdAndFaceId(tenantId, f.getId())).thenReturn(List.of(gravada));
+        doThrow(new IllegalStateException("Connection refused"))
+                .when(client).removerFoto(any(), anyLong());
+
+        FaceService.RevogacaoConsentimento r =
+                service.revogarConsentimento(tenantId, f.getId(), UUID.randomUUID(), null);
+
+        // O consentimento e' da familia: nao depende de equipamento no ar.
+        assertThat(f.getConsentimentoRevogadoEm()).isNotNull();
+        assertThat(f.isConsentimentoObtido()).isFalse();
+        // Mas a falha aparece, com nome. Some-la em silencio deixaria o
+        // rosto num leitor com o consentimento revogado no papel.
+        assertThat(r.equipamentosComFalha()).hasSize(1);
+        assertThat(r.removidaDeEquipamentos()).isZero();
+    }
+
+    @Test
+    @DisplayName("depois de revogado, o motivo do bloqueio diz que a familia RETIROU")
+    void consentimentoRevogadoTemMotivoProprio() {
+        AccFace f = face("CONSENTIMENTO", true);
+        f.setConsentimentoRevogadoEm(Instant.now());
+
+        // Distinto de "nunca houve consentimento": quem tentar reenviar
+        // precisa saber que houve uma decisao da familia.
+        assertThat(FaceService.motivoDeBloqueio(f)).isEqualTo("CONSENTIMENTO_REVOGADO");
+    }
+
     @Test
     @DisplayName("base legal em branco conta como ausente")
     void baseLegalEmBrancoNaoVale() {

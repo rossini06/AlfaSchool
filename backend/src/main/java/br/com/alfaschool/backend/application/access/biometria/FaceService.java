@@ -21,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
+import java.util.ArrayList;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
@@ -231,6 +233,92 @@ public class FaceService {
         return sincronizacoes.save(sync);
     }
 
+    /**
+     * Revogacao do consentimento pela familia.
+     *
+     * <h2>Por que nao e' so' virar um booleano</h2>
+     * O dado biometrico ja' foi gravado DENTRO dos leitores. Marcar
+     * "revogado" no banco e deixar o rosto no equipamento seria dizer que a
+     * familia retirou o consentimento enquanto a crianca continua entrando
+     * pela catraca com aquele dado. A revogacao so' vale quando a face sai
+     * de cada leitor onde foi gravada.
+     *
+     * <h2>O que acontece se um leitor nao responder</h2>
+     * A revogacao NAO e' desfeita: o consentimento e' da familia e nao
+     * depende de equipamento estar no ar. Mas os leitores que falharam sao
+     * devolvidos na resposta, com nome, para alguem ir atras — some-los em
+     * silencio deixaria o rosto num equipamento com o consentimento
+     * revogado no papel.
+     *
+     * Base: LGPD Art. 8 par. 5 — revogacao a qualquer momento, gratuita e
+     * facilitada. Nao se pede motivo; ele e' opcional e serve a escola.
+     */
+    @Transactional
+    public RevogacaoConsentimento revogarConsentimento(UUID tenantId, UUID faceId,
+                                                       UUID usuarioId, String motivo) {
+        AccFace face = faces.findByIdAndTenantIdAndDeletedFalse(faceId, tenantId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Face não encontrada."));
+
+        List<String> equipamentosComFalha = new ArrayList<>();
+        int removidos = 0;
+
+        for (AccFaceSync sync : sincronizacoes.findByTenantIdAndFaceId(tenantId, faceId)) {
+            // ENVIADA e ACEITA: o rosto chegou ao leitor. RECUSADA e
+            // PENDENTE nunca foram gravados, e REMOVIDA ja saiu.
+            if (sync.getStatus() != StatusFaceSync.ENVIADA
+                    && sync.getStatus() != StatusFaceSync.ACEITA) {
+                continue;
+            }
+            Dispositivo dispositivo = dispositivos.findById(sync.getDispositivoId())
+                    .filter(d -> tenantId.equals(d.getTenantId()))
+                    .orElse(null);
+            if (dispositivo == null) {
+                continue;
+            }
+            try {
+                client.removerFoto(dispositivo, face.getDeviceUserId());
+                client.revogarAcesso(dispositivo, face.getDeviceUserId());
+                sync.setStatus(StatusFaceSync.REMOVIDA);
+                sync.setFotoHash(null);
+                sync.setCodigoErro(null);
+                sync.setDetalhe(null);
+                sincronizacoes.save(sync);
+                removidos++;
+            } catch (RuntimeException e) {
+                log.error("Revogacao do consentimento da face {}: o leitor {} nao removeu o rosto",
+                        faceId, dispositivo.getNome(), e);
+                sync.setCodigoErro("REVOGACAO_FALHOU");
+                sync.setDetalhe(e.getMessage());
+                sincronizacoes.save(sync);
+                equipamentosComFalha.add(dispositivo.getNome());
+            }
+        }
+
+        Instant agora = Instant.now();
+        face.setConsentimentoObtido(false);
+        face.setConsentimentoRevogadoEm(agora);
+        face.setConsentimentoRevogadoPor(usuarioId);
+        face.setConsentimentoRevogadoMotivo(motivo);
+        // Inativa tambem: sem isso o proximo sincronismo automatico
+        // reenviaria o rosto que acabou de ser removido.
+        face.setAtivo(false);
+        faces.save(face);
+
+        log.info("Consentimento revogado: face={} removida de {} leitor(es), {} falha(s)",
+                faceId, removidos, equipamentosComFalha.size());
+        return new RevogacaoConsentimento(faceId, agora, removidos, equipamentosComFalha);
+    }
+
+    /**
+     * @param equipamentosComFalha leitores que NAO confirmaram a remocao.
+     *        Lista vazia = o rosto saiu de todos.
+     */
+    public record RevogacaoConsentimento(UUID faceId, Instant revogadoEm,
+                                         int removidaDeEquipamentos,
+                                         List<String> equipamentosComFalha) {
+    }
+
     // =================================================================
     // Apoio
     // =================================================================
@@ -239,6 +327,12 @@ public class FaceService {
     public static String motivoDeBloqueio(AccFace face) {
         if (face.getBaseLegal() == null || face.getBaseLegal().isBlank()) {
             return "SEM_BASE_LEGAL";
+        }
+        if (face.getConsentimentoRevogadoEm() != null) {
+            // Distinto de "nunca houve consentimento": aqui a familia
+            // RETIROU, e a mensagem precisa dizer isso a quem tentar
+            // reenviar o rosto para um leitor.
+            return "CONSENTIMENTO_REVOGADO";
         }
         if (!face.isConsentimentoObtido()) {
             return "SEM_CONSENTIMENTO";
@@ -253,6 +347,7 @@ public class FaceService {
         return switch (codigo) {
             case "SEM_BASE_LEGAL" -> "não há base legal declarada para o tratamento";
             case "SEM_CONSENTIMENTO" -> "o consentimento do responsável não foi registrado";
+            case "CONSENTIMENTO_REVOGADO" -> "o responsável revogou o consentimento";
             case "FACE_INATIVA" -> "o cadastro biométrico está inativo";
             default -> codigo;
         };
