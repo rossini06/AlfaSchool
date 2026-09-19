@@ -3,6 +3,7 @@ package br.com.alfaschool.backend.application.access.autorizacao;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.AlunoAutorizadoResponse;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.PessoaAutorizadaResponse;
 import br.com.alfaschool.backend.application.access.shared.AutorizacaoPort;
+import br.com.alfaschool.backend.application.access.shared.AutorizacaoPort.MotivoNegativa;
 import br.com.alfaschool.backend.domain.access.autorizacao.AutorizacaoRetirada;
 import br.com.alfaschool.backend.domain.access.autorizacao.PessoaAutorizada;
 import br.com.alfaschool.backend.domain.access.autorizacao.Restricao;
@@ -92,7 +93,7 @@ public class AutorizacaoConsultaService implements AutorizacaoPort {
     public Veredito verificar(UUID alunoId, UUID pessoaAutorizadaId, Instant momento) {
         try {
             if (alunoId == null || pessoaAutorizadaId == null || momento == null) {
-                return Veredito.negar("Dados insuficientes para validar a retirada");
+                return Veredito.negar(MotivoNegativa.DADOS_INSUFICIENTES, "Dados insuficientes para validar a retirada");
             }
 
             UUID tenantId = ContextoAtual.tenantObrigatorio();
@@ -113,7 +114,7 @@ public class AutorizacaoConsultaService implements AutorizacaoPort {
                     restricaoRepository.findByTenantIdAndAlunoIdAndAtivoTrueAndDeletedFalse(tenantId, alunoId);
             for (Restricao restricao : restricoes) {
                 if (restricaoAlcanca(restricao, pessoaAutorizadaId, cpfPessoa) && restricao.vigenteEm(data)) {
-                    return Veredito.negar("Restricao judicial vigente");
+                    return Veredito.negar(MotivoNegativa.RESTRICAO_JUDICIAL, "Restricao judicial vigente");
                 }
             }
 
@@ -121,27 +122,27 @@ public class AutorizacaoConsultaService implements AutorizacaoPort {
             // independente de portal e de notificacao.
             PessoaAutorizada pessoa = pessoaOpt.orElse(null);
             if (pessoa == null) {
-                return Veredito.negar("Pessoa autorizada nao encontrada");
+                return Veredito.negar(MotivoNegativa.PESSOA_NAO_ENCONTRADA, "Pessoa autorizada nao encontrada");
             }
             if (!pessoa.isAtivo()) {
-                return Veredito.negar("Pessoa autorizada inativa");
+                return Veredito.negar(MotivoNegativa.PESSOA_INATIVA, "Pessoa autorizada inativa");
             }
             if (!pessoa.isPodeRetirar()) {
-                return Veredito.negar("Pessoa sem permissao de retirada");
+                return Veredito.negar(MotivoNegativa.SEM_PERMISSAO_RETIRADA, "Pessoa sem permissao de retirada");
             }
 
             // 3. AUTORIZACAO — precisa existir uma ATIVA para este par.
             List<AutorizacaoRetirada> autorizacoes = autorizacaoRepository
                     .findByTenantIdAndAlunoIdAndPessoaAutorizadaIdAndDeletedFalse(tenantId, alunoId, pessoaAutorizadaId);
             if (autorizacoes.isEmpty()) {
-                return Veredito.negar("Pessoa nao autorizada a retirar este aluno");
+                return Veredito.negar(MotivoNegativa.SEM_AUTORIZACAO, "Pessoa nao autorizada a retirar este aluno");
             }
 
             List<AutorizacaoRetirada> ativas = autorizacoes.stream()
                     .filter(a -> a.getStatus() == StatusAutorizacao.ATIVA)
                     .toList();
             if (ativas.isEmpty()) {
-                return Veredito.negar(motivoDeStatusNaoAtivo(autorizacoes));
+                return Veredito.negar(MotivoNegativa.AUTORIZACAO_NAO_ATIVA, motivoDeStatusNaoAtivo(autorizacoes));
             }
 
             // Pode haver mais de uma ATIVA (ex.: permanente restrita a certos
@@ -179,14 +180,14 @@ public class AutorizacaoConsultaService implements AutorizacaoPort {
                 return Veredito.permitir(autorizacao.getId());
             }
 
-            return Veredito.negar(motivoMaisProximo != null ? motivoMaisProximo : "Autorizacao nao vigente");
+            return Veredito.negar(MotivoNegativa.FORA_DA_JANELA, motivoMaisProximo != null ? motivoMaisProximo : "Autorizacao nao vigente");
 
         } catch (Exception e) {
             // FALHA FECHADA: erro nunca vira permissao. Logamos em ERROR para
             // que a falha apareca, e devolvemos negado.
             log.error("Falha ao validar autorizacao de retirada (aluno={}, pessoa={}, momento={})",
                     alunoId, pessoaAutorizadaId, momento, e);
-            return Veredito.negar("Falha ao validar autorizacao");
+            return Veredito.negar(MotivoNegativa.ERRO_INTERNO, "Falha ao validar autorizacao");
         }
     }
 

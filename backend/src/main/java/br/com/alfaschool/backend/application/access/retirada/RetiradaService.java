@@ -143,12 +143,29 @@ public class RetiradaService {
         List<UUID> candidatos = alunosAutorizadosPort.alunosCandidatos(tenantId, pessoaId, momento);
         List<AccRetirada> abertas = new ArrayList<>();
         Integer ordem = null;
+        boolean houveRestricaoJudicial = false;
 
         for (UUID alunoId : candidatos) {
             // Palavra final e' sempre do AutorizacaoPort: vigencia, faixa de
             // horario e restricao judicial moram la'.
             AutorizacaoPort.Veredito veredito = autorizacao.verificar(alunoId, pessoaId, momento);
             if (veredito == null || !veredito.permitido()) {
+                // Nao autorizado apenas nao entra na fila — pode ser um pai
+                // cuja autorizacao venceu, e isso nao e' alarme. Mas quem
+                // tem medida protetiva e mesmo assim apareceu no portao e'
+                // exatamente o que a coordenacao precisa saber AGORA, e nao
+                // pode sumir em silencio so' porque a fila o ignorou.
+                if (veredito != null && veredito.restricaoJudicial()) {
+                    houveRestricaoJudicial = true;
+                    log.warn("Pessoa com restricao judicial identificada na portaria: aluno {} pessoa {}",
+                            alunoId, pessoaId);
+                    ocorrenciaPort.registrar(new RegistrarOcorrenciaEvent(
+                            tenantId, evento.unitId(), TipoOcorrencia.RESTRICAO_JUDICIAL,
+                            GravidadeOcorrencia.CRITICA, alunoId, pessoaId,
+                            evento.portariaId(), evento.dispositivoId(), null,
+                            "Pessoa com restricao judicial vigente foi identificada na portaria. "
+                          + "Nenhuma retirada foi aberta."));
+                }
                 continue;
             }
             if (jaTemRetiradaAberta(tenantId, alunoId)) {
@@ -187,7 +204,10 @@ public class RetiradaService {
             abertas.add(salva);
         }
 
-        if (abertas.isEmpty()) {
+        // A ocorrencia generica so' faz sentido quando nao houve uma mais
+        // especifica. Duas linhas para o mesmo fato fazem a coordenacao
+        // triar duas vezes — e a mais branda pode ser lida primeiro.
+        if (abertas.isEmpty() && !houveRestricaoJudicial) {
             registrarOcorrenciaDeTentativa(evento, TipoOcorrencia.TENTATIVA_NAO_AUTORIZADA,
                     GravidadeOcorrencia.ALTA,
                     "Pessoa reconhecida na portaria sem autorizacao vigente para retirar nenhum aluno");
@@ -218,6 +238,42 @@ public class RetiradaService {
         }
 
         Instant agora = Instant.now();
+
+        // A retirada manual existe para o caso legitimo: leitor quebrado,
+        // pessoa sem biometria, excecao que a coordenacao assume. Por isso
+        // ela NAO exige autorizacao previa — mas isso nao pode virar uma
+        // porta que contorna medida protetiva.
+        //
+        // Regra: restricao judicial bloqueia, e nao ha como contornar por
+        // este caminho. Qualquer outro motivo (sem autorizacao, vencida,
+        // fora do horario) a coordenacao pode assumir, e o motivo real vai
+        // para a ocorrencia em vez de se perder.
+        AutorizacaoPort.Veredito veredito = null;
+        if (request.pessoaAutorizadaId() != null) {
+            AutorizacaoPort autorizacao = autorizacaoPort.getIfAvailable();
+            if (autorizacao == null) {
+                // Falha fechada: sem o modulo no ar nao ha como saber se
+                // existe restricao, e assumir que nao existe e' o erro que
+                // este sistema nao pode cometer.
+                log.error("Modulo de autorizacao indisponivel: retirada manual recusada (tenant {})", tenantId);
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                        "Nao foi possivel verificar restricoes. A retirada manual nao pode ser aberta agora.");
+            }
+            veredito = autorizacao.verificar(request.alunoId(), request.pessoaAutorizadaId(), agora);
+            if (veredito.restricaoJudicial()) {
+                log.warn("Retirada manual BLOQUEADA por restricao judicial: aluno {} pessoa {} operador {}",
+                        request.alunoId(), request.pessoaAutorizadaId(), userId);
+                ocorrenciaPort.registrar(new RegistrarOcorrenciaEvent(
+                        tenantId, request.unitId(), TipoOcorrencia.RESTRICAO_JUDICIAL,
+                        GravidadeOcorrencia.CRITICA,
+                        request.alunoId(), request.pessoaAutorizadaId(), null, null, null,
+                        "Tentativa de retirada manual de aluno com restricao judicial vigente. Motivo informado: "
+                                + request.motivo()));
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Esta pessoa tem restricao judicial vigente para este aluno. "
+                      + "A retirada nao pode ser liberada por nenhum caminho.");
+            }
+        }
         ContextoAlunoPort.ContextoAluno contexto = contextoAlunoPort.contextoDe(tenantId, request.alunoId(), agora);
         UUID unitId = request.unitId() != null ? request.unitId() : contexto.unitId();
 
@@ -244,10 +300,17 @@ public class RetiradaService {
         gravarHistorico(salva, null, StatusRetirada.SOLICITADA, userId, OrigemTransicao.ADMIN, request.motivo(), ip);
         publicarMudanca(salva, null);
 
+        // Retirada manual de quem JA' era autorizado e' rotina; de quem nao
+        // era e' excecao assumida por alguem, e a ocorrencia precisa dizer
+        // qual era o impedimento — senao a coordenacao revisa um alarme sem
+        // saber o que aconteceu.
+        boolean semAutorizacao = veredito != null && !veredito.permitido();
         ocorrenciaPort.registrar(new RegistrarOcorrenciaEvent(
-                tenantId, unitId, TipoOcorrencia.RETIRADA_MANUAL, GravidadeOcorrencia.MEDIA,
+                tenantId, unitId, TipoOcorrencia.RETIRADA_MANUAL,
+                semAutorizacao ? GravidadeOcorrencia.ALTA : GravidadeOcorrencia.MEDIA,
                 salva.getAlunoId(), salva.getPessoaAutorizadaId(), null, null, salva.getId(),
-                "Retirada manual aberta pela coordenacao: " + request.motivo()));
+                "Retirada manual aberta pela coordenacao: " + request.motivo()
+                        + (semAutorizacao ? " | Impedimento assumido: " + veredito.motivo() : "")));
         return salva;
     }
 
@@ -341,6 +404,35 @@ public class RetiradaService {
         // anonimamente, nem por engano de configuracao.
         UUID userId = ContextoAcesso.userIdObrigatorio();
         AccRetirada retirada = carregar(id);
+
+        // Entre a chegada e a entrega passam minutos, as vezes uma hora. E'
+        // exatamente nessa janela que uma medida protetiva costuma chegar a'
+        // escola — a mae liga, a secretaria cadastra a restricao, e a fila
+        // ja' estava aberta. Sem reconferir aqui, a restricao so' valeria
+        // para a proxima retirada, e a de hoje sairia pela porta.
+        if (retirada.getPessoaAutorizadaId() != null) {
+            AutorizacaoPort autorizacao = autorizacaoPort.getIfAvailable();
+            if (autorizacao != null) {
+                AutorizacaoPort.Veredito veredito = autorizacao.verificar(
+                        retirada.getAlunoId(), retirada.getPessoaAutorizadaId(), Instant.now());
+                if (veredito.restricaoJudicial()) {
+                    log.warn("Entrega BLOQUEADA por restricao judicial registrada apos a abertura: "
+                            + "retirada {} aluno {} pessoa {}",
+                            retirada.getId(), retirada.getAlunoId(), retirada.getPessoaAutorizadaId());
+                    ocorrenciaPort.registrar(new RegistrarOcorrenciaEvent(
+                            retirada.getTenantId(), retirada.getUnitId(),
+                            TipoOcorrencia.RESTRICAO_JUDICIAL, GravidadeOcorrencia.CRITICA,
+                            retirada.getAlunoId(), retirada.getPessoaAutorizadaId(), null, null,
+                            retirada.getId(),
+                            "Restricao judicial vigente no momento da entrega. A entrega foi bloqueada "
+                          + "e a retirada permanece aberta para decisao da coordenacao."));
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Restricao judicial vigente para esta pessoa. A entrega nao pode ser concluida. "
+                          + "Acione a coordenacao.");
+                }
+            }
+        }
+
         StatusRetirada anterior = retirada.getStatus();
         aplicarTransicao(retirada, StatusRetirada.ENTREGUE, userId, OrigemTransicao.PAINEL, null, ip);
         retirada.setEntregueEm(Instant.now());

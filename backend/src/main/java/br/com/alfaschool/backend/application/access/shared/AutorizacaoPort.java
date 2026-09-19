@@ -21,16 +21,46 @@ public interface AutorizacaoPort {
     Veredito verificar(UUID alunoId, UUID pessoaAutorizadaId, Instant momento);
 
     /**
-     * @param autorizacaoId autorizacao aplicada, quando permitido; nulo quando negado
+     * Por que a retirada foi negada.
+     *
+     * Existe como CODIGO, e nao so' como texto, porque quem decide o que
+     * fazer com a negativa precisa distinguir os casos — e comparar
+     * mensagem por string e' frágil demais para uma decisao que envolve
+     * entregar uma crianca. Em especial:
+     *
+     * RESTRICAO_JUDICIAL **nao pode ser contornada por nenhum caminho**,
+     * nem pela retirada manual. Os demais motivos podem ser assumidos pela
+     * coordenacao, com justificativa registrada.
      */
-    record Veredito(boolean permitido, String motivo, UUID autorizacaoId) {
+    enum MotivoNegativa {
+        RESTRICAO_JUDICIAL,
+        PESSOA_NAO_ENCONTRADA,
+        PESSOA_INATIVA,
+        SEM_PERMISSAO_RETIRADA,
+        SEM_AUTORIZACAO,
+        AUTORIZACAO_NAO_ATIVA,
+        FORA_DA_JANELA,
+        DADOS_INSUFICIENTES,
+        ERRO_INTERNO
+    }
+
+    /**
+     * @param autorizacaoId autorizacao aplicada, quando permitido; nulo quando negado
+     * @param codigo        por que negou; nulo quando permitido
+     */
+    record Veredito(boolean permitido, String motivo, UUID autorizacaoId, MotivoNegativa codigo) {
 
         public static Veredito permitir(UUID autorizacaoId) {
-            return new Veredito(true, null, autorizacaoId);
+            return new Veredito(true, null, autorizacaoId, null);
         }
 
-        public static Veredito negar(String motivo) {
-            return new Veredito(false, motivo, null);
+        public static Veredito negar(MotivoNegativa codigo, String motivo) {
+            return new Veredito(false, motivo, null, codigo);
+        }
+
+        /** Restricao judicial e' a unica negativa absoluta do sistema. */
+        public boolean restricaoJudicial() {
+            return codigo == MotivoNegativa.RESTRICAO_JUDICIAL;
         }
     }
 }

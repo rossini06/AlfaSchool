@@ -15,6 +15,7 @@ import br.com.alfaschool.backend.application.access.shared.NotificacaoPort;
 import br.com.alfaschool.backend.application.access.shared.PermanenciaPort;
 import br.com.alfaschool.backend.domain.access.retirada.AccRetirada;
 import br.com.alfaschool.backend.domain.access.retirada.AccRetiradaHistorico;
+import br.com.alfaschool.backend.domain.access.retirada.GravidadeOcorrencia;
 import br.com.alfaschool.backend.domain.access.shared.FuncaoDispositivo;
 import br.com.alfaschool.backend.domain.access.shared.ResultadoAcesso;
 import br.com.alfaschool.backend.domain.access.shared.SentidoAcesso;
@@ -205,7 +206,7 @@ class RetiradaServiceTest {
         Instant momento = Instant.now();
         when(alunosAutorizadosPort.alunosCandidatos(TENANT, PESSOA, momento)).thenReturn(List.of(ALUNO_A));
         when(autorizacaoPort.verificar(ALUNO_A, PESSOA, momento))
-                .thenReturn(AutorizacaoPort.Veredito.negar("Autorizacao fora de vigencia"));
+                .thenReturn(AutorizacaoPort.Veredito.negar(AutorizacaoPort.MotivoNegativa.AUTORIZACAO_NAO_ATIVA, "Autorizacao fora de vigencia"));
 
         List<AccRetirada> abertas = service.abrirPorReconhecimento(chegadaDeResponsavel(momento));
 
@@ -642,6 +643,155 @@ class RetiradaServiceTest {
         ResponseStatusException erro = assertThrows(ResponseStatusException.class,
                 () -> service.abrirManual(request, null));
         assertEquals(HttpStatus.UNAUTHORIZED, erro.getStatusCode());
+    }
+
+    // =================================================================
+    // Restricao judicial: precedencia sobre qualquer caminho
+    //
+    // Estes testes existem por causa de um furo real que o sistema teve: o
+    // /verificar dizia "restricao judicial vigente", e a retirada manual —
+    // que nunca consultava o AutorizacaoPort — abria, preparava e ENTREGAVA
+    // a crianca mesmo assim. A regra 3 do CLAUDE.md nao pode depender de
+    // qual porta a pessoa usou.
+    // =================================================================
+
+    private AutorizacaoPort.Veredito restricaoJudicial() {
+        return AutorizacaoPort.Veredito.negar(AutorizacaoPort.MotivoNegativa.RESTRICAO_JUDICIAL,
+                "Restricao judicial vigente");
+    }
+
+    @Test
+    @DisplayName("Retirada manual de pessoa com restricao judicial e' bloqueada e nada e' salvo")
+    void retiradaManualComRestricaoJudicialEhBloqueada() {
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any())).thenReturn(restricaoJudicial());
+        RetiradaManualRequest request = new RetiradaManualRequest(ALUNO_A, UNIDADE, null, PESSOA,
+                "Carlos Silva", "12345678900", "Pai veio buscar, leitor quebrado", null);
+
+        ResponseStatusException erro = assertThrows(ResponseStatusException.class,
+                () -> service.abrirManual(request, "10.0.0.9"));
+
+        assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+        verify(retiradaRepository, never()).save(any());
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        assertEquals(TipoOcorrencia.RESTRICAO_JUDICIAL, ocorrenciaCaptor.getValue().tipo());
+        assertEquals(GravidadeOcorrencia.CRITICA, ocorrenciaCaptor.getValue().gravidade());
+    }
+
+    @Test
+    @DisplayName("Retirada manual de quem apenas nao tem autorizacao passa, mas com ocorrencia ALTA e o motivo real")
+    void retiradaManualSemAutorizacaoPassaComOcorrenciaAlta() {
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any())).thenReturn(
+                AutorizacaoPort.Veredito.negar(AutorizacaoPort.MotivoNegativa.AUTORIZACAO_NAO_ATIVA,
+                        "Autorizacao vencida em 01/09"));
+        RetiradaManualRequest request = new RetiradaManualRequest(ALUNO_A, UNIDADE, null, PESSOA,
+                "Tia Ana", null, "Mae confirmou por telefone", null);
+
+        AccRetirada resultado = service.abrirManual(request, "10.0.0.9");
+
+        assertEquals(StatusRetirada.SOLICITADA, resultado.getStatus());
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        RegistrarOcorrenciaEvent ocorrencia = ocorrenciaCaptor.getValue();
+        assertEquals(TipoOcorrencia.RETIRADA_MANUAL, ocorrencia.tipo());
+        assertEquals(GravidadeOcorrencia.ALTA, ocorrencia.gravidade());
+        // Sem isto a coordenacao revisa o alarme sem saber qual era o impedimento.
+        assertTrue(ocorrencia.descricao().contains("Autorizacao vencida em 01/09"));
+    }
+
+    @Test
+    @DisplayName("Retirada manual de pessoa autorizada segue rotina: ocorrencia MEDIA")
+    void retiradaManualDePessoaAutorizadaEhRotina() {
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any()))
+                .thenReturn(AutorizacaoPort.Veredito.permitir(UUID.randomUUID()));
+        RetiradaManualRequest request = new RetiradaManualRequest(ALUNO_A, UNIDADE, null, PESSOA,
+                "Mae", null, "Leitor da portaria fora do ar", null);
+
+        service.abrirManual(request, "10.0.0.9");
+
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        assertEquals(GravidadeOcorrencia.MEDIA, ocorrenciaCaptor.getValue().gravidade());
+    }
+
+    @Test
+    @DisplayName("Sem o modulo de autorizacao no ar, a retirada manual falha fechada")
+    void retiradaManualFalhaFechadaSemModuloDeAutorizacao() {
+        service = new RetiradaService(retiradaRepository, historicoRepository,
+                provedorDe((AutorizacaoPort) null), alunosAutorizadosPort, contextoAlunoPort,
+                provedorDe(permanenciaPort), provedorDe(notificacaoPort), ocorrenciaPort, publisher);
+        RetiradaManualRequest request = new RetiradaManualRequest(ALUNO_A, UNIDADE, null, PESSOA,
+                "Mae", null, "Leitor fora do ar", null);
+
+        ResponseStatusException erro = assertThrows(ResponseStatusException.class,
+                () -> service.abrirManual(request, null));
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, erro.getStatusCode());
+        verify(retiradaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Restricao cadastrada DEPOIS da chegada bloqueia a entrega")
+    void entregaEhBloqueadaPorRestricaoRegistradaAposAChegada() {
+        UUID id = UUID.randomUUID();
+        AccRetirada retirada = retiradaEm(StatusRetirada.PRONTO);
+        retirada.setPessoaAutorizadaId(PESSOA);
+        retiradaExistente(id, retirada);
+        // Na abertura estava liberado; a medida protetiva chegou no meio da tarde.
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any())).thenReturn(restricaoJudicial());
+
+        ResponseStatusException erro = assertThrows(ResponseStatusException.class,
+                () -> service.entregar(id, new EntregaRequest(null), "10.0.0.9"));
+
+        assertEquals(HttpStatus.FORBIDDEN, erro.getStatusCode());
+        // A retirada continua aberta: quem decide o que fazer e' a coordenacao.
+        assertEquals(StatusRetirada.PRONTO, retirada.getStatus());
+        assertNull(retirada.getEntregueEm());
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        assertEquals(TipoOcorrencia.RESTRICAO_JUDICIAL, ocorrenciaCaptor.getValue().tipo());
+    }
+
+    @Test
+    @DisplayName("Entrega normal nao e' afetada pela reconferencia")
+    void entregaSegueNormalQuandoNaoHaRestricao() {
+        UUID id = UUID.randomUUID();
+        AccRetirada retirada = retiradaEm(StatusRetirada.PRONTO);
+        retirada.setPessoaAutorizadaId(PESSOA);
+        retiradaExistente(id, retirada);
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any()))
+                .thenReturn(AutorizacaoPort.Veredito.permitir(UUID.randomUUID()));
+
+        AccRetirada resultado = service.entregar(id, new EntregaRequest(null), "10.0.0.9");
+
+        assertEquals(StatusRetirada.ENTREGUE, resultado.getStatus());
+        assertNotNull(resultado.getEntregueEm());
+    }
+
+    @Test
+    @DisplayName("Pessoa com restricao judicial identificada na portaria gera ocorrencia CRITICA")
+    void reconhecimentoComRestricaoJudicialGeraOcorrencia() {
+        Instant momento = Instant.now();
+        when(alunosAutorizadosPort.alunosCandidatos(eq(TENANT), eq(PESSOA), any()))
+                .thenReturn(List.of(ALUNO_A));
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any())).thenReturn(restricaoJudicial());
+
+        List<AccRetirada> abertas = service.abrirPorReconhecimento(chegadaDeResponsavel(momento));
+
+        assertTrue(abertas.isEmpty());
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        assertEquals(TipoOcorrencia.RESTRICAO_JUDICIAL, ocorrenciaCaptor.getValue().tipo());
+        assertEquals(GravidadeOcorrencia.CRITICA, ocorrenciaCaptor.getValue().gravidade());
+    }
+
+    @Test
+    @DisplayName("Autorizacao vencida na portaria gera a ocorrencia generica, nao a de restricao judicial")
+    void reconhecimentoSemAutorizacaoGeraOcorrenciaGenerica() {
+        when(alunosAutorizadosPort.alunosCandidatos(eq(TENANT), eq(PESSOA), any()))
+                .thenReturn(List.of(ALUNO_A));
+        when(autorizacaoPort.verificar(eq(ALUNO_A), eq(PESSOA), any())).thenReturn(
+                AutorizacaoPort.Veredito.negar(AutorizacaoPort.MotivoNegativa.AUTORIZACAO_NAO_ATIVA,
+                        "Autorizacao vencida"));
+
+        assertTrue(service.abrirPorReconhecimento(chegadaDeResponsavel(Instant.now())).isEmpty());
+        verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
+        assertEquals(TipoOcorrencia.TENTATIVA_NAO_AUTORIZADA, ocorrenciaCaptor.getValue().tipo());
     }
 
     // =================================================================
