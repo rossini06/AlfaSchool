@@ -109,7 +109,7 @@ class PortalIsolamentoTest {
     @DisplayName("responsavel A nao consegue solicitar autorizacao para o aluno de B")
     void solicitacaoParaAlunoDeOutroNegada() {
         PortalSolicitacaoAutorizacaoRequest pedido = new PortalSolicitacaoAutorizacaoRequest(
-                "Estranho", "tio", "123", "27999", null, "quero buscar");
+                "Estranho", "tio", "123", "27999", null, null, null, null, null, "quero buscar");
 
         assertThatThrownBy(() -> portalService.solicitarAutorizacao(ALUNO_DE_B, pedido))
                 .isInstanceOf(ResponseStatusException.class)
@@ -139,7 +139,7 @@ class PortalIsolamentoTest {
     @DisplayName("a solicitacao do portal usa o responsavel do token, nao id vindo do request")
     void solicitanteVemDoToken() {
         PortalSolicitacaoAutorizacaoRequest pedido = new PortalSolicitacaoAutorizacaoRequest(
-                "Tia Joana", "tia", "123", "27999", null, "buscar as sextas");
+                "Tia Joana", "tia", "123", "27999", null, null, null, null, null, "buscar as sextas");
 
         portalService.solicitarAutorizacao(ALUNO_DE_A, pedido);
 

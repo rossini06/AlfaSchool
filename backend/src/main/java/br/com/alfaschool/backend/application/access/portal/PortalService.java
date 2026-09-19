@@ -1,6 +1,7 @@
 package br.com.alfaschool.backend.application.access.portal;
 
 import br.com.alfaschool.backend.application.access.notificacao.dto.EnvioResponse;
+import br.com.alfaschool.backend.domain.access.notificacao.AccNotificacaoEnvio;
 import br.com.alfaschool.backend.application.access.portal.dto.PortalAlunoResumo;
 import br.com.alfaschool.backend.application.access.portal.dto.PortalAutorizacaoResumo;
 import br.com.alfaschool.backend.application.access.portal.dto.PortalPermanenciaDia;
@@ -126,15 +127,37 @@ public class PortalService {
 
     /** Avisos que a escola mandou para este responsavel. */
     @Transactional(readOnly = true)
-    public Page<EnvioResponse> minhasNotificacoes(Pageable pageable) {
+    public Page<EnvioResponse> minhasNotificacoes(boolean somenteNaoLidas, Pageable pageable) {
         PortalIdentidadeService.PortalIdentidade id = identidadeService.resolver();
         if (id.responsavelIds().isEmpty()) {
             return Page.empty(pageable);
         }
-        return envioRepository
-                .findByTenantIdAndTitularIdInOrderByCreatedAtDesc(
+        Page<AccNotificacaoEnvio> pagina = somenteNaoLidas
+                ? envioRepository.findByTenantIdAndTitularIdInAndLidaEmIsNullOrderByCreatedAtDesc(
                         id.tenantId(), id.responsavelIds(), pageable)
-                .map(EnvioResponse::from);
+                : envioRepository.findByTenantIdAndTitularIdInOrderByCreatedAtDesc(
+                        id.tenantId(), id.responsavelIds(), pageable);
+        return pagina.map(EnvioResponse::from);
+    }
+
+    /**
+     * Marca o aviso como lido pela familia.
+     *
+     * Confere o titular antes: um responsavel nao pode marcar como lido o
+     * aviso de outra familia, ainda que descubra o id.
+     */
+    @Transactional
+    public void marcarComoLida(UUID envioId) {
+        PortalIdentidadeService.PortalIdentidade id = identidadeService.resolver();
+        AccNotificacaoEnvio envio = envioRepository.findById(envioId)
+                .filter(e -> id.tenantId().equals(e.getTenantId()))
+                .filter(e -> e.getTitularId() != null && id.responsavelIds().contains(e.getTitularId()))
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Aviso não encontrado"));
+        if (envio.getLidaEm() == null) {
+            envio.setLidaEm(java.time.Instant.now());
+            envioRepository.save(envio);
+        }
     }
 
     private String texto(Tuple t, String coluna) {

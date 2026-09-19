@@ -36,6 +36,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -69,6 +70,7 @@ public class PermanenciaService implements PermanenciaPort {
     public enum ResultadoRecalculo { RECALCULADO, IGNORADO_CONGELADO, IGNORADO_AJUSTADO, IGNORADO_FECHAMENTO, SEM_DADOS }
 
     private final AccPresencaRepository presencaRepository;
+    private final PresentesLookupJdbc presentesLookup;
     private final AccPresencaParRepository parRepository;
     private final AccFechamentoRepository fechamentoRepository;
     private final MatriculaRepository matriculaRepository;
@@ -97,10 +99,11 @@ public class PermanenciaService implements PermanenciaPort {
                               AuditLogRepository auditLogRepository,
                               JornadaService jornadaService,
                               EventoAcessoLeitor eventoLeitor,
-                              ObjectProvider<CalendarioPort> calendarioProvider) {
+                              ObjectProvider<CalendarioPort> calendarioProvider,
+                              PresentesLookupJdbc presentesLookup) {
         this(presencaRepository, parRepository, fechamentoRepository, matriculaRepository,
                 auditLogRepository, jornadaService, eventoLeitor, calendarioProvider,
-                Clock.system(CalculoPermanencia.ZONE));
+                presentesLookup, Clock.system(CalculoPermanencia.ZONE));
     }
 
     /** Construtor com relogio injetado — usado nos testes de borda de data. */
@@ -112,6 +115,7 @@ public class PermanenciaService implements PermanenciaPort {
                               JornadaService jornadaService,
                               EventoAcessoLeitor eventoLeitor,
                               ObjectProvider<CalendarioPort> calendarioProvider,
+                              PresentesLookupJdbc presentesLookup,
                               Clock clock) {
         this.presencaRepository = presencaRepository;
         this.parRepository = parRepository;
@@ -121,6 +125,7 @@ public class PermanenciaService implements PermanenciaPort {
         this.jornadaService = jornadaService;
         this.eventoLeitor = eventoLeitor;
         this.calendarioProvider = calendarioProvider;
+        this.presentesLookup = presentesLookup;
         this.clock = clock;
     }
 
@@ -389,13 +394,38 @@ public class PermanenciaService implements PermanenciaPort {
     // -------------------------------------------------------------- consultas
 
     /** Quem esta na unidade agora (status ABERTA no dia corrente). */
-    public Page<PresencaResponse> quemEstaNaUnidade(UUID unitId, UUID turmaId, Pageable pageable) {
+    /**
+     * Quem esta na escola agora, com os NOMES que o painel mostra.
+     *
+     * Antes devolvia PresencaResponse, que so' tem ids: as colunas Aluno,
+     * Turma e Sala ficavam vazias, a busca por nome nao achava ninguem e os
+     * totais por turma agrupavam a escola inteira em "Sem turma".
+     */
+    public Page<PresenteAgoraResponse> quemEstaNaUnidade(UUID unitId, UUID turmaId, UUID salaId,
+                                                         Pageable pageable) {
         UUID tenantId = tenantObrigatorio();
         List<UUID> alunos = alunosDaTurma(tenantId, turmaId);
         boolean semFiltro = alunos == null;
-        return presencaRepository
-                .buscarAbertas(tenantId, hoje(), unitId, semFiltro, semFiltro ? List.of(ID_NULO) : alunos, pageable)
-                .map(p -> PresencaResponse.from(p, paresDe(tenantId, p.getId())));
+        Page<AccPresenca> pagina = presencaRepository
+                .buscarAbertas(tenantId, hoje(), unitId, semFiltro, semFiltro ? List.of(ID_NULO) : alunos, pageable);
+
+        Map<UUID, PresentesLookupJdbc.Contexto> contextos = presentesLookup.de(
+                tenantId, pagina.getContent().stream().map(AccPresenca::getAlunoId).distinct().toList(), hoje());
+
+        List<PresenteAgoraResponse> linhas = pagina.getContent().stream()
+                .map(p -> {
+                    var c = contextos.getOrDefault(p.getAlunoId(),
+                            new PresentesLookupJdbc.Contexto(null, null, null, null, null));
+                    return PresenteAgoraResponse.de(p, c.alunoNome(), c.turmaId(), c.turmaNome(),
+                            c.salaId(), c.salaNome());
+                })
+                // O recorte por sala nao existe no banco de presenca: a sala
+                // vem do vinculo turma-sala do dia, resolvido acima.
+                .filter(r -> salaId == null || salaId.equals(r.salaId()))
+                .toList();
+
+        return new org.springframework.data.domain.PageImpl<>(linhas, pageable,
+                salaId == null ? pagina.getTotalElements() : linhas.size());
     }
 
     public ExtratoAlunoResponse extrato(UUID alunoId, LocalDate inicio, LocalDate fim, Pageable pageable) {

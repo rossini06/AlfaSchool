@@ -33,6 +33,8 @@ public record EnvioResponse(
         Instant agendadoPara,
         Instant enviadoEm,
         Instant entregueEm,
+        Instant lidaEm,
+        boolean lida,
         Instant createdAt
 ) {
     public static EnvioResponse from(AccNotificacaoEnvio e) {
@@ -40,6 +42,6 @@ public record EnvioResponse(
                 e.getId(), e.getTenantId(), e.getCanal(), e.getEvento(), e.getTitularTipo(), e.getTitularId(),
                 e.getAlunoId(), e.getDestino(), e.getAssunto(), e.getCorpo(), e.getStatus(), e.getTentativas(),
                 e.getErro(), e.erroPermanente(), e.getProviderMessageId(), e.getChaveIdempotencia(),
-                e.getAgendadoPara(), e.getEnviadoEm(), e.getEntregueEm(), e.getCreatedAt());
+                e.getAgendadoPara(), e.getEnviadoEm(), e.getEntregueEm(), e.getLidaEm(), e.getLidaEm() != null, e.getCreatedAt());
     }
 }

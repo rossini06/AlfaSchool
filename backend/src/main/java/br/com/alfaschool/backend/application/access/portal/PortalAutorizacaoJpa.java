@@ -113,11 +113,13 @@ public class PortalAutorizacaoJpa implements PortalAutorizacaoPort {
         entityManager.createNativeQuery("""
                         INSERT INTO acc_autorizacoes_retirada
                             (id, tenant_id, aluno_id, pessoa_autorizada_id, permanente,
-                             vigencia_inicio, vigencia_fim, status, origem, motivo, observacao,
+                             vigencia_inicio, vigencia_fim, dias_semana, hora_inicio, hora_fim,
+                             status, origem, motivo, observacao,
                              created_at, updated_at, created_by, deleted)
                         VALUES
                             (:id, :tenantId, :alunoId, :pessoaId, :permanente,
-                             :vigenciaInicio, :vigenciaFim, 'PENDENTE', 'PORTAL', :motivo, :observacao,
+                             :vigenciaInicio, :vigenciaFim, :diasSemana, :horaInicio, :horaFim,
+                             'PENDENTE', 'PORTAL', :motivo, :observacao,
                              :agora, :agora, :responsavelId, FALSE)
                         """)
                 .setParameter("id", autorizacaoId.toString())
@@ -125,8 +127,13 @@ public class PortalAutorizacaoJpa implements PortalAutorizacaoPort {
                 .setParameter("alunoId", alunoId.toString())
                 .setParameter("pessoaId", pessoaId.toString())
                 .setParameter("permanente", permanente)
-                .setParameter("vigenciaInicio", permanente ? null : LocalDate.now().toString())
+                .setParameter("vigenciaInicio", permanente
+                        ? null
+                        : (request.validoDe() != null ? request.validoDe() : LocalDate.now()).toString())
                 .setParameter("vigenciaFim", permanente ? null : request.validoAte().toString())
+                .setParameter("diasSemana", request.diasSemana())
+                .setParameter("horaInicio", request.horaInicio() == null ? null : request.horaInicio().toString())
+                .setParameter("horaFim", request.horaFim() == null ? null : request.horaFim().toString())
                 .setParameter("motivo", request.parentesco())
                 .setParameter("observacao", request.justificativa())
                 .setParameter("agora", agora)

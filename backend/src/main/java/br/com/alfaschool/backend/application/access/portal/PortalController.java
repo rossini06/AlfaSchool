@@ -99,10 +99,23 @@ public class PortalController {
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_PORTAL_ACESSAR')")
     public ResponseEntity<ApiResponse<Page<EnvioResponse>>> notificacoes(
+            @RequestParam(defaultValue = "false") boolean naoLidas,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Notificações listadas com sucesso",
-                portalService.minhasNotificacoes(pageable)));
+                portalService.minhasNotificacoes(naoLidas, pageable)));
+    }
+
+    /**
+     * A familia marca o aviso como lido. Existe o botao na tela desde
+     * sempre; a rota, nao — cada clique dava erro.
+     */
+    @PostMapping("/notificacoes/{envioId}/lida")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_PORTAL_ACESSAR')")
+    public ResponseEntity<ApiResponse<Void>> marcarLida(@PathVariable UUID envioId) {
+        portalService.marcarComoLida(envioId);
+        return ResponseEntity.ok(ApiResponse.of(200, "Aviso marcado como lido", null));
     }
 }

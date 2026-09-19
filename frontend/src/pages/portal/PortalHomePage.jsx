@@ -18,16 +18,44 @@ export function PortalHomePage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
+  /**
+   * São duas chamadas, não uma.
+   *
+   * /meus-alunos devolve só quem está sob a responsabilidade de quem
+   * entrou — id, nome e parentesco. O que aconteceu HOJE (entrada, saída,
+   * se está presente, jornada) vem de /aluno/{id}/hoje, um por criança.
+   *
+   * A tela buscava "/portal/filhos", rota que não existe: o 404 derrubava
+   * tudo e todo responsável via "Nenhum aluno vinculado ao seu acesso".
+   */
   const carregar = useCallback(async () => {
     setCarregando(true);
-    const r = await accessApi.get("/access/portal/filhos");
-    if (r.ok) {
-      setFilhos(comoLista(r.data));
-      setErro("");
-    } else {
+    const r = await accessApi.get("/access/portal/meus-alunos");
+    if (!r.ok) {
       setFilhos([]);
       setErro(r.erro);
+      setCarregando(false);
+      return;
     }
+    const alunos = comoLista(r.data);
+    const comResumo = await Promise.all(
+      alunos.map(async (a) => {
+        const dia = await accessApi.get(`/access/portal/aluno/${a.id}/hoje`);
+        const d = dia.ok ? dia.data || {} : {};
+        return {
+          ...a,
+          alunoId: a.id,
+          presente: d.presenteAgora === true,
+          entrada: d.entrada || null,
+          saida: d.saida || null,
+          minutosContratados: d.jornadaContratadaMinutos ?? null,
+          minutosRealizados: d.permanenciaMinutos ?? null,
+          eventos: d.ultimosEventos || [],
+        };
+      })
+    );
+    setFilhos(comResumo);
+    setErro("");
     setCarregando(false);
   }, []);
 

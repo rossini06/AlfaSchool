@@ -41,7 +41,7 @@ export function PortalAutorizacoesPage() {
   const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
-    accessApi.get("/access/portal/filhos").then((r) => {
+    accessApi.get("/access/portal/meus-alunos").then((r) => {
       const lista = r.ok ? comoLista(r.data) : [];
       setFilhos(lista);
       if (lista.length > 0) setAlunoId(lista[0].alunoId || lista[0].id);
@@ -52,7 +52,7 @@ export function PortalAutorizacoesPage() {
   const carregar = useCallback(async () => {
     if (!alunoId) return;
     setCarregando(true);
-    const r = await accessApi.get(`/access/portal/autorizacoes?${qs({ alunoId })}`);
+    const r = await accessApi.get(`/access/portal/aluno/${alunoId}/autorizacoes`);
     if (r.ok) {
       setItens(comoLista(r.data));
       setErro("");
@@ -89,19 +89,21 @@ export function PortalAutorizacoesPage() {
     if (!validar()) return;
     setEnviando(true);
     setErroForm("");
-    const r = await accessApi.post("/access/portal/autorizacoes/solicitar", {
-      alunoId,
+    // O aluno vai no caminho, nao no corpo. E os nomes sao os da API:
+    // documento (nao cpf), validoAte (nao vigenciaFim), justificativa
+    // (nao observacoes). Os dias da semana viajam como CSV, que e' o
+    // formato que a autorizacao guarda.
+    const r = await accessApi.post(`/access/portal/aluno/${alunoId}/autorizacoes/solicitar`, {
       nome: form.nome.trim(),
-      cpf: form.cpf.replace(/\D/g, ""),
+      documento: form.cpf.replace(/\D/g, ""),
       parentesco: form.parentesco,
       telefone: form.telefone.trim(),
-      temporaria: form.temporaria,
-      vigenciaInicio: form.vigenciaInicio,
-      vigenciaFim: form.vigenciaFim || null,
-      diasSemana: form.diasSemana,
+      validoDe: form.temporaria ? form.vigenciaInicio : null,
+      validoAte: form.temporaria ? form.vigenciaFim || null : null,
+      diasSemana: (form.diasSemana || []).join(",") || null,
       horaInicio: form.horaInicio || null,
       horaFim: form.horaFim || null,
-      observacoes: form.observacoes.trim() || null,
+      justificativa: form.observacoes.trim() || null,
     });
     setEnviando(false);
     if (!r.ok) {
@@ -178,7 +180,7 @@ export function PortalAutorizacoesPage() {
           <article className="ac-filho-card" key={item.id}>
             <header className="ac-filho-head">
               <div>
-                <div className="ac-filho-nome">{item.pessoaNome}</div>
+                <div className="ac-filho-nome">{item.nome}</div>
                 <div className="ac-filho-turma">{item.parentesco || "Relação não informada"}</div>
               </div>
               <span className="ac-filho-selo">
@@ -191,7 +193,7 @@ export function PortalAutorizacoesPage() {
                   <span className="ac-kv-rot">Vigência</span>
                   <span className="ac-kv-val">
                     {formatarData(item.vigenciaInicio)} →{" "}
-                    {item.vigenciaFim ? formatarData(item.vigenciaFim) : "sem prazo"}
+                    {item.validoAte ? formatarData(item.validoAte) : "sem prazo"}
                   </span>
                 </div>
                 <div className="ac-kv-item">

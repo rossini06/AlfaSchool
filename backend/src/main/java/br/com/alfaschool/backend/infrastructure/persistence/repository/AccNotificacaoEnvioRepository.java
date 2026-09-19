@@ -31,6 +31,10 @@ public interface AccNotificacaoEnvioRepository
     Page<AccNotificacaoEnvio> findByTenantIdAndTitularIdInOrderByCreatedAtDesc(
             UUID tenantId, Collection<UUID> titularIds, Pageable pageable);
 
+    /** Filtro "somente nao lidos" do portal da familia. */
+    Page<AccNotificacaoEnvio> findByTenantIdAndTitularIdInAndLidaEmIsNullOrderByCreatedAtDesc(
+            UUID tenantId, Collection<UUID> titularIds, Pageable pageable);
+
     /**
      * CLAIM ATOMICO. Sem este UPDATE condicional dois workers (ou duas
      * instancias do backend) leem a mesma linha PENDENTE e a familia recebe a

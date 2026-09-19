@@ -122,6 +122,14 @@ public class AccNotificacaoEnvio {
     @Column(name = "entregue_em")
     private Instant entregueEm;
 
+    /**
+     * Quando a FAMILIA abriu o aviso no portal. Diferente de entregueEm,
+     * que e' a confirmacao do provedor: a mensagem pode ter sido entregue
+     * no WhatsApp e ninguem ter lido.
+     */
+    @Column(name = "lida_em")
+    private Instant lidaEm;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -177,6 +185,9 @@ public class AccNotificacaoEnvio {
     public void setAgendadoPara(Instant agendadoPara) { this.agendadoPara = agendadoPara; }
     public Instant getEnviadoEm() { return enviadoEm; }
     public void setEnviadoEm(Instant enviadoEm) { this.enviadoEm = enviadoEm; }
+    public Instant getLidaEm() { return lidaEm; }
+    public void setLidaEm(Instant lidaEm) { this.lidaEm = lidaEm; }
+
     public Instant getEntregueEm() { return entregueEm; }
     public void setEntregueEm(Instant entregueEm) { this.entregueEm = entregueEm; }
     public Instant getCreatedAt() { return createdAt; }

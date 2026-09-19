@@ -88,8 +88,13 @@ class PermanenciaServiceTest {
         Clock relogio = Clock.fixed(HOJE.atTime(14, 0).atZone(CalculoPermanencia.ZONE).toInstant(),
                 CalculoPermanencia.ZONE);
 
+        // O painel "Presentes Agora" resolve nomes por JDBC; nos testes de
+        // apuracao nada consulta nome, entao um mock vazio basta.
+        var presentesLookup = mock(br.com.alfaschool.backend.application.access.permanencia.PresentesLookupJdbc.class);
+
         service = new PermanenciaService(presencaRepository, parRepository, fechamentoRepository,
-                matriculaRepository, auditLogRepository, jornadaService, eventoLeitor, provider, relogio);
+                matriculaRepository, auditLogRepository, jornadaService, eventoLeitor, provider,
+                presentesLookup, relogio);
 
         armazenada = null;
         pares.clear();

@@ -17,22 +17,33 @@ import "../../styles/accessCadastros.css";
 
 const AJUSTE_VAZIO = { entrada: "", saida: "", motivo: "" };
 
+/**
+ * "2026-09-19" + "07:30" -> instante ISO.
+ *
+ * A conversao usa o fuso do navegador de proposito: quem ajusta esta na
+ * escola e digita o horario local do relogio da portaria.
+ */
+function instanteDoDia(data, hora) {
+  if (!data || !hora) return null;
+  return new Date(`${data}T${hora}:00`).toISOString();
+}
+
 function ehInconsistente(dia) {
   return dia.status === "INCONSISTENTE" || dia.inconsistente === true;
 }
 
 /** Minutos realizados: usa o que o servidor mandou ou calcula pela marcação. */
 function realizado(dia) {
-  if (typeof dia.minutosRealizados === "number") return dia.minutosRealizados;
-  return calcularCarga(dia.entrada, dia.saida);
+  if (typeof dia.minutosPermanencia === "number") return dia.minutosPermanencia;
+  return calcularCarga(dia.primeiraEntradaEm, dia.ultimaSaidaEm);
 }
 
 function contratado(dia) {
-  return typeof dia.minutosContratados === "number" ? dia.minutosContratados : null;
+  return typeof dia.minutosPrevistos === "number" ? dia.minutosPrevistos : null;
 }
 
 function excedente(dia) {
-  if (typeof dia.excedenteMinutos === "number") return dia.excedenteMinutos;
+  if (typeof dia.minutosExcedente === "number") return dia.minutosExcedente;
   const r = realizado(dia);
   const c = contratado(dia);
   if (r === null || c === null) return null;
@@ -76,7 +87,7 @@ export function PermanenciaPage() {
     setCarregando(true);
     setErro("");
     setConsultou(true);
-    const r = await accessApi.get(`/access/permanencia?${qs({ alunoId, inicio, fim })}`);
+    const r = await accessApi.get(`/access/permanencia/aluno/${alunoId}?${qs({ inicio, fim, page: 0, size: 200 })}`);
     if (r.ok) {
       const dias = comoLista(r.data?.dias ?? r.data);
       setDados({ ...(r.data || {}), dias });
@@ -105,8 +116,8 @@ export function PermanenciaPage() {
   const abrirAjuste = (dia) => {
     setAjuste({ dia });
     setFormAjuste({
-      entrada: formatarHora(dia.entrada) === "—" ? "" : formatarHora(dia.entrada),
-      saida: formatarHora(dia.saida) === "—" ? "" : formatarHora(dia.saida),
+      entrada: formatarHora(dia.primeiraEntradaEm) === "—" ? "" : formatarHora(dia.primeiraEntradaEm),
+      saida: formatarHora(dia.ultimaSaidaEm) === "—" ? "" : formatarHora(dia.ultimaSaidaEm),
       motivo: "",
     });
     setErrosAjuste({});
@@ -125,16 +136,20 @@ export function PermanenciaPage() {
     setSalvandoAjuste(true);
     setErroAjuste("");
     const dia = ajuste.dia;
+    // A API ajusta um PAR entrada/saida, nao o dia inteiro: sem o parId
+    // ela criaria um par novo em vez de corrigir o existente. E os
+    // horarios viajam como instante — "HH:MM" solto grava nulo.
+    const parExistente = (dia.pares || [])[0] || null;
     const corpo = {
       alunoId,
       data: dia.data,
-      entrada: formAjuste.entrada,
-      saida: formAjuste.saida,
+      parId: parExistente?.id ?? null,
+      entradaEm: instanteDoDia(dia.data, formAjuste.entrada),
+      saidaEm: instanteDoDia(dia.data, formAjuste.saida),
+      remover: false,
       motivo: formAjuste.motivo.trim(),
     };
-    const r = dia.id
-      ? await accessApi.post(`/access/permanencia/${dia.id}/ajuste`, corpo)
-      : await accessApi.post(`/access/permanencia/ajuste`, corpo);
+    const r = await accessApi.post(`/access/permanencia/ajustes`, corpo);
     setSalvandoAjuste(false);
     if (!r.ok) {
       setErroAjuste(r.erro);
@@ -160,8 +175,8 @@ export function PermanenciaPage() {
       ],
       dias.map((d) => ({
         data: d.data,
-        entrada: d.entrada,
-        saida: d.saida,
+        entrada: d.primeiraEntradaEm,
+        saida: d.ultimaSaidaEm,
         realizado: realizado(d) ?? "",
         contratado: contratado(d) ?? "",
         excedente: excedente(d) ?? "",
@@ -197,11 +212,11 @@ export function PermanenciaPage() {
         <div className="ac-apuracao-grid">
           <div className="ac-apuracao-item">
             <div className="ac-apuracao-rot">Entrada registrada</div>
-            <div className="ac-apuracao-val">{formatarHora(dia.entrada)}</div>
+            <div className="ac-apuracao-val">{formatarHora(dia.primeiraEntradaEm)}</div>
           </div>
           <div className="ac-apuracao-item">
             <div className="ac-apuracao-rot">Saída registrada</div>
-            <div className="ac-apuracao-val">{formatarHora(dia.saida)}</div>
+            <div className="ac-apuracao-val">{formatarHora(dia.ultimaSaidaEm)}</div>
           </div>
           <div className="ac-apuracao-item">
             <div className="ac-apuracao-rot">Jornada contratada</div>
@@ -378,8 +393,8 @@ export function PermanenciaPage() {
                       <td>
                         <strong>{formatarData(dia.data)}</strong>
                       </td>
-                      <td className="ac-mono">{formatarHora(dia.entrada)}</td>
-                      <td className="ac-mono">{formatarHora(dia.saida)}</td>
+                      <td className="ac-mono">{formatarHora(dia.primeiraEntradaEm)}</td>
+                      <td className="ac-mono">{formatarHora(dia.ultimaSaidaEm)}</td>
                       <td className={incons ? "ac-fora-totais" : ""}>{formatarDuracao(realizado(dia))}</td>
                       <td className="td-muted">{formatarDuracao(contratado(dia))}</td>
                       <td className={incons ? "ac-fora-totais" : ex > 0 ? "text-warning font-bold" : "td-muted"}>

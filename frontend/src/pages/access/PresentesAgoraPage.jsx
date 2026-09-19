@@ -25,7 +25,7 @@ export function PresentesAgoraPage() {
   const carregar = useCallback(
     async (silencioso = false) => {
       if (!silencioso) setCarregando(true);
-      const r = await accessApi.get(`/access/presentes-agora?${qs({ turmaId: filtroTurma, salaId: filtroSala })}`);
+      const r = await accessApi.get(`/access/permanencia/hoje?${qs({ turmaId: filtroTurma, salaId: filtroSala, page: 0, size: 200 })}`);
       if (r.ok) {
         setItens(comoLista(r.data));
         setErro("");

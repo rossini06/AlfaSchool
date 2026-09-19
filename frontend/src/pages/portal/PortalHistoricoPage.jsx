@@ -26,7 +26,7 @@ export function PortalHistoricoPage() {
   const [consultou, setConsultou] = useState(false);
 
   useEffect(() => {
-    accessApi.get("/access/portal/filhos").then((r) => {
+    accessApi.get("/access/portal/meus-alunos").then((r) => {
       const lista = r.ok ? comoLista(r.data) : [];
       setFilhos(lista);
       if (lista.length > 0) setAlunoId(lista[0].alunoId || lista[0].id);
@@ -45,7 +45,7 @@ export function PortalHistoricoPage() {
     setErroFiltro("");
     setCarregando(true);
     setConsultou(true);
-    const r = await accessApi.get(`/access/portal/historico?${qs({ alunoId, inicio, fim })}`);
+    const r = await accessApi.get(`/access/portal/aluno/${alunoId}/historico?${qs({ inicio, fim })}`);
     if (r.ok) {
       setDias(comoLista(r.data?.dias ?? r.data));
       setErro("");
@@ -62,7 +62,7 @@ export function PortalHistoricoPage() {
   }, [alunoId]);
 
   const realizado = (d) =>
-    typeof d.minutosRealizados === "number" ? d.minutosRealizados : calcularCarga(d.entrada, d.saida);
+    typeof d.permanenciaMinutos === "number" ? d.permanenciaMinutos : calcularCarga(d.entrada, d.saida);
 
   const totalPeriodo = dias.reduce((s, d) => s + (realizado(d) || 0), 0);
 
@@ -155,7 +155,7 @@ export function PortalHistoricoPage() {
                     <td className="ac-mono">{formatarHora(d.entrada)}</td>
                     <td className="ac-mono">{formatarHora(d.saida)}</td>
                     <td>{formatarDuracao(realizado(d))}</td>
-                    <td className="td-muted">{formatarDuracao(d.minutosContratados)}</td>
+                    <td className="td-muted">{formatarDuracao(d.jornadaContratadaMinutos)}</td>
                     <td className={ex > 0 ? "text-warning font-bold" : "td-muted"}>
                       {ex > 0 ? formatarDuracao(ex) : "—"}
                     </td>

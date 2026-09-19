@@ -24,7 +24,7 @@ export function PortalNotificacoesPage() {
 
   const carregar = useCallback(async () => {
     setCarregando(true);
-    const r = await accessApi.get(`/access/portal/notificacoes?${qs({ naoLidas: somenteNaoLidas || "" })}`);
+    const r = await accessApi.get(`/access/portal/notificacoes?${qs({ naoLidas: somenteNaoLidas ? true : "", page: 0, size: 50 })}`);
     if (r.ok) {
       setItens(comoLista(r.data));
       setErro("");
@@ -91,12 +91,12 @@ export function PortalNotificacoesPage() {
             style={item.lida ? { opacity: 0.72 } : undefined}
           >
             <header className="ac-filho-head">
-              <Icon name={ICONE_POR_TIPO[item.tipo] || "Bell"} size={18} />
+              <Icon name={ICONE_POR_TIPO[item.evento] || "Bell"} size={18} />
               <div>
-                <div className="ac-filho-nome">{item.titulo || item.tipo}</div>
+                <div className="ac-filho-nome">{item.assunto || item.evento}</div>
                 <div className="ac-filho-turma">
-                  {formatarDataHora(item.dataHora || item.criadoEm)}
-                  {item.alunoNome ? ` · ${item.alunoNome}` : ""}
+                  {formatarDataHora(item.enviadoEm || item.createdAt)}
+                  
                 </div>
               </div>
               <span className="ac-filho-selo">
@@ -110,7 +110,7 @@ export function PortalNotificacoesPage() {
               </span>
             </header>
             <div className="ac-filho-body">
-              <p style={{ fontSize: 13.5 }}>{item.mensagem || item.descricao}</p>
+              <p style={{ fontSize: 13.5 }}>{item.corpo}</p>
             </div>
           </article>
         ))}

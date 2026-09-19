@@ -29,14 +29,15 @@ public class PermanenciaController {
     @GetMapping("/hoje")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_ACESSO_PERMANENCIA_VER')")
-    public ResponseEntity<ApiResponse<Page<PresencaResponse>>> hoje(
+    public ResponseEntity<ApiResponse<Page<PresenteAgoraResponse>>> hoje(
             @RequestParam(required = false) UUID unitId,
             @RequestParam(required = false) UUID turmaId,
+            @RequestParam(required = false) UUID salaId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Alunos presentes listados com sucesso",
-                permanenciaService.quemEstaNaUnidade(unitId, turmaId, pageable)));
+                permanenciaService.quemEstaNaUnidade(unitId, turmaId, salaId, pageable)));
     }
 
     /** Extrato diario do aluno, com os totais do periodo inteiro. */
