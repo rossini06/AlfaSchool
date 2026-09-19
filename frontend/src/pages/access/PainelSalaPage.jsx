@@ -9,7 +9,6 @@ import {
   PAINEL_TOKEN_KEY,
   painelEstado,
   painelStreamUrl,
-  painelPrepararRetirada,
   normalizarEstadoPainel,
   normalizarRetirada,
   pareceEndpointAusente,
@@ -24,6 +23,22 @@ const FINALIZADAS = ["ENTREGUE", "CANCELADA", "NEGADA", "EXPIRADA"];
  * Rota pública: /painel/:slug. Não há login: a TV se identifica com o token do
  * dispositivo, lido de `?token=` e guardado no localStorage para sobreviver a
  * uma recarga ou a uma queda de energia.
+ *
+ * <h2>A tela NÃO opera nada</h2>
+ * Ela só informa. Não há botão, não há ação, e nada que se toque nela muda o
+ * estado de uma retirada. Havia um botão "Preparar aluno para saída" na mão
+ * da professora; foi retirado por decisão de operação — a sala não comanda a
+ * fila.
+ *
+ * O cartão do aluno fica na tela, com a foto dele e a de quem veio buscar,
+ * até o sistema receber a leitura do rosto dele no leitor de SAÍDA. É esse
+ * evento que fecha a retirada (ver RetiradaService.marcarSaidaPorEvento) e,
+ * só então, o cartão sai — depois de alguns segundos mostrando que a criança
+ * passou, para a professora ver que terminou.
+ *
+ * Como a TV fica pendurada à vista de outras crianças e de quem passa no
+ * corredor, ela é o lugar mais exposto do sistema: por isso não tem login,
+ * não tem ação e o token é revogável a qualquer momento.
  */
 export function PainelSalaPage() {
   const { slug } = useParams();
@@ -45,8 +60,6 @@ export function PainelSalaPage() {
   const [erro, setErro] = useState("");
   const [semBackend, setSemBackend] = useState(false);
 
-  const [preparandoId, setPreparandoId] = useState(null);
-  const [erroAcao, setErroAcao] = useState("");
   const [agora, setAgora] = useState(() => new Date());
 
   const retencaoRef = useRef(20);
@@ -173,23 +186,6 @@ export function PainelSalaPage() {
     [ordenadas]
   );
 
-  const preparar = async () => {
-    if (!destaque) return;
-    setErroAcao("");
-    setPreparandoId(destaque.id);
-    try {
-      await painelPrepararRetirada(destaque.id, token, slug);
-      // Não esperamos o evento chegar: a professora acabou de apertar o botão.
-      setRetiradas((prev) =>
-        prev.map((r) => (r.id === destaque.id ? { ...r, status: "PREPARANDO" } : r))
-      );
-    } catch (err) {
-      setErroAcao(err.message || "Não foi possível avisar a coordenação.");
-    } finally {
-      setPreparandoId(null);
-    }
-  };
-
   /* ------------------------------ telas ------------------------------ */
 
   if (!token) {
@@ -310,18 +306,7 @@ export function PainelSalaPage() {
               />
             </div>
 
-            <BotaoPreparar
-              retirada={destaque}
-              carregando={preparandoId === destaque.id}
-              onPreparar={preparar}
-            />
-
-            {erroAcao && (
-              <div className="painel-tv-erro" style={{ margin: 0 }} role="alert">
-                <Icon name="AlertCircle" size={22} />
-                <span>{erroAcao}</span>
-              </div>
-            )}
+            <SituacaoRetirada retirada={destaque} />
           </section>
 
           <section>
@@ -412,45 +397,35 @@ function CartaoPessoa({ papel, nome, foto, info }) {
   );
 }
 
-function BotaoPreparar({ retirada, carregando, onPreparar }) {
+/**
+ * Linha de situação — informa, não age.
+ *
+ * Era um <button> que a professora tocava para avisar a coordenação. Virou
+ * um bloco de leitura: a TV da sala não comanda a fila, e o que move a
+ * retirada é o rosto da criança no leitor de saída.
+ */
+function SituacaoRetirada({ retirada }) {
   const status = normalizarStatus(retirada.status);
   const chegada = horaDe(retirada.solicitadoEm);
   const legendaChegada = chegada ? `Responsável chegou às ${chegada}` : "Responsável na portaria";
 
   if (status === "ENTREGUE") {
+    const saida = horaDe(retirada.saidaEm) || horaDe(retirada.entregueEm);
     return (
       <div className="painel-tv-botao is-feito" role="status">
-        <span>Aluno entregue</span>
+        <span>Aluno saiu</span>
         <span className="painel-tv-botao-legenda">
-          {horaDe(retirada.entregueEm) ? `Confirmado às ${horaDe(retirada.entregueEm)}` : "Saída registrada"}
+          {saida ? `Rosto lido na saída às ${saida}` : "Saída registrada"}
         </span>
       </div>
     );
   }
 
-  if (status === "PRONTO") {
-    return (
-      <div className="painel-tv-botao is-feito" role="status">
-        <span>Aluno pronto — aguardando entrega</span>
-        <span className="painel-tv-botao-legenda">{legendaChegada}</span>
-      </div>
-    );
-  }
-
-  if (status === "PREPARANDO") {
-    return (
-      <button className="painel-tv-botao" disabled>
-        <span>Preparando o aluno…</span>
-        <span className="painel-tv-botao-legenda">{legendaChegada}</span>
-      </button>
-    );
-  }
-
   return (
-    <button className="painel-tv-botao" onClick={onPreparar} disabled={carregando}>
-      <span>{carregando ? "Avisando a coordenação…" : "Preparar aluno para saída"}</span>
+    <div className="painel-tv-botao is-aguardando" role="status">
+      <span>Aguardando o aluno na saída</span>
       <span className="painel-tv-botao-legenda">{legendaChegada}</span>
-    </button>
+    </div>
   );
 }
 

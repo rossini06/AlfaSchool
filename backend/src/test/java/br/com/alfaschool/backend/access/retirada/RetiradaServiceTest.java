@@ -16,6 +16,7 @@ import br.com.alfaschool.backend.application.access.shared.PermanenciaPort;
 import br.com.alfaschool.backend.domain.access.retirada.AccRetirada;
 import br.com.alfaschool.backend.domain.access.retirada.AccRetiradaHistorico;
 import br.com.alfaschool.backend.domain.access.retirada.GravidadeOcorrencia;
+import br.com.alfaschool.backend.domain.access.retirada.OrigemTransicao;
 import br.com.alfaschool.backend.domain.access.shared.FuncaoDispositivo;
 import br.com.alfaschool.backend.domain.access.shared.ResultadoAcesso;
 import br.com.alfaschool.backend.domain.access.shared.SentidoAcesso;
@@ -60,6 +61,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -792,6 +794,74 @@ class RetiradaServiceTest {
         assertTrue(service.abrirPorReconhecimento(chegadaDeResponsavel(Instant.now())).isEmpty());
         verify(ocorrenciaPort).registrar(ocorrenciaCaptor.capture());
         assertEquals(TipoOcorrencia.TENTATIVA_NAO_AUTORIZADA, ocorrenciaCaptor.getValue().tipo());
+    }
+
+    // =================================================================
+    // Saida pelo leitor fecha a retirada
+    //
+    // A TV da sala nao opera nada: nao ha botao e ninguem confirma entrega
+    // por la'. Entao quem fecha a retirada e' o rosto do aluno no leitor de
+    // saida. Antes, marcarSaidaPorEvento so' agia sobre retirada JA
+    // entregue — sem a confirmacao manual ela ficaria aberta para sempre, o
+    // cartao nunca sairia da TV e a fila cresceria pelo dia inteiro.
+    // =================================================================
+
+    @Test
+    @DisplayName("Rosto lido na saida fecha a retirada que ninguem confirmou")
+    void saidaPeloLeitorFechaRetiradaAberta() {
+        AccRetirada aberta = retiradaEm(StatusRetirada.SOLICITADA);
+        aberta.setPessoaAutorizadaId(PESSOA);
+        when(retiradaRepository.findByTenantIdAndAlunoIdAndDeletedFalseOrderBySolicitadoEmDesc(TENANT, ALUNO_A))
+                .thenReturn(List.of(aberta));
+        Instant momento = Instant.now();
+
+        service.marcarSaidaPorEvento(saidaDeAluno(momento));
+
+        assertEquals(StatusRetirada.ENTREGUE, aberta.getStatus());
+        // O ato e' a passagem: os dois carimbos recebem o MESMO instante.
+        assertEquals(momento, aberta.getEntregueEm());
+        assertEquals(momento, aberta.getSaidaEm());
+        // Ninguem confirmou com a mao: o campo de quem entregou fica vazio,
+        // e e' o historico que diz que veio da catraca.
+        assertNull(aberta.getEntreguePorUserId());
+        verify(historicoRepository, atLeastOnce()).save(historicoCaptor.capture());
+        assertTrue(historicoCaptor.getAllValues().stream()
+                .anyMatch(h -> h.getOrigem() == OrigemTransicao.CATRACA
+                        && h.getStatusNovo() == StatusRetirada.ENTREGUE));
+    }
+
+    @Test
+    @DisplayName("Retirada ja entregue por uma pessoa recebe so' o carimbo da saida")
+    void saidaPeloLeitorApenasCarimbaQuandoJaEntregue() {
+        AccRetirada entregue = retiradaEm(StatusRetirada.ENTREGUE);
+        entregue.setEntregueEm(Instant.now().minus(Duration.ofMinutes(5)));
+        entregue.setEntreguePorUserId(USUARIO);
+        when(retiradaRepository.findByTenantIdAndAlunoIdAndDeletedFalseOrderBySolicitadoEmDesc(TENANT, ALUNO_A))
+                .thenReturn(List.of(entregue));
+        Instant momento = Instant.now();
+
+        service.marcarSaidaPorEvento(saidaDeAluno(momento));
+
+        assertEquals(momento, entregue.getSaidaEm());
+        // A entrega feita por uma pessoa NAO e' reescrita pela catraca.
+        assertEquals(USUARIO, entregue.getEntreguePorUserId());
+    }
+
+    @Test
+    @DisplayName("Saida de aluno sem retirada aberta nao inventa nenhuma")
+    void saidaSemRetiradaAbertaNaoCriaNada() {
+        when(retiradaRepository.findByTenantIdAndAlunoIdAndDeletedFalseOrderBySolicitadoEmDesc(TENANT, ALUNO_A))
+                .thenReturn(List.of());
+
+        service.marcarSaidaPorEvento(saidaDeAluno(Instant.now()));
+
+        verify(retiradaRepository, never()).save(any());
+    }
+
+    private AcessoRegistradoEvent saidaDeAluno(Instant momento) {
+        return new AcessoRegistradoEvent(TENANT, UNIDADE, UUID.randomUUID(), UUID.randomUUID(),
+                UUID.randomUUID(), FuncaoDispositivo.ALUNO, TitularTipo.ALUNO, ALUNO_A,
+                ResultadoAcesso.PERMITIDO, SentidoAcesso.SAIDA, null, momento);
     }
 
     // =================================================================

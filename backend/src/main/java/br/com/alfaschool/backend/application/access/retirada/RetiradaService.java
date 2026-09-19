@@ -536,11 +536,38 @@ public class RetiradaService {
         }
         List<AccRetirada> candidatas = retiradaRepository
                 .findByTenantIdAndAlunoIdAndDeletedFalseOrderBySolicitadoEmDesc(evento.tenantId(), evento.titularId());
+
         for (AccRetirada retirada : candidatas) {
-            if (retirada.getStatus() == StatusRetirada.ENTREGUE && retirada.getSaidaEm() == null) {
+            if (retirada.getSaidaEm() != null) {
+                continue;
+            }
+
+            // Retirada ja' entregue por alguem: so' falta o carimbo da saida.
+            if (retirada.getStatus() == StatusRetirada.ENTREGUE) {
                 retirada.setSaidaEm(evento.dataHora());
                 retirada.setSaidaEventoId(evento.eventoId());
                 retiradaRepository.save(retirada);
+                return;
+            }
+
+            // Retirada ainda aberta quando a crianca cruzou o leitor de
+            // saida. E' o caso da escola que NAO tem etapa de confirmacao na
+            // sala: o painel da sala so' informa, e nada na interface move a
+            // retirada. Sem fechar aqui, ela ficaria aberta para sempre — o
+            // cartao nunca sairia da TV e a fila cresceria pelo dia inteiro.
+            //
+            // O rosto lido na saida e' o ato: a crianca passou. Por isso
+            // entregue_em e saida_em recebem o MESMO instante, e o historico
+            // grava origem CATRACA — quem consultar depois distingue a
+            // entrega confirmada por uma pessoa da registrada pelo leitor.
+            if (!MaquinaEstadosRetirada.ehFinal(retirada.getStatus())) {
+                StatusRetirada anterior = retirada.getStatus();
+                aplicarTransicao(retirada, StatusRetirada.ENTREGUE, null,
+                        OrigemTransicao.CATRACA, "Saida do aluno lida no leitor", null);
+                retirada.setEntregueEm(evento.dataHora());
+                retirada.setSaidaEm(evento.dataHora());
+                retirada.setSaidaEventoId(evento.eventoId());
+                salvarEPublicar(retirada, anterior);
                 return;
             }
         }
