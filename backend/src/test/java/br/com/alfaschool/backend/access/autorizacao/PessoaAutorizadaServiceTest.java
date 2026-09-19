@@ -53,7 +53,7 @@ class PessoaAutorizadaServiceTest {
     @DisplayName("as tres permissoes sao independentes: portal e notificacao nao ligam pode_retirar")
     void permissoesIndependentes() {
         PessoaAutorizadaResponse resposta = service.create(new PessoaAutorizadaRequest(
-                null, "Avo Rita", "529.982.247-25", null, null, null, null,
+                null, "Avo Rita", "Avo", "529.982.247-25", null, null, null, null, null,
                 false, true, true, true));
 
         assertThat(resposta.podeRetirar()).isFalse();
@@ -65,7 +65,7 @@ class PessoaAutorizadaServiceTest {
     @DisplayName("quem pode retirar nao ganha portal nem notificacao por tabela")
     void retirarNaoConcedePortal() {
         PessoaAutorizadaResponse resposta = service.create(new PessoaAutorizadaRequest(
-                null, "Avo Rita", null, null, null, null, null,
+                null, "Avo Rita", null, null, null, null, null, null, null,
                 true, null, null, null));
 
         assertThat(resposta.podeRetirar()).isTrue();
@@ -77,7 +77,7 @@ class PessoaAutorizadaServiceTest {
     @DisplayName("CPF invalido e recusado")
     void cpfInvalidoRecusado() {
         assertThatThrownBy(() -> service.create(new PessoaAutorizadaRequest(
-                null, "Fulano", "111.111.111-11", null, null, null, null, true, null, null, null)))
+                null, "Fulano", null, "111.111.111-11", null, null, null, null, null, true, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("CPF inválido");
     }
@@ -88,7 +88,7 @@ class PessoaAutorizadaServiceTest {
         when(pessoaRepository.existsByTenantIdAndCpfAndDeletedFalse(TENANT, "52998224725")).thenReturn(true);
 
         assertThatThrownBy(() -> service.create(new PessoaAutorizadaRequest(
-                null, "Fulano", "52998224725", null, null, null, null, true, null, null, null)))
+                null, "Fulano", null, "52998224725", null, null, null, null, null, true, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.CONFLICT);
@@ -98,7 +98,7 @@ class PessoaAutorizadaServiceTest {
     @DisplayName("CPF e' persistido so com digitos para casar com restricao mascarada")
     void cpfNormalizado() {
         PessoaAutorizadaResponse resposta = service.create(new PessoaAutorizadaRequest(
-                null, "Fulano", "529.982.247-25", null, null, null, null, true, null, null, null));
+                null, "Fulano", null, "529.982.247-25", null, null, null, null, null, true, null, null, null));
 
         assertThat(resposta.cpf()).isEqualTo("52998224725");
     }
@@ -109,7 +109,7 @@ class PessoaAutorizadaServiceTest {
         TenantContext.clear();
 
         assertThatThrownBy(() -> service.create(new PessoaAutorizadaRequest(
-                null, "Fulano", null, null, null, null, null, true, null, null, null)))
+                null, "Fulano", null, null, null, null, null, null, null, true, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class);
     }
 

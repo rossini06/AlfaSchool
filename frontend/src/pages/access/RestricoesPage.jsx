@@ -65,7 +65,7 @@ export function RestricoesPage() {
           size: PAGE_SIZE,
           alunoId: filtroAluno,
           situacao: filtroSituacao,
-          search: busca,
+          q: busca,
         })}`
       );
       if (r.ok) {
@@ -106,11 +106,11 @@ export function RestricoesPage() {
       pessoaCpf: item.pessoaCpf || "",
       numeroProcesso: item.numeroProcesso || "",
       orgaoEmissor: item.orgaoEmissor || "",
-      dataInicio: item.dataInicio || hojeIso(),
-      dataFim: item.dataFim || "",
-      documentoUrl: item.documentoUrl || "",
-      observacoes: item.observacoes || "",
-      ativa: item.ativa !== false,
+      dataInicio: item.vigenciaInicio || hojeIso(),
+      dataFim: item.vigenciaFim || "",
+      documentoUrl: "",
+      observacoes: item.descricao || "",
+      ativa: item.ativo !== false,
     });
     setErros({});
     setErroForm("");
@@ -130,21 +130,48 @@ export function RestricoesPage() {
     return Object.keys(e).length === 0;
   };
 
+  /**
+   * A listagem devolve so' `temDocumento` (booleano) — a chave do arquivo
+   * nunca trafega numa lista. O arquivo sai por um endpoint proprio, que
+   * confere a permissao antes de devolver a URL.
+   */
+  const abrirDocumento = async (item) => {
+    const r = await accessApi.get(`/access/restricoes/${item.id}/documento`);
+    if (!r.ok) {
+      setFeedback({ tipo: "erro", mensagem: r.erro });
+      return;
+    }
+    const url = r.data?.documentoKey;
+    if (!url) {
+      setFeedback({ tipo: "erro", mensagem: "O documento não está disponível." });
+      return;
+    }
+    window.open(url, "_blank", "noreferrer");
+  };
+
   const salvar = async () => {
     if (!validar()) return;
     setSalvando(true);
     setErroForm("");
+    const observacoes = form.observacoes.trim();
     const corpo = {
       alunoId: form.alunoId,
       pessoaNome: form.pessoaNome.trim(),
       pessoaCpf: form.pessoaCpf.replace(/\D/g, "") || null,
+      // Esta tela e' so' de medida judicial; a restricao administrativa
+      // (decisao da propria escola) entra por Ocorrencias.
+      tipo: "JUDICIAL",
       numeroProcesso: form.numeroProcesso.trim(),
       orgaoEmissor: form.orgaoEmissor.trim(),
-      dataInicio: form.dataInicio,
-      dataFim: form.dataFim || null,
-      documentoUrl: form.documentoUrl.trim() || null,
-      observacoes: form.observacoes.trim() || null,
-      ativa: form.ativa,
+      // `descricao` e' obrigatorio na API. Quando a coordenacao nao escreve
+      // observacao, o processo e o orgao ja dizem do que se trata — melhor
+      // do que recusar o cadastro de uma medida protetiva por falta de um
+      // texto livre.
+      descricao: observacoes || `Processo ${form.numeroProcesso.trim()} — ${form.orgaoEmissor.trim()}`,
+      vigenciaInicio: form.dataInicio,
+      vigenciaFim: form.dataFim || null,
+      documentoKey: form.documentoUrl.trim() || null,
+      ativo: form.ativa,
     };
     const r = editando
       ? await accessApi.put(`/access/restricoes/${editando.id}`, corpo)
@@ -179,7 +206,7 @@ export function RestricoesPage() {
   };
 
   const vigente = (item) =>
-    item.ativa !== false && (!item.dataFim || item.dataFim >= hojeIso()) && item.dataInicio <= hojeIso();
+    item.ativo !== false && (!item.vigenciaFim || item.vigenciaFim >= hojeIso()) && item.vigenciaInicio <= hojeIso();
 
   return (
     <div className="page">
@@ -290,7 +317,7 @@ export function RestricoesPage() {
                     <td className="td-muted ac-mono">{item.numeroProcesso}</td>
                     <td className="td-muted">{item.orgaoEmissor}</td>
                     <td className="td-muted">
-                      {formatarData(item.dataInicio)} → {item.dataFim ? formatarData(item.dataFim) : "sem prazo"}
+                      {formatarData(item.vigenciaInicio)} → {item.vigenciaFim ? formatarData(item.vigenciaFim) : "sem prazo"}
                     </td>
                     <td>
                       <span className={`badge ${vigente(item) ? "badge-danger" : "badge-secondary"}`}>
@@ -298,17 +325,17 @@ export function RestricoesPage() {
                       </span>
                     </td>
                     <td>
-                      {!item.documentoUrl ? (
+                      {!item.temDocumento ? (
                         <span className="ac-meta">Sem anexo</span>
                       ) : podeVerDocumento ? (
-                        <a
+                        <button
+                          type="button"
                           className="btn btn-ghost btn-xs"
-                          href={item.documentoUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                          onClick={() => abrirDocumento(item)}
+                          title="Abrir o documento da medida"
                         >
                           <Icon name="FileText" size={12} /> Abrir
-                        </a>
+                        </button>
                       ) : (
                         <span className="ac-meta" title="Seu perfil não tem permissão para abrir o documento">
                           <Icon name="Lock" size={12} /> Restrito

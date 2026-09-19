@@ -39,11 +39,15 @@ public class RestricaoController {
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
     public ResponseEntity<ApiResponse<Page<RestricaoResponse>>> list(
+            @RequestParam(required = false) UUID alunoId,
+            /** VIGENTE | ENCERRADA. Vazio traz as duas. */
+            @RequestParam(required = false) String situacao,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Restrições listadas com sucesso",
-                restricaoService.list(pageable)));
+                restricaoService.list(alunoId, situacao, q, pageable)));
     }
 
     @GetMapping("/aluno/{alunoId}")

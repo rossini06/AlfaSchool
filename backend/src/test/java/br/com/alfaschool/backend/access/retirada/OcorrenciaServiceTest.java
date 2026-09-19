@@ -52,12 +52,15 @@ class OcorrenciaServiceTest {
 
     @Mock private AccOcorrenciaRepository ocorrenciaRepository;
     @Mock private NotificacaoPort notificacaoPort;
+    @Mock private br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository alunoRepository;
+    @Mock private br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository userRepository;
 
     private OcorrenciaService service;
 
     @BeforeEach
     void preparar() {
-        service = new OcorrenciaService(ocorrenciaRepository, RetiradaServiceTest.provedorDe(notificacaoPort));
+        service = new OcorrenciaService(ocorrenciaRepository, RetiradaServiceTest.provedorDe(notificacaoPort),
+                alunoRepository, userRepository);
         TenantContext.setTenantId(TENANT);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 new AuthenticatedUser(USUARIO, TENANT, UNIDADE, List.of("COORDENADOR")), null, List.of()));

@@ -21,6 +21,8 @@ public record RestricaoResponse(
         String pessoaNome,
         String pessoaCpf,
         TipoRestricao tipo,
+        String numeroProcesso,
+        String orgaoEmissor,
         String descricao,
         boolean temDocumento,
         LocalDate vigenciaInicio,
@@ -33,7 +35,7 @@ public record RestricaoResponse(
     public static RestricaoResponse from(Restricao r) {
         return new RestricaoResponse(
                 r.getId(), r.getTenantId(), r.getAlunoId(), r.getPessoaAutorizadaId(),
-                r.getPessoaNome(), r.getPessoaCpf(), r.getTipo(), r.getDescricao(),
+                r.getPessoaNome(), r.getPessoaCpf(), r.getTipo(), r.getNumeroProcesso(), r.getOrgaoEmissor(), r.getDescricao(),
                 r.getDocumentoKey() != null && !r.getDocumentoKey().isBlank(),
                 r.getVigenciaInicio(), r.getVigenciaFim(), r.isAtivo(),
                 r.getRegistradoPorUserId(), r.getCreatedAt(), r.getUpdatedAt()

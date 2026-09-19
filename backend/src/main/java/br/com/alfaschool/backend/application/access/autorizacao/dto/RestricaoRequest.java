@@ -19,6 +19,8 @@ public record RestricaoRequest(
         @Size(max = 120) String pessoaNome,
         @Size(max = 14) String pessoaCpf,
         TipoRestricao tipo,
+        @Size(max = 60) String numeroProcesso,
+        @Size(max = 120) String orgaoEmissor,
         @NotBlank String descricao,
         @Size(max = 255) String documentoKey,
         LocalDate vigenciaInicio,

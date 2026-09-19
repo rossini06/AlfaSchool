@@ -11,13 +11,18 @@ import "../../styles/accessCadastros.css";
 
 const PAGE_SIZE = 20;
 
+// Estes valores sao o enum TipoOcorrencia do backend, nao rotulos livres.
+// A lista anterior era inventada e nao tinha UMA correspondencia sequer:
+// salvar dava 400 e filtrar por tipo tambem.
 const TIPOS = [
-  { valor: "ACESSO_NEGADO", label: "Acesso negado" },
-  { valor: "RETIRADA_NAO_AUTORIZADA", label: "Tentativa de retirada não autorizada" },
-  { valor: "ALUNO_NAO_RETIRADO", label: "Aluno não retirado no horário" },
-  { valor: "EQUIPAMENTO", label: "Falha de equipamento" },
-  { valor: "MARCACAO_INCONSISTENTE", label: "Marcação inconsistente" },
-  { valor: "OUTRO", label: "Outro" },
+  { valor: "TENTATIVA_NAO_AUTORIZADA", label: "Tentativa de retirada não autorizada" },
+  { valor: "PESSOA_DESCONHECIDA", label: "Pessoa não reconhecida na portaria" },
+  { valor: "RESTRICAO_JUDICIAL", label: "Restrição judicial" },
+  { valor: "RETIRADA_MANUAL", label: "Retirada manual pela coordenação" },
+  { valor: "HORARIO_EXCEDIDO", label: "Aluno não retirado no horário" },
+  { valor: "EQUIPAMENTO_OFFLINE", label: "Equipamento fora do ar" },
+  { valor: "SAIDA_SEM_REGISTRO", label: "Saída sem registro" },
+  { valor: "ENTRADA_DUPLICADA", label: "Entrada duplicada" },
 ];
 
 const GRAVIDADES = [
@@ -27,15 +32,15 @@ const GRAVIDADES = [
   { valor: "CRITICA", label: "Crítica", classe: "badge-danger" },
 ];
 
+// Enum StatusOcorrencia: ABERTA -> EM_TRATATIVA -> FECHADA.
 const STATUS = [
   { valor: "ABERTA", label: "Aberta", classe: "badge-danger" },
-  { valor: "EM_ANALISE", label: "Em análise", classe: "badge-warning" },
-  { valor: "TRATADA", label: "Tratada", classe: "badge-success" },
-  { valor: "CANCELADA", label: "Cancelada", classe: "badge-secondary" },
+  { valor: "EM_TRATATIVA", label: "Em tratativa", classe: "badge-warning" },
+  { valor: "FECHADA", label: "Fechada", classe: "badge-success" },
 ];
 
 const FORM_VAZIO = {
-  tipo: "OUTRO",
+  tipo: "TENTATIVA_NAO_AUTORIZADA",
   gravidade: "MEDIA",
   alunoId: "",
   dataHora: "",
@@ -81,7 +86,7 @@ export function OcorrenciasPage() {
           tipo: filtroTipo,
           gravidade: filtroGravidade,
           status: filtroStatus,
-          search: busca,
+          q: busca,
         })}`
       );
       if (r.ok) {
@@ -132,7 +137,7 @@ export function OcorrenciasPage() {
       tipo: form.tipo,
       gravidade: form.gravidade,
       alunoId: form.alunoId || null,
-      dataHora: form.dataHora,
+      ocorridoEm: new Date(form.dataHora).toISOString(),
       descricao: form.descricao.trim(),
     });
     setSalvando(false);
@@ -179,13 +184,13 @@ export function OcorrenciasPage() {
     exportarCsv(
       "ocorrencias",
       [
-        { key: "dataHora", label: "Data e hora", format: formatarDataHora },
+        { key: "ocorridoEm", label: "Data e hora", format: formatarDataHora },
         { key: "tipo", label: "Tipo", format: (v) => rotulo(TIPOS, v) },
         { key: "gravidade", label: "Gravidade", format: (v) => rotulo(GRAVIDADES, v) },
         { key: "alunoNome", label: "Aluno" },
         { key: "status", label: "Status", format: (v) => rotulo(STATUS, v) },
         { key: "descricao", label: "Descrição" },
-        { key: "tratadaPor", label: "Tratada por" },
+        { key: "tratadoPorNome", label: "Tratada por" },
         { key: "tratativa", label: "Tratativa" },
       ],
       itens
@@ -304,7 +309,7 @@ export function OcorrenciasPage() {
               !erro &&
               itens.map((item) => (
                 <tr key={item.id}>
-                  <td className="td-muted">{formatarDataHora(item.dataHora)}</td>
+                  <td className="td-muted">{formatarDataHora(item.ocorridoEm)}</td>
                   <td>{rotulo(TIPOS, item.tipo)}</td>
                   <td>
                     <span className={`badge ${classe(GRAVIDADES, item.gravidade)}`}>
@@ -319,10 +324,10 @@ export function OcorrenciasPage() {
                     <span className={`badge ${classe(STATUS, item.status)}`}>{rotulo(STATUS, item.status)}</span>
                   </td>
                   <td className="td-muted">
-                    {item.tratadaPor ? (
+                    {item.tratadoPorNome ? (
                       <>
-                        {item.tratadaPor}
-                        <div className="ac-meta">{formatarDataHora(item.tratadaEm)}</div>
+                        {item.tratadoPorNome}
+                        <div className="ac-meta">{formatarDataHora(item.tratadoEm)}</div>
                       </>
                     ) : (
                       "—"
@@ -333,7 +338,7 @@ export function OcorrenciasPage() {
                       <button className="btn btn-ghost btn-sm" title="Ver detalhes" onClick={() => setDetalhe(item)}>
                         <Icon name="Eye" size={13} />
                       </button>
-                      {item.status !== "TRATADA" && item.status !== "CANCELADA" && (
+                      {item.status !== "FECHADA" && (
                         <button className="btn btn-secondary btn-sm" onClick={() => abrirTratamento(item)}>
                           <Icon name="CheckSquare" size={13} /> Tratar
                         </button>
@@ -468,7 +473,7 @@ export function OcorrenciasPage() {
             <div className="ac-kv mb-4">
               <div className="ac-kv-item">
                 <span className="ac-kv-rot">Quando</span>
-                <span className="ac-kv-val">{formatarDataHora(tratar.dataHora)}</span>
+                <span className="ac-kv-val">{formatarDataHora(tratar.ocorridoEm)}</span>
               </div>
               <div className="ac-kv-item">
                 <span className="ac-kv-rot">Tipo</span>

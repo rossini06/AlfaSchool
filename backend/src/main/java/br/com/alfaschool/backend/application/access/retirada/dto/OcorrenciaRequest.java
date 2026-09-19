@@ -15,6 +15,8 @@ public record OcorrenciaRequest(
         UUID pessoaAutorizadaId,
         UUID dispositivoId,
         UUID retiradaId,
+        /** Quando o fato aconteceu. Ausente, vale o instante do registro. */
+        java.time.Instant ocorridoEm,
         @NotBlank(message = "Descreva a ocorrencia") String descricao
 ) {
 }

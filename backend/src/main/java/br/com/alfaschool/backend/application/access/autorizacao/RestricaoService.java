@@ -40,9 +40,23 @@ public class RestricaoService {
         this.alunoRepository = alunoRepository;
     }
 
-    public Page<RestricaoResponse> list(Pageable pageable) {
+    public Page<RestricaoResponse> list(UUID alunoId, String situacao, String q, Pageable pageable) {
         UUID tenantId = ContextoAtual.tenantObrigatorio();
-        return restricaoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(RestricaoResponse::from);
+        boolean semFiltro = alunoId == null && (q == null || q.isBlank())
+                && (situacao == null || situacao.isBlank());
+        if (semFiltro) {
+            return restricaoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
+                    .map(RestricaoResponse::from);
+        }
+        Boolean vigentes = switch (situacao == null ? "" : situacao) {
+            case "VIGENTE" -> Boolean.TRUE;
+            case "ENCERRADA" -> Boolean.FALSE;
+            default -> null;
+        };
+        String termo = (q == null || q.isBlank()) ? null : q.trim();
+        return restricaoRepository
+                .buscar(tenantId, alunoId, termo, vigentes, java.time.LocalDate.now(), pageable)
+                .map(RestricaoResponse::from);
     }
 
     public List<RestricaoResponse> listarPorAluno(UUID alunoId) {
@@ -131,6 +145,8 @@ public class RestricaoService {
         restricao.setPessoaNome(request.pessoaNome());
         restricao.setPessoaCpf(cpf);
         restricao.setTipo(request.tipo() != null ? request.tipo() : TipoRestricao.JUDICIAL);
+        restricao.setNumeroProcesso(request.numeroProcesso());
+        restricao.setOrgaoEmissor(request.orgaoEmissor());
         restricao.setDescricao(request.descricao());
         restricao.setDocumentoKey(request.documentoKey());
         restricao.setVigenciaInicio(request.vigenciaInicio());

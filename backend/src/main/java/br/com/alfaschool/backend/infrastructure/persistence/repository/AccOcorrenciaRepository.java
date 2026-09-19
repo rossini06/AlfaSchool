@@ -27,10 +27,12 @@ public interface AccOcorrenciaRepository extends JpaRepository<AccOcorrencia, UU
              and (:unitId is null or o.unitId = :unitId)
              and (:tipo is null or o.tipo = :tipo)
              and (:gravidade is null or o.gravidade = :gravidade)
+             and (:q is null or lower(o.descricao) like lower(concat('%', :q, '%')))
              and (:status is null or o.status = :status)
            order by o.createdAt desc
            """)
     Page<AccOcorrencia> buscar(@Param("tenantId") UUID tenantId,
+                               @Param("q") String q,
                                @Param("unitId") UUID unitId,
                                @Param("tipo") TipoOcorrencia tipo,
                                @Param("gravidade") GravidadeOcorrencia gravidade,

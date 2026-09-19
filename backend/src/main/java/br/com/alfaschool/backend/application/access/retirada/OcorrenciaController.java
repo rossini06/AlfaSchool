@@ -44,11 +44,12 @@ public class OcorrenciaController {
             @RequestParam(required = false) TipoOcorrencia tipo,
             @RequestParam(required = false) GravidadeOcorrencia gravidade,
             @RequestParam(required = false) StatusOcorrencia status,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size);
         return ResponseEntity.ok(ApiResponse.of(200, "Ocorrencias listadas com sucesso",
-                ocorrenciaService.listar(unitId, tipo, gravidade, status, pageable)));
+                ocorrenciaService.listar(unitId, tipo, gravidade, status, q, pageable)));
     }
 
     @GetMapping("/{id}")

@@ -45,6 +45,14 @@ public class Restricao extends BaseEntity {
     @Column(nullable = false, length = 20)
     private TipoRestricao tipo = TipoRestricao.JUDICIAL;
 
+    /** Processo que originou a medida. E' o que a escola mostra a quem contesta o bloqueio. */
+    @Column(name = "numero_processo", length = 60)
+    private String numeroProcesso;
+
+    /** Vara ou orgao que expediu a medida. */
+    @Column(name = "orgao_emissor", length = 120)
+    private String orgaoEmissor;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
@@ -77,6 +85,12 @@ public class Restricao extends BaseEntity {
     public void setPessoaNome(String pessoaNome) { this.pessoaNome = pessoaNome; }
     public String getPessoaCpf() { return pessoaCpf; }
     public void setPessoaCpf(String pessoaCpf) { this.pessoaCpf = pessoaCpf; }
+    public String getNumeroProcesso() { return numeroProcesso; }
+    public void setNumeroProcesso(String numeroProcesso) { this.numeroProcesso = numeroProcesso; }
+
+    public String getOrgaoEmissor() { return orgaoEmissor; }
+    public void setOrgaoEmissor(String orgaoEmissor) { this.orgaoEmissor = orgaoEmissor; }
+
     public TipoRestricao getTipo() { return tipo; }
     public void setTipo(TipoRestricao tipo) { this.tipo = tipo; }
     public String getDescricao() { return descricao; }

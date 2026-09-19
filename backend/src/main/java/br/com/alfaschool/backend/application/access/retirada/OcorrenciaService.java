@@ -47,10 +47,51 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
      */
     private final ObjectProvider<NotificacaoPort> notificacaoPort;
 
+    private final br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository alunoRepository;
+    private final br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository userRepository;
+
     public OcorrenciaService(AccOcorrenciaRepository ocorrenciaRepository,
-                             ObjectProvider<NotificacaoPort> notificacaoPort) {
+                             ObjectProvider<NotificacaoPort> notificacaoPort,
+                             br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository alunoRepository,
+                             br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository userRepository) {
         this.ocorrenciaRepository = ocorrenciaRepository;
         this.notificacaoPort = notificacaoPort;
+        this.alunoRepository = alunoRepository;
+        this.userRepository = userRepository;
+    }
+
+    /**
+     * Resolve os nomes de uma pagina inteira em duas consultas, nao em duas
+     * por linha. Sao poucos ids distintos: a mesma ocorrencia costuma
+     * repetir aluno, e quem trata e' um punhado de pessoas.
+     */
+    /** Mesma resolucao da listagem, para uma ocorrencia so'. */
+    private OcorrenciaResponse comNomes(AccOcorrencia o) {
+        String alunoNome = o.getAlunoId() == null ? null
+                : alunoRepository.findById(o.getAlunoId()).map(a -> a.getNome()).orElse(null);
+        String tratadoPor = o.getTratadoPorUserId() == null ? null
+                : userRepository.findById(o.getTratadoPorUserId()).map(u -> u.getName()).orElse(null);
+        return OcorrenciaResponse.from(o, alunoNome, tratadoPor);
+    }
+
+    private Page<OcorrenciaResponse> comNomes(Page<AccOcorrencia> pagina) {
+        java.util.Set<UUID> alunoIds = pagina.getContent().stream()
+                .map(AccOcorrencia::getAlunoId).filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+        java.util.Set<UUID> userIds = pagina.getContent().stream()
+                .map(AccOcorrencia::getTratadoPorUserId).filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+
+        Map<UUID, String> alunos = alunoIds.isEmpty() ? Map.of()
+                : alunoRepository.findAllById(alunoIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(a -> a.getId(), a -> a.getNome()));
+        Map<UUID, String> usuarios = userIds.isEmpty() ? Map.of()
+                : userRepository.findAllById(userIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(u -> u.getId(), u -> u.getName()));
+
+        return pagina.map(o -> OcorrenciaResponse.from(o,
+                o.getAlunoId() == null ? null : alunos.get(o.getAlunoId()),
+                o.getTratadoPorUserId() == null ? null : usuarios.get(o.getTratadoPorUserId())));
     }
 
     // ---------------------------------------------------------------
@@ -78,6 +119,7 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
             ocorrencia.setRetiradaId(pedido.retiradaId());
             ocorrencia.setDescricao(pedido.descricao() == null ? pedido.tipo().name() : pedido.descricao());
             ocorrencia.setStatus(StatusOcorrencia.ABERTA);
+            ocorrencia.setOcorridoEm(Instant.now());
             AccOcorrencia salva = ocorrenciaRepository.save(ocorrencia);
             notificarCoordenacao(salva);
             return salva;
@@ -152,22 +194,26 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
         ocorrencia.setRetiradaId(request.retiradaId());
         ocorrencia.setDescricao(request.descricao());
         ocorrencia.setStatus(StatusOcorrencia.ABERTA);
+        // Quando a coordenacao nao informa, o fato e' agora — que e' o
+        // caso das ocorrencias geradas pelo proprio sistema.
+        ocorrencia.setOcorridoEm(request.ocorridoEm() != null ? request.ocorridoEm() : Instant.now());
         ocorrencia.setCreatedBy(ContextoAcesso.userIdOuNulo());
-        return OcorrenciaResponse.from(ocorrenciaRepository.save(ocorrencia));
+        return comNomes(ocorrenciaRepository.save(ocorrencia));
     }
 
     public Page<OcorrenciaResponse> listar(UUID unitId,
                                            TipoOcorrencia tipo,
                                            GravidadeOcorrencia gravidade,
                                            StatusOcorrencia status,
+                                           String q,
                                            Pageable pageable) {
         UUID tenantId = ContextoAcesso.tenantObrigatorio();
-        return ocorrenciaRepository.buscar(tenantId, unitId, tipo, gravidade, status, pageable)
-                .map(OcorrenciaResponse::from);
+        String termo = (q == null || q.isBlank()) ? null : q.trim();
+        return comNomes(ocorrenciaRepository.buscar(tenantId, termo, unitId, tipo, gravidade, status, pageable));
     }
 
     public OcorrenciaResponse buscar(UUID id) {
-        return OcorrenciaResponse.from(carregar(id));
+        return comNomes(carregar(id));
     }
 
     @Transactional
@@ -181,7 +227,7 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
         ocorrencia.setGravidade(request.gravidade() == null ? ocorrencia.getGravidade() : request.gravidade());
         ocorrencia.setDescricao(request.descricao());
         ocorrencia.setUpdatedBy(ContextoAcesso.userIdOuNulo());
-        return OcorrenciaResponse.from(ocorrenciaRepository.save(ocorrencia));
+        return comNomes(ocorrenciaRepository.save(ocorrencia));
     }
 
     /**
@@ -202,7 +248,7 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
         ocorrencia.setTratativa(request.tratativa());
         ocorrencia.setStatus(StatusOcorrencia.EM_TRATATIVA);
         ocorrencia.setUpdatedBy(ocorrencia.getTratadoPorUserId());
-        return OcorrenciaResponse.from(ocorrenciaRepository.save(ocorrencia));
+        return comNomes(ocorrenciaRepository.save(ocorrencia));
     }
 
     /** So' fecha o que passou pela tratativa — senao some da tela sem ninguem ter olhado. */
@@ -218,7 +264,7 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
         }
         ocorrencia.setStatus(StatusOcorrencia.FECHADA);
         ocorrencia.setUpdatedBy(ContextoAcesso.userIdObrigatorio());
-        return OcorrenciaResponse.from(ocorrenciaRepository.save(ocorrencia));
+        return comNomes(ocorrenciaRepository.save(ocorrencia));
     }
 
     @Transactional

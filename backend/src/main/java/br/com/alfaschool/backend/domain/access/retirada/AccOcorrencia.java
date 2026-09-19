@@ -56,6 +56,13 @@ public class AccOcorrencia extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     private StatusOcorrencia status = StatusOcorrencia.ABERTA;
 
+    /**
+     * Quando o fato aconteceu. Diferente de createdAt, que e' quando
+     * alguem registrou — a coordenacao lanca as 17h o episodio das 14h.
+     */
+    @Column(name = "ocorrido_em")
+    private Instant ocorridoEm;
+
     @Column(name = "tratado_por_user_id")
     private UUID tratadoPorUserId;
 
@@ -83,6 +90,9 @@ public class AccOcorrencia extends BaseEntity {
     public void setRetiradaId(UUID v) { this.retiradaId = v; }
     public String getDescricao() { return descricao; }
     public void setDescricao(String v) { this.descricao = v; }
+    public Instant getOcorridoEm() { return ocorridoEm; }
+    public void setOcorridoEm(Instant ocorridoEm) { this.ocorridoEm = ocorridoEm; }
+
     public StatusOcorrencia getStatus() { return status; }
     public void setStatus(StatusOcorrencia v) { this.status = v; }
     public UUID getTratadoPorUserId() { return tratadoPorUserId; }
