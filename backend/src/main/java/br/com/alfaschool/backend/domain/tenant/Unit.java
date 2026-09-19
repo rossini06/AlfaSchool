@@ -21,6 +21,16 @@ public class Unit extends BaseEntity {
     @Column(length = 2)
     private String state;
 
+    /** Contato da UNIDADE: e' o telefone que o responsavel liga, nao o da rede. */
+    @Column(length = 9)
+    private String cep;
+
+    @Column(length = 160)
+    private String email;
+
+    @Column(length = 20)
+    private String telefone;
+
     @Column(nullable = false)
     private boolean active = true;
 
@@ -55,6 +65,15 @@ public class Unit extends BaseEntity {
     public void setState(String state) {
         this.state = state;
     }
+
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
     public boolean isActive() {
         return active;

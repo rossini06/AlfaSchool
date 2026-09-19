@@ -14,19 +14,17 @@ const ESTADOS_BR = [
 
 const EMPTY_FORM = {
   nome: "", endereco: "", cidade: "", estado: "", cep: "",
-  email: "", telefone: "", tenantId: "", active: true,
+  email: "", telefone: "", active: true,
 };
 
 export function EscolasPage() {
   const [items, setItems] = useState([]);
-  const [redes, setRedes] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [search, setSearch] = useState("");
-  const [filterRede, setFilterRede] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -38,8 +36,7 @@ export function EscolasPage() {
     setError("");
     try {
       const params = new URLSearchParams({ page: p, size: PAGE_SIZE });
-      if (search) params.set("search", search);
-      if (filterRede) params.set("tenantId", filterRede);
+      if (search) params.set("q", search);
       const data = await api.get(`/unidades?${params}`);
       setItems(data?.content || data || []);
       setTotal(data?.totalElements ?? (data?.content ?? data ?? []).length);
@@ -49,11 +46,10 @@ export function EscolasPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, filterRede]);
+  }, [search]);
 
   useEffect(() => {
     load(0);
-    api.get("/tenants?size=200").then((d) => setRedes(d?.content || d || [])).catch(() => {});
   }, []);
 
   const openNew = () => {
@@ -65,14 +61,13 @@ export function EscolasPage() {
   const openEdit = (item) => {
     setEditItem(item);
     setForm({
-      nome: item.nome || "",
-      endereco: item.endereco || "",
-      cidade: item.cidade || "",
-      estado: item.estado || "",
+      nome: item.name || "",
+      endereco: item.address || "",
+      cidade: item.city || "",
+      estado: item.state || "",
       cep: item.cep || "",
       email: item.email || "",
       telefone: item.telefone || "",
-      tenantId: item.tenantId || "",
       active: item.active !== false,
     });
     setModalOpen(true);
@@ -82,10 +77,23 @@ export function EscolasPage() {
     if (!form.nome.trim()) { setFeedback({ tipo: "alerta", mensagem: "Informe o nome." }); return; }
     setSaving(true);
     try {
+      // A API de unidades usa name/address/city/state. A tela mandava
+      // nome/endereco/cidade/estado, entao `name` — que e' obrigatorio —
+      // nunca chegava: todo salvamento dava 400 "Informe o nome da unidade".
+      const body = {
+        name: form.nome.trim(),
+        address: form.endereco?.trim() || null,
+        city: form.cidade?.trim() || null,
+        state: form.estado?.trim() || null,
+        cep: form.cep?.trim() || null,
+        email: form.email?.trim() || null,
+        telefone: form.telefone?.trim() || null,
+        active: form.active,
+      };
       if (editItem) {
-        await api.put(`/unidades/${editItem.id}`, form);
+        await api.put(`/unidades/${editItem.id}`, body);
       } else {
-        await api.post("/unidades", form);
+        await api.post("/unidades", body);
       }
       setModalOpen(false);
       load(page);
@@ -135,12 +143,6 @@ export function EscolasPage() {
                 onKeyDown={(e) => e.key === "Enter" && load(0)}
               />
             </div>
-            <div className="form-field">
-              <select className="form-select" value={filterRede} onChange={(e) => setFilterRede(e.target.value)}>
-                <option value="">Todas as Redes</option>
-                {redes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-              </select>
-            </div>
             <button className="btn btn-brand" onClick={() => load(0)}>
               <Icon name="Search" size={14} />
               Buscar
@@ -161,7 +163,6 @@ export function EscolasPage() {
           <thead>
             <tr>
               <th>Nome da Escola</th>
-              <th>Rede</th>
               <th>Cidade / Estado</th>
               <th>E-mail</th>
               <th>Telefone</th>
@@ -175,7 +176,7 @@ export function EscolasPage() {
                 <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j}><div className="skeleton skeleton-text" /></td>)}</tr>
               ))
             ) : items.length === 0 ? (
-              <tr><td colSpan={7}>
+              <tr><td colSpan={6}>
                 <div className="empty-state">
                   <div className="empty-state-icon"><Icon name="School" size={28} /></div>
                   <h3>Nenhuma escola encontrada</h3>
@@ -185,10 +186,9 @@ export function EscolasPage() {
             ) : (
               items.map((item) => (
                 <tr key={item.id}>
-                  <td><strong>{item.nome}</strong></td>
-                  <td className="td-muted">{item.tenantNome || redes.find((r) => r.id === item.tenantId)?.nome || "—"}</td>
+                  <td><strong>{item.name}</strong></td>
                   <td className="td-muted">
-                    {[item.cidade, item.estado].filter(Boolean).join(" / ") || "—"}
+                    {[item.city, item.state].filter(Boolean).join(" / ") || "—"}
                   </td>
                   <td className="td-muted">{item.email || "—"}</td>
                   <td className="td-muted">{item.telefone || "—"}</td>
@@ -234,13 +234,6 @@ export function EscolasPage() {
           <div className="form-field">
             <label className="form-label required">Nome da Escola</label>
             <input className="form-input" value={form.nome} onChange={f("nome")} placeholder="Nome completo da escola" />
-          </div>
-          <div className="form-field">
-            <label className="form-label">Rede de Ensino</label>
-            <select className="form-select" value={form.tenantId} onChange={f("tenantId")}>
-              <option value="">Selecione a rede</option>
-              {redes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-            </select>
           </div>
           <div className="form-field">
             <label className="form-label">Endereço</label>

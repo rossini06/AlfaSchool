@@ -28,10 +28,12 @@ public class UnitController {
     @GetMapping
     @PreAuthorize("isAuthenticated() and hasAuthority('PERM_ESCOLA_VER')")
     public ResponseEntity<ApiResponse<Page<UnitResponse>>> list(
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("name").ascending());
-        return ResponseEntity.ok(ApiResponse.of(200, "Escolas listadas com sucesso", unitService.list(pageable)));
+        return ResponseEntity.ok(ApiResponse.of(200, "Escolas listadas com sucesso",
+                unitService.list(q, pageable)));
     }
 
     @GetMapping("/{id}")

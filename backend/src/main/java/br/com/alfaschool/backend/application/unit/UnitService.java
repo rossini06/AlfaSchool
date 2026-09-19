@@ -23,9 +23,12 @@ public class UnitService {
         this.unitRepository = unitRepository;
     }
 
-    public Page<UnitResponse> list(Pageable pageable) {
+    public Page<UnitResponse> list(String q, Pageable pageable) {
         UUID tenantId = requiredTenant();
-        return unitRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(UnitResponse::from);
+        Page<Unit> pagina = (q == null || q.isBlank())
+                ? unitRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
+                : unitRepository.buscar(tenantId, q.trim(), pageable);
+        return pagina.map(UnitResponse::from);
     }
 
     public UnitResponse findById(UUID id) {
@@ -70,6 +73,9 @@ public class UnitService {
         unit.setAddress(request.address());
         unit.setCity(request.city());
         unit.setState(request.state());
+        unit.setCep(request.cep());
+        unit.setEmail(request.email());
+        unit.setTelefone(request.telefone());
         if (request.active() != null) {
             unit.setActive(request.active());
         }
