@@ -123,7 +123,7 @@ export function EquipamentosAccessPage() {
       portariaId: item.portariaId || "",
       funcao: item.funcao || "MISTO",
       sentido: item.sentido || "ENTRADA",
-      modoSincronizacao: item.modoSincronizacao || "PUSH",
+      modoSincronizacao: item.modoSync || "PUSH",
       ip: item.ip || "",
       porta: String(item.porta ?? "80"),
       modelo: item.modelo || "",
@@ -157,7 +157,7 @@ export function EquipamentosAccessPage() {
       portariaId: form.portariaId,
       funcao: form.funcao,
       sentido: form.sentido,
-      modoSincronizacao: form.modoSincronizacao,
+      modoSync: form.modoSincronizacao,
       ip: form.ip.trim(),
       porta: Number(form.porta),
       modelo: form.modelo.trim() || null,
@@ -165,8 +165,8 @@ export function EquipamentosAccessPage() {
       ativo: form.ativo,
     };
     const r = editando
-      ? await accessApi.put(`/access/equipamentos/${editando.id}`, corpo)
-      : await accessApi.post("/access/equipamentos", corpo);
+      ? await accessApi.put(`/dispositivos/${editando.id}`, corpo)
+      : await accessApi.post("/dispositivos", corpo);
     setSalvando(false);
     if (!r.ok) {
       setErroForm(r.erro);
@@ -195,22 +195,12 @@ export function EquipamentosAccessPage() {
     carregar(pagina);
   };
 
-  const sincronizar = async (item) => {
-    setOcupado(item.id);
-    const r = await accessApi.post(`/access/equipamentos/${item.id}/sincronizar`, {});
-    setOcupado(null);
-    if (!r.ok) {
-      setFeedback({ tipo: "erro", mensagem: `${item.nome}: ${r.erro}` });
-      return;
-    }
-    setFeedback({
-      tipo: "sucesso",
-      mensagem: r.data?.totalCredenciais
-        ? `${item.nome}: ${r.data.totalCredenciais} credencial(is) enviada(s).`
-        : `${item.nome}: sincronização disparada.`,
-    });
-    carregar(pagina);
-  };
+  // O botão "Sincronizar" foi removido de propósito. O agente local PUXA
+  // as tarefas da fila no ritmo dele — não existe, no protocolo, um
+  // comando de "sincronize tudo agora" para um equipamento. O botão
+  // chamava uma rota inexistente e errava a cada clique, prometendo uma
+  // operação que o sistema não tem. Se a escola precisar forçar, o
+  // caminho é enfileirar tarefas por pessoa, e isso merece tela própria.
 
   const gerarToken = async () => {
     setRotacionando(true);
@@ -237,7 +227,7 @@ export function EquipamentosAccessPage() {
   const excluir = async () => {
     setExcluindo(true);
     setErroExcluir("");
-    const r = await accessApi.delete(`/access/equipamentos/${excluirId}`);
+    const r = await accessApi.delete(`/dispositivos/${excluirId}`);
     setExcluindo(false);
     if (!r.ok) {
       setErroExcluir(r.erro);
@@ -372,7 +362,7 @@ export function EquipamentosAccessPage() {
                     {item.porta ? `:${item.porta}` : ""}
                   </td>
                   <td className="td-muted">
-                    {MODOS_SINC.find((m) => m.valor === item.modoSincronizacao)?.label || item.modoSincronizacao}
+                    {MODOS_SINC.find((m) => m.valor === item.modoSync)?.label || item.modoSync}
                     {item.webhookTokenGeradoEm && (
                       <div className="ac-meta">token em {formatarDataHora(item.webhookTokenGeradoEm)}</div>
                     )}
@@ -387,14 +377,6 @@ export function EquipamentosAccessPage() {
                         onClick={() => testarConexao(item)}
                       >
                         <Icon name="Zap" size={13} />
-                      </button>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        title="Sincronizar credenciais"
-                        disabled={ocupado === item.id}
-                        onClick={() => sincronizar(item)}
-                      >
-                        <Icon name="RefreshCw" size={13} />
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"

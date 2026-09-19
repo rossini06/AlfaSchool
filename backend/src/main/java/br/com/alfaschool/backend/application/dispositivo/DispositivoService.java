@@ -99,6 +99,19 @@ public class DispositivoService {
         dispositivo.setPorta(request.porta() != null ? request.porta() : 80);
         dispositivo.setSerial(request.serial());
         dispositivo.setApiToken(request.apiToken());
+        dispositivo.setPortariaId(request.portariaId());
+        // Os defaults da entidade valem quando o campo nao vem: um leitor
+        // sem funcao ou sem sentido nao serve para a fila nem para a
+        // apuracao, entao nao pode acabar nulo.
+        if (request.funcao() != null) {
+            dispositivo.setFuncao(request.funcao());
+        }
+        if (request.sentido() != null) {
+            dispositivo.setSentido(request.sentido());
+        }
+        if (request.modoSync() != null) {
+            dispositivo.setModoSync(request.modoSync());
+        }
         dispositivo.setUnitId(request.unitId());
         if (request.ativo() != null) {
             dispositivo.setAtivo(request.ativo());

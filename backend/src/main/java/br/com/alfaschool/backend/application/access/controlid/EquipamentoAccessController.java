@@ -105,6 +105,35 @@ public class EquipamentoAccessController {
      * payload. Tipo desconhecido ou parametro fora do padrao viram 400
      * AQUI, nunca chegam ao equipamento.
      */
+    /**
+     * Testa se o leitor responde no IP e na porta cadastrados.
+     *
+     * A tela tinha o botao "Testar conexao" chamando um caminho que nao
+     * existia. Este endpoint fala com o equipamento de verdade — e' isso
+     * que distingue "cadastrei certo" de "o leitor esta' na rede".
+     */
+    @PostMapping("/{id}/testar-conexao")
+    @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
+            + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> testarConexao(@PathVariable UUID id) {
+        Dispositivo d = carregar(id);
+        try {
+            // login() e nao sessao(): a sessao devolve a credencial em
+            // cache e nao encostaria no equipamento — o botao diria "OK"
+            // sobre um leitor desligado. O login forca a ida ate' ele.
+            client.login(d);
+        } catch (ControlIdException e) {
+            // 502 e nao 500: o problema esta' no equipamento ou na rede da
+            // escola, nao no servidor. A mensagem vai crua porque ela e'
+            // exatamente o que a operacao precisa ler ("Connection refused",
+            // "timeout", "senha invalida").
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, e.getMessage());
+        }
+        return ResponseEntity.ok(ApiResponse.of(200, "Equipamento respondeu",
+                Map.of("dispositivoId", d.getId(), "ip", String.valueOf(d.getIp()),
+                        "porta", d.getPorta() == null ? 0 : d.getPorta())));
+    }
+
     @PostMapping("/{id}/acionar")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_ACESSO_EQUIPAMENTOS_GERIR')")
