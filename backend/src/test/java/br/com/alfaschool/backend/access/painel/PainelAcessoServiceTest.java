@@ -35,6 +35,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -310,7 +311,9 @@ class PainelAcessoServiceTest {
         assertEquals("Joao", estado.retiradas().get(0).aluno().nome());
         assertEquals(false, estado.painel().exibeFoto());
         assertEquals(15, estado.painel().retencaoSeg());
-        // Chave de foto, nunca bytes.
-        assertTrue(estado.retiradas().get(0).aluno().fotoKey().startsWith("faces/"));
+        // exibeFoto=false corta a foto NO SERVIDOR: antes a URL assinada ia
+        // no payload assim mesmo e so' a tela deixava de desenhar.
+        assertNull(estado.retiradas().get(0).aluno().fotoKey());
+        assertNull(estado.retiradas().get(0).aluno().fotoUrl());
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -83,11 +84,26 @@ public class PainelPublicador {
         // Payload enxuto e sem bytes de imagem: so' ids, nomes, horarios e
         // CHAVES de foto. A TV busca a imagem por outro caminho.
         RetiradaFilaItem cartao = consultaService.porId(evento.tenantId(), evento.retiradaId());
-        Object payload = cartao != null ? cartao : new CartaoMinimo(
+        Object fallback = new CartaoMinimo(
                 evento.retiradaId(), evento.alunoId(), evento.statusNovo().name(), Instant.now());
 
+        // A carga e' montada POR PAINEL, nao uma so' para todos.
+        //
+        // O mesmo payload ia para todos os destinos, entao um painel com
+        // exibeFoto=false recebia a URL assinada da foto assim mesmo — e
+        // bastava a aba de rede do navegador, ou o token da TV, para baixar
+        // a imagem da crianca. A tela nao desenhava; o dado chegava.
+        //
+        // Sao poucos paineis por escola e a consulta e' por id, entao o
+        // custo de diferenciar e' menor do que o de vazar.
+        Map<UUID, Boolean> exibeFotoPorPainel = painelRepository.findAllById(destinos).stream()
+                .collect(java.util.stream.Collectors.toMap(AccPainel::getId, AccPainel::isExibeFoto));
+
+        RetiradaFilaItem cartaoSemFotos = cartao == null ? null : cartao.semFotos();
         String nomeEvento = evento.nomeSse();
         for (UUID painelId : destinos) {
+            boolean comFoto = exibeFotoPorPainel.getOrDefault(painelId, Boolean.FALSE);
+            Object payload = cartao == null ? fallback : (comFoto ? cartao : cartaoSemFotos);
             sseHub.publicar(evento.tenantId(), "painel:" + painelId, nomeEvento, payload);
         }
     }

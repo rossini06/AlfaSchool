@@ -111,58 +111,21 @@ public class PainelStreamController {
                 acessoService.estado(autenticado)));
     }
 
-    /**
-     * O botao "Preparar aluno para saida" da TV da sala.
+    /*
+     * NAO HA ROTA DE ESCRITA PARA A TV.
      *
-     * A Smart TV nao faz login: fica ligada o dia inteiro, nao tem teclado e
-     * e' compartilhada pela turma. Por isso esta rota autentica pelo token do
-     * dispositivo, e nao pelo JWT — mas so' aceita retirada que esteja DENTRO
-     * DO RECORTE daquele painel. A TV da sala 101 nao prepara aluno da 102.
+     * Existia um POST /{slug}/retiradas/{id}/preparar, que a professora
+     * disparava pelo botao "Preparar aluno para saida". O botao foi retirado
+     * por decisao de operacao — a sala nao comanda a fila — e a rota saiu
+     * junto, de proposito.
      *
-     * Preparar nao entrega crianca nenhuma. O ato de responsabilidade e'
-     * ENTREGAR, que continua exigindo colaborador autenticado em
-     * POST /api/v1/access/retiradas/{id}/entregar.
+     * O token da TV e' a credencial mais fraca do sistema: fica numa tela
+     * ligada o dia inteiro, sem login, a vista de quem passa no corredor, e
+     * viaja na query string quando o EventSource nao manda header. Uma
+     * credencial nessas condicoes nao pode mudar o estado de uma retirada.
+     * Quem fecha a retirada e' o rosto do aluno no leitor de saida.
      */
-    @PostMapping("/{slug}/retiradas/{retiradaId}/preparar")
-    public ResponseEntity<ApiResponse<Void>> prepararPeloPainel(
-            @PathVariable String slug,
-            @PathVariable UUID retiradaId,
-            @RequestHeader(value = "X-Painel-Token", required = false) String tokenHeader,
-            @RequestParam(value = "token", required = false) String tokenQuery,
-            HttpServletRequest http) {
-        String token = escolherToken(slug, tokenHeader, tokenQuery);
-        String ip = ContextoAcesso.ipDaRequisicao(http);
-        PainelAcessoService.PainelAutenticado autenticado = acessoService.autenticar(
-                slug, token, ip, http.getHeader("User-Agent"));
 
-        boolean noRecorte = acessoService.itensDoRecorte(autenticado.painel()).stream()
-                .map(RetiradaFilaItem::id)
-                .anyMatch(retiradaId::equals);
-        if (!noRecorte) {
-            // Fail-closed: fora do recorte, a TV nem confirma que a retirada
-            // existe. 404 em vez de 403 para nao virar sonda de existencia.
-            log.warn("Painel {} tentou preparar a retirada {}, que esta fora do seu recorte.",
-                    slug, retiradaId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Retirada nao encontrada neste painel");
-        }
-
-        // As rotas do painel nao passam pelo JWT, entao o TenantContext ainda
-        // nao foi populado; quem define o tenant aqui e' o proprio token.
-        UUID tenantAnterior = TenantContext.getTenantId();
-        try {
-            TenantContext.setTenantId(autenticado.tenantId());
-            String identificacao = "Painel " + autenticado.painel().getNome()
-                    + " / TV " + autenticado.dispositivo().getNome();
-            retiradaService.prepararPeloPainel(retiradaId, identificacao, ip);
-        } finally {
-            if (tenantAnterior == null) {
-                TenantContext.clear();
-            } else {
-                TenantContext.setTenantId(tenantAnterior);
-            }
-        }
-        return ResponseEntity.ok(ApiResponse.of(200, "Aluno em preparo", null));
-    }
 
     private String escolherToken(String slug, String tokenHeader, String tokenQuery) {
         if (tokenHeader != null && !tokenHeader.isBlank()) {

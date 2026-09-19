@@ -109,22 +109,14 @@ export function painelStreamUrl(slug, token) {
   return `${API_BASE}/access/paineis/${encodeURIComponent(slug)}/stream?token=${encodeURIComponent(token)}`;
 }
 
-/**
- * Botão "Preparar aluno para saída" da TV da sala.
+/*
+ * painelPrepararRetirada foi removida.
  *
- * Usa a rota do PAINEL, não a de retiradas: a TV autentica por token de
- * dispositivo e não por login, e o servidor só aceita retirada que esteja
- * dentro do recorte daquele painel — a TV da 101 não prepara aluno da 102.
- *
- * Preparar não entrega criança nenhuma. A entrega continua exigindo
- * colaborador autenticado, pela Central de Coordenação.
+ * A TV da sala não opera nada: não há botão e a rota de escrita do painel
+ * saiu do backend junto. O token da TV é a credencial mais fraca do
+ * sistema — tela ligada o dia inteiro, sem login, à vista do corredor — e
+ * não pode mudar o estado de uma retirada.
  */
-export function painelPrepararRetirada(retiradaId, token, slug) {
-  return painelRequest(
-    `/access/paineis/${encodeURIComponent(slug)}/retiradas/${encodeURIComponent(retiradaId)}/preparar`,
-    { method: "POST", token, body: {} }
-  );
-}
 
 /* ------------------------ coordenação (com JWT) ------------------------- */
 

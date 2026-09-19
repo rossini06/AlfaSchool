@@ -125,7 +125,27 @@ public class PainelAcessoService {
         return new PainelEstadoResponse(
                 PainelEstadoResponse.PainelDaTela.from(painel),
                 Instant.now(),
-                itensDoRecorte(painel));
+                itensParaExibicao(painel));
+    }
+
+    /**
+     * Os itens do recorte, ja' com a politica de foto aplicada.
+     *
+     * "Nao exibir foto" precisa acontecer AQUI. Antes, o painel com
+     * exibeFoto=false recebia a URL assinada da foto assim mesmo e apenas a
+     * tela deixava de desenhar a imagem — quem tivesse o token da TV, ou
+     * abrisse a aba de rede do navegador, baixava a foto da crianca.
+     * Politica de exibicao decidida no cliente nao e' politica.
+     *
+     * Vale para o estado inicial e para tudo que vai pelo SSE: os dois
+     * caminhos passam por este metodo.
+     */
+    public List<RetiradaFilaItem> itensParaExibicao(AccPainel painel) {
+        List<RetiradaFilaItem> itens = itensDoRecorte(painel);
+        if (painel.isExibeFoto()) {
+            return itens;
+        }
+        return itens.stream().map(RetiradaFilaItem::semFotos).toList();
     }
 
     public List<RetiradaFilaItem> itensDoRecorte(AccPainel painel) {

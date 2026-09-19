@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -141,21 +142,49 @@ class PainelPublicadorTest {
     @Test
     @DisplayName("O payload leva chave de foto, nunca bytes de imagem")
     void payloadNaoCarregaBytesDeImagem() {
+        RetiradaFilaItem item = publicarPara(true);
+
+        assertTrue(item.aluno().fotoKey().startsWith("faces/"));
+        assertFalse(item.aluno().fotoKey().startsWith("data:"), "chave de storage, nunca base64");
+        assertEquals("Joao", item.aluno().nome());
+    }
+
+    @Test
+    @DisplayName("Painel com foto desligada NAO recebe a foto — o corte e' no servidor")
+    void painelSemFotoNaoRecebeFoto() {
+        RetiradaFilaItem item = publicarPara(false);
+
+        // O mesmo payload ia para todos os destinos, entao a TV com
+        // exibeFoto=false recebia a URL assinada assim mesmo: bastava a aba
+        // de rede do navegador para baixar a foto da crianca. A tela nao
+        // desenhava; o dado chegava.
+        assertNull(item.aluno().fotoKey());
+        assertNull(item.aluno().fotoUrl());
+        assertNull(item.pessoaAutorizada().fotoKey());
+        assertNull(item.pessoaAutorizada().fotoUrl());
+        // O resto da linha continua chegando: a TV precisa do nome.
+        assertEquals("Joao", item.aluno().nome());
+    }
+
+    /** Publica para um unico painel com a politica de foto informada. */
+    private RetiradaFilaItem publicarPara(boolean exibeFoto) {
         UUID painelDaSala = UUID.randomUUID();
+        AccPainel painel = new AccPainel();
+        ReflectionTestUtils.setField(painel, "id", painelDaSala);
+        painel.setExibeFoto(exibeFoto);
+
         when(fonteRepository.paineisQueCobrem(any(), any(), any(), any(), any()))
                 .thenReturn(List.of(painelDaSala));
         when(painelRepository.findByTenantIdAndUnitIdAndTipoAndAtivoTrueAndDeletedFalse(any(), any(), any()))
                 .thenReturn(List.of());
+        when(painelRepository.findAllById(any())).thenReturn(List.of(painel));
         when(consultaService.porId(any(), any())).thenReturn(cartao());
 
         publicador.publicar(evento(TENANT_A, StatusRetirada.PRONTO, StatusRetirada.ENTREGUE));
 
         ArgumentCaptor<Object> payload = ArgumentCaptor.forClass(Object.class);
         verify(sseHub).publicar(any(), anyString(), eq("retirada.entregue"), payload.capture());
-        RetiradaFilaItem item = (RetiradaFilaItem) payload.getValue();
-        assertTrue(item.aluno().fotoKey().startsWith("faces/"));
-        assertFalse(item.aluno().fotoKey().startsWith("data:"), "chave de storage, nunca base64");
-        assertEquals("Joao", item.aluno().nome());
+        return (RetiradaFilaItem) payload.getValue();
     }
 
     @Test

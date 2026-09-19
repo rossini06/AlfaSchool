@@ -59,4 +59,30 @@ public record RetiradaFilaItem(
     public record RetiranteDoCartao(UUID id, String nome, String fotoKey, String fotoUrl,
                                     String parentesco) {
     }
+
+    /**
+     * Devolve a mesma linha SEM nenhuma foto.
+     *
+     * Existe porque "nao exibir foto" precisa acontecer no SERVIDOR. O
+     * painel com {@code exibeFoto=false} recebia a URL assinada assim
+     * mesmo, e apenas a tela deixava de desenhar a imagem — quem tivesse o
+     * token da TV (ou abrisse a aba de rede do navegador) baixava a foto da
+     * crianca. Politica de exibicao decidida no cliente nao e' politica.
+     *
+     * A TV e' o ponto mais exposto do sistema: fica pendurada a vista de
+     * outras criancas e de quem passa no corredor.
+     */
+    public RetiradaFilaItem semFotos() {
+        return new RetiradaFilaItem(
+                id, unitId,
+                aluno == null ? null
+                        : new AlunoDoCartao(aluno.id(), aluno.nome(), null, null,
+                                aluno.turmaNome(), aluno.salaNome()),
+                pessoaAutorizada == null ? null
+                        : new RetiranteDoCartao(pessoaAutorizada.id(), pessoaAutorizada.nome(),
+                                null, null, pessoaAutorizada.parentesco()),
+                turmaId, turmaNome, salaId, salaNome, portariaId, portariaNome,
+                status, ordemChegada, solicitadoEm, preparandoEm, prontoEm, entregueEm, saidaEm,
+                retiradaManual, motivo, observacao, tempoEsperaMinutos);
+    }
 }
