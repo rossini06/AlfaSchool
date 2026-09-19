@@ -18,8 +18,14 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
+    /**
+     * Quem so' tem o portal da familia nao tem dashboard: a tela e' da
+     * operacao da escola. As permissoes abaixo sao as de quem trabalha nela;
+     * a montagem do conteudo, cartao a cartao, esta' no service.
+     */
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('PERM_ESCOLA_VER','PERM_ALUNOS_VER','PERM_FINANCEIRO_VER',"
+            + "'PERM_ACESSO_PAINEL_VER','PERM_DIARIO_VER','PERM_MATRICULAS_VER')")
     public ResponseEntity<ApiResponse<DashboardResponseDTO>> dashboard() {
         return ResponseEntity.ok(ApiResponse.of(200, "Dashboard loaded successfully", dashboardService.loadDashboard()));
     }

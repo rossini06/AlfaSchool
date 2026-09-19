@@ -23,6 +23,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.alfaschool.backend.security.permissao.Permissao;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,18 +70,27 @@ class DashboardServiceTest {
         SecurityContextHolder.clearContext();
     }
 
+    /** Autentica com as permissoes informadas, no formato PERM_<nome>. */
+    private void autenticar(UUID tenantId, UUID unitId, Permissao... permissoes) {
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(permissoes)
+                .map(p -> new SimpleGrantedAuthority("PERM_" + p.name()))
+                .toList();
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        new AuthenticatedUser(UUID.randomUUID(), tenantId, unitId, List.of("USER")),
+                        null,
+                        authorities
+                )
+        );
+    }
+
     @Test
     void deveRetornarDashboardComStatsEHealth() {
         UUID tenantId = UUID.randomUUID();
         UUID unitId = UUID.randomUUID();
         TenantContext.setTenantId(tenantId);
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        new AuthenticatedUser(UUID.randomUUID(), tenantId, unitId, List.of("USER")),
-                        null,
-                        List.of()
-                )
-        );
+        autenticar(tenantId, unitId, Permissao.ALUNOS_VER, Permissao.FINANCEIRO_VER,
+                Permissao.MATRICULAS_VER, Permissao.ESCOLA_GERIR);
 
         when(dashboardMetricsRepository.buildSnapshot(eq(tenantId), eq(unitId)))
                 .thenReturn(new DashboardSnapshot(120, 18, 110, 4, 33));
@@ -91,6 +103,32 @@ class DashboardServiceTest {
         assertThat(response.stats().getFirst().key()).isEqualTo("totalStudents");
         assertThat(response.alerts()).isNotEmpty();
         assertThat(response.systemHealth().status()).isEqualTo("UP");
+    }
+
+    /**
+     * O dashboard e' montado cartao a cartao pela permissao de quem pede.
+     * A portaria acompanha o movimento do dia; o numero de inadimplentes
+     * e o nome de aluno de terceiro nao sao assunto dela.
+     */
+    @Test
+    void portariaVeOMovimentoMasNaoAInadimplencia() {
+        UUID tenantId = UUID.randomUUID();
+        UUID unitId = UUID.randomUUID();
+        TenantContext.setTenantId(tenantId);
+        autenticar(tenantId, unitId, Permissao.ACESSO_PAINEL_VER);
+
+        when(dashboardMetricsRepository.buildSnapshot(eq(tenantId), eq(unitId)))
+                .thenReturn(new DashboardSnapshot(120, 18, 110, 4, 33));
+
+        DashboardResponseDTO response = dashboardService.loadDashboard();
+
+        assertThat(response.stats()).extracting("key").containsExactly("accessToday");
+        assertThat(response.stats()).extracting("key").doesNotContain("overduePayments");
+        assertThat(response.recentMatriculas()).isEmpty();
+        assertThat(response.schoolKpis()).isNull();
+        assertThat(response.systemHealth()).isNull();
+        // O alerta de pagamento em atraso tambem e' financeiro.
+        assertThat(response.alerts()).extracting("type").doesNotContain("FINANCE");
     }
 
     @Test

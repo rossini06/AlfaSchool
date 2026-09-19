@@ -1,14 +1,17 @@
 package br.com.alfaschool.backend;
 
 import br.com.alfaschool.backend.domain.professor.Professor;
+import br.com.alfaschool.backend.domain.role.Permission;
 import br.com.alfaschool.backend.domain.role.Role;
 import br.com.alfaschool.backend.domain.tenant.Tenant;
 import br.com.alfaschool.backend.domain.user.UserAccount;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AuditLogRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.PermissionRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.ProfessorRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TenantRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
+import br.com.alfaschool.backend.security.permissao.Permissao;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +53,9 @@ class DashboardControllerTest {
     private RoleRepository roleRepository;
 
     @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
     private AuditLogRepository auditLogRepository;
 
     @Autowired
@@ -66,6 +73,7 @@ class DashboardControllerTest {
         auditLogRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
+        permissionRepository.deleteAll();
         tenantRepository.deleteAll();
 
         tenantA = new Tenant();
@@ -82,17 +90,11 @@ class DashboardControllerTest {
         tenantB.setActive(true);
         tenantB = tenantRepository.save(tenantB);
 
-        Role roleUserA = new Role();
-        roleUserA.setTenantId(tenantA.getTenantId());
-        roleUserA.setName("USER");
-        roleUserA.setDescription("Usuário base");
-        roleUserA = roleRepository.save(roleUserA);
-
-        Role roleUserB = new Role();
-        roleUserB.setTenantId(tenantB.getTenantId());
-        roleUserB.setName("USER");
-        roleUserB.setDescription("Usuário base");
-        roleUserB = roleRepository.save(roleUserB);
+        // O dashboard deixou de ser aberto a qualquer autenticado: cada
+        // bloco depende de permissao. Um perfil sem permissao nenhuma
+        // agora recebe 403 — e' o que o teste do responsavel verifica.
+        Role roleUserA = perfilCompleto(tenantA.getTenantId());
+        Role roleUserB = perfilCompleto(tenantB.getTenantId());
 
         userA = new UserAccount();
         userA.setTenantId(tenantA.getTenantId());
@@ -114,12 +116,62 @@ class DashboardControllerTest {
         professorRepository.save(professorDe(tenantB.getTenantId(), "Professor do Tenant B"));
     }
 
+    /** Perfil com as permissoes que o dashboard exige de quem opera a escola. */
+    private Role perfilCompleto(UUID tenantId) {
+        Role role = new Role();
+        role.setTenantId(tenantId);
+        role.setName("USER");
+        role.setDescription("Usuário base");
+        for (Permissao p : List.of(Permissao.ESCOLA_VER, Permissao.ESCOLA_GERIR,
+                Permissao.ALUNOS_VER, Permissao.MATRICULAS_VER, Permissao.FINANCEIRO_VER)) {
+            Permission permissao = new Permission();
+            permissao.setTenantId(tenantId);
+            permissao.setName(p.name());
+            permissao.setDescription(p.getDescricao());
+            role.getPermissions().add(permissionRepository.save(permissao));
+        }
+        return roleRepository.save(role);
+    }
+
     private Professor professorDe(UUID tenantId, String nome) {
         Professor professor = new Professor();
         professor.setTenantId(tenantId);
         professor.setNome(nome);
         professor.setStatus("ativo");
         return professor;
+    }
+
+    /**
+     * O furo que este teste fecha: /dashboard respondia 200 para qualquer
+     * autenticado, e um responsavel via a matricula NOMINAL dos filhos das
+     * outras familias e a inadimplencia da escola.
+     */
+    @Test
+    void responsavelSemPermissaoDeOperacaoNaoAcessaODashboard() throws Exception {
+        Role perfilPortal = new Role();
+        perfilPortal.setTenantId(tenantA.getTenantId());
+        perfilPortal.setName("RESPONSAVEL");
+        perfilPortal.setDescription("Portal da família");
+        Permission portal = new Permission();
+        portal.setTenantId(tenantA.getTenantId());
+        portal.setName(Permissao.PORTAL_ACESSAR.name());
+        portal.setDescription(Permissao.PORTAL_ACESSAR.getDescricao());
+        perfilPortal.getPermissions().add(permissionRepository.save(portal));
+        perfilPortal = roleRepository.save(perfilPortal);
+
+        UserAccount responsavel = new UserAccount();
+        responsavel.setTenantId(tenantA.getTenantId());
+        responsavel.setName("Mãe de aluno");
+        responsavel.setEmail("mae@tenant-a.com");
+        responsavel.setPassword(passwordEncoder.encode("123456"));
+        responsavel.getRoles().add(perfilPortal);
+        userRepository.save(responsavel);
+
+        String token = loginAndGetToken(tenantA.getTenantId(), "mae@tenant-a.com", "123456");
+
+        mockMvc.perform(get("/api/v1/dashboard")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
     }
 
     @Test

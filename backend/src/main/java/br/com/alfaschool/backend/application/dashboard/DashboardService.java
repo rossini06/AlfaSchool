@@ -12,6 +12,7 @@ import br.com.alfaschool.backend.infrastructure.persistence.repository.CursoRepo
 import br.com.alfaschool.backend.infrastructure.persistence.repository.MatriculaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
+import br.com.alfaschool.backend.security.permissao.Permissao;
 import br.com.alfaschool.backend.security.jwt.AuthenticatedUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,19 @@ public class DashboardService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * O dashboard nao e' um bloco unico: cada cartao mostra dado de uma area
+     * diferente, e quem abre a tela nao tem necessariamente acesso a todas.
+     *
+     * Ja' esteve aberto a qualquer autenticado. O efeito era um responsavel
+     * abrir /dashboard e enxergar a matricula nominal dos filhos das outras
+     * familias e o indicador de inadimplencia da escola. Nao adianta a tela
+     * nao ter o link se o endpoint responde.
+     *
+     * Por isso a montagem e' por permissao, cartao a cartao: a portaria ve o
+     * movimento do dia sem ver inadimplencia, o financeiro ve inadimplencia,
+     * e quem so' tem o portal nao chega aqui.
+     */
     public DashboardResponseDTO loadDashboard() {
         UUID tenantId = TenantContext.getTenantId();
         if (tenantId == null) {
@@ -62,20 +76,48 @@ public class DashboardService {
 
         UUID unitId = currentUnitId();
         DashboardSnapshot snapshot = dashboardMetricsRepository.buildSnapshot(tenantId, unitId);
-        SystemHealthDTO healthDTO = systemHealthService.currentHealth();
 
-        List<StatCardDTO> stats = List.of(
-                new StatCardDTO("totalStudents", "Total de Alunos", snapshot.totalStudents()),
-                new StatCardDTO("totalStaff", "Total de Colaboradores", snapshot.totalStaff()),
-                new StatCardDTO("attendanceToday", "Presenças Hoje", snapshot.attendanceToday()),
-                new StatCardDTO("overduePayments", "Inadimplências", snapshot.overduePayments()),
-                new StatCardDTO("accessToday", "Acessos Hoje", snapshot.accessToday())
-        );
+        boolean vePessoas = temPermissao(Permissao.ALUNOS_VER);
+        boolean veFinanceiro = temPermissao(Permissao.FINANCEIRO_VER);
+        boolean veMatriculas = temPermissao(Permissao.MATRICULAS_VER);
+        boolean veInfra = temPermissao(Permissao.ESCOLA_GERIR);
 
-        SchoolKpisDTO schoolKpis = buildSchoolKpis(tenantId);
-        List<Map<String, Object>> recentMatriculas = buildRecentMatriculas(tenantId);
+        List<StatCardDTO> stats = new ArrayList<>();
+        if (vePessoas) {
+            stats.add(new StatCardDTO("totalStudents", "Total de Alunos", snapshot.totalStudents()));
+            stats.add(new StatCardDTO("totalStaff", "Total de Colaboradores", snapshot.totalStaff()));
+            stats.add(new StatCardDTO("attendanceToday", "Presenças Hoje", snapshot.attendanceToday()));
+        }
+        if (veFinanceiro) {
+            stats.add(new StatCardDTO("overduePayments", "Inadimplências", snapshot.overduePayments()));
+        }
+        stats.add(new StatCardDTO("accessToday", "Acessos Hoje", snapshot.accessToday()));
 
-        return new DashboardResponseDTO(stats, buildAlerts(snapshot), healthDTO, schoolKpis, recentMatriculas);
+        // Saude do sistema e' informacao de infraestrutura (versao, banco,
+        // fila). Serve para quem administra, nao para quem opera.
+        SystemHealthDTO healthDTO = veInfra ? systemHealthService.currentHealth() : null;
+        SchoolKpisDTO schoolKpis = vePessoas ? buildSchoolKpis(tenantId) : null;
+        // Nome de aluno de terceiro: so' para quem ja' pode abrir a tela de
+        // matriculas de qualquer jeito.
+        List<Map<String, Object>> recentMatriculas =
+                veMatriculas ? buildRecentMatriculas(tenantId) : List.of();
+
+        return new DashboardResponseDTO(stats, buildAlerts(snapshot, veFinanceiro),
+                healthDTO, schoolKpis, recentMatriculas);
+    }
+
+    /**
+     * Le a authority direto do contexto. O formato PERM_<nome> e' o mesmo
+     * que o @PreAuthorize usa — nao ha' segunda fonte de verdade.
+     */
+    private boolean temPermissao(Permissao permissao) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+        String authority = "PERM_" + permissao.name();
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> authority.equals(a.getAuthority()));
     }
 
     private SchoolKpisDTO buildSchoolKpis(UUID tenantId) {
@@ -110,9 +152,9 @@ public class DashboardService {
         return principal.unitId();
     }
 
-    private List<AlertDTO> buildAlerts(DashboardSnapshot snapshot) {
+    private List<AlertDTO> buildAlerts(DashboardSnapshot snapshot, boolean veFinanceiro) {
         List<AlertDTO> alerts = new ArrayList<>();
-        if (snapshot.overduePayments() > 0) {
+        if (veFinanceiro && snapshot.overduePayments() > 0) {
             alerts.add(new AlertDTO("FINANCE", "WARNING", "Existem pagamentos em atraso que exigem atenção."));
         }
         if (snapshot.attendanceToday() == 0) {
