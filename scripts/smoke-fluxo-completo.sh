@@ -51,6 +51,39 @@ api() { # metodo caminho [json]
   fi
 }
 
+# =====================================================================
+# Limpeza do dia
+#
+# O smoke simula SEMPRE o mesmo dia: entrada de manha, saida a tarde. Se
+# ele ja' rodou hoje, os eventos da rodada anterior continuam no banco e
+# a apuracao pareia a entrada de uma rodada com a entrada da outra — um
+# dia de 3h59 apura 8 minutos, e a falha parece um bug de calculo que
+# nao existe.
+#
+# Pior: o inverso tambem acontece. Uma regressao de verdade pode ficar
+# escondida atras do lixo da rodada anterior. Um teste de aceitacao que
+# so' vale na primeira execucao do dia nao serve para decidir se o
+# sistema esta pronto, entao ele limpa o proprio rastro antes de comecar.
+#
+# So' apaga o que o SIMULADOR gerou hoje. Leitura de equipamento de
+# verdade tem outra origem e nao e' tocada.
+# =====================================================================
+MYSQL_PASS="${MYSQL_ROOT_PASSWORD:-alfaschool123}"
+if docker exec alfaschool-mysql true 2>/dev/null; then
+  passo "Limpando o rastro de execucoes anteriores de hoje"
+  docker exec -i alfaschool-mysql mysql -uroot -p"$MYSQL_PASS" alfaschool >/dev/null 2>&1 <<SQL
+DELETE FROM acc_presenca_pares WHERE presenca_id IN (SELECT id FROM acc_presencas WHERE data=CURDATE());
+DELETE FROM acc_presencas WHERE data=CURDATE();
+DELETE FROM acc_retirada_historico WHERE retirada_id IN (SELECT id FROM acc_retiradas WHERE DATE(solicitado_em)=CURDATE());
+DELETE FROM acc_retiradas WHERE DATE(solicitado_em)=CURDATE();
+DELETE FROM acc_eventos WHERE origem='SIMULADOR' AND DATE(data_hora)=CURDATE();
+SQL
+  if [ $? -eq 0 ]; then ok "dia limpo — a rodada comeca do zero"
+  else falha "nao foi possivel limpar; o resultado pode vir contaminado"; fi
+else
+  printf '  \033[33m!\033[0m sem acesso ao mysql: se o smoke ja rodou hoje, o resultado nao e confiavel\n'
+fi
+
 passo "Autenticando na escola"
 TOKEN=$(curl -s -X POST "$API/api/v1/auth/login" -H 'Content-Type: application/json' \
   -d "{\"tenantId\":\"$TENANT\",\"email\":\"$EMAIL\",\"password\":\"$SENHA\"}" | jqp data.accessToken)

@@ -9,6 +9,7 @@ import br.com.alfaschool.backend.application.access.permanencia.EventoAcessoLeit
 import br.com.alfaschool.backend.domain.access.shared.RegraExcedente;
 import br.com.alfaschool.backend.domain.access.shared.SentidoAcesso;
 import br.com.alfaschool.backend.domain.access.shared.StatusPresenca;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -236,6 +237,69 @@ class CalculoPermanenciaTest {
                 contrato(regra, toleranciaSaida), StatusPresenca.FECHADA, DIA);
     }
 
+    // =================================================================
+    // Repique de leitura
+    //
+    // Encontrado pelo smoke, nao pelos testes unitarios: um dia real de
+    // 3h59 apurou ZERO minuto, com status FECHADA — ou seja, entrou nos
+    // totais como se a crianca nao tivesse ficado na escola.
+    // =================================================================
+
+    @Test
+    @DisplayName("Crachao encostado duas vezes na entrada nao pode zerar o dia")
+    void repiqueNaEntradaNaoZeraODia() {
+        // E, E(+14s), S, S(+14s) — o que o equipamento grava quando a
+        // crianca nao ve a luz verde e encosta de novo.
+        List<EventoAcesso> eventos = List.of(
+                eventoEm(DIA, 7, 46, 39),
+                eventoEm(DIA, 7, 46, 53),
+                eventoEm(DIA, 11, 45, 39),
+                eventoEm(DIA, 11, 45, 53));
+
+        ResultadoDia r = CalculoPermanencia.apurar(eventos, contrato(RegraExcedente.HORARIO, 0), DIA, DIA.plusDays(1));
+
+        assertThat(r.totais().minutosPermanencia()).isEqualTo(239);
+        assertThat(r.status()).isEqualTo(StatusPresenca.FECHADA);
+        assertThat(r.intervalos()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("O horario que vale e' o da PRIMEIRA leitura, nao o da repetida")
+    void repiqueMantemOHorarioDaPrimeiraLeitura() {
+        List<EventoAcesso> limpos = CalculoPermanencia.semRepique(List.of(
+                eventoEm(DIA, 7, 0, 0),
+                eventoEm(DIA, 7, 0, 30),
+                eventoEm(DIA, 17, 0, 0)));
+
+        assertThat(limpos).hasSize(2);
+        assertThat(limpos.get(0).dataHora()).isEqualTo(em(DIA, 7, 0));
+    }
+
+    @Test
+    @DisplayName("Saida e entrada de verdade, fora da janela, continuam sendo dois eventos")
+    void passagensRealmenteDistintasSobrevivem() {
+        // Almoco em casa: sai 11h30, volta 13h. Nada a ver com repique.
+        List<EventoAcesso> eventos = List.of(
+                evento(DIA, 7, 0), evento(DIA, 11, 30),
+                evento(DIA, 13, 0), evento(DIA, 17, 0));
+
+        ResultadoDia r = CalculoPermanencia.apurar(eventos, contrato(RegraExcedente.HORARIO, 0), DIA, DIA.plusDays(1));
+
+        assertThat(r.intervalos()).hasSize(2);
+        assertThat(r.totais().minutosPermanencia()).isEqualTo(270 + 240);
+    }
+
+    @Test
+    @DisplayName("Dia inconsistente continua inconsistente: o antirepique nao inventa saida")
+    void antirepiqueNaoConsertaDiaSemSaida() {
+        List<EventoAcesso> eventos = List.of(eventoEm(DIA, 7, 0, 0), eventoEm(DIA, 7, 0, 20));
+
+        ResultadoDia r = CalculoPermanencia.apurar(eventos, contrato(RegraExcedente.HORARIO, 0), DIA, DIA.plusDays(1));
+
+        assertThat(r.status()).isEqualTo(StatusPresenca.INCONSISTENTE);
+        assertThat(r.totais().minutosPermanencia()).isZero();
+    }
+
     private static ParametrosDia contrato(RegraExcedente regra, int toleranciaSaida) {
         return new ParametrosDia(true, true, LocalTime.of(7, 0), LocalTime.of(17, 0),
                 600, 0, toleranciaSaida, regra);
@@ -243,6 +307,12 @@ class CalculoPermanenciaTest {
 
     private static EventoAcesso evento(LocalDate dia, int hora, int minuto) {
         return new EventoAcesso(UUID.randomUUID(), em(dia, hora, minuto), null, SentidoAcesso.INDEFINIDO);
+    }
+
+    private static EventoAcesso eventoEm(LocalDate dia, int hora, int minuto, int segundo) {
+        return new EventoAcesso(UUID.randomUUID(),
+                dia.atTime(hora, minuto, segundo).atZone(CalculoPermanencia.ZONE).toInstant(),
+                null, SentidoAcesso.INDEFINIDO);
     }
 
     private static Instant em(LocalDate dia, int hora, int minuto) {
