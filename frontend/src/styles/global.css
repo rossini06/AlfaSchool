@@ -1562,3 +1562,18 @@ body {
 }
 .sidebar-ajuda:hover { background: var(--color-bg-3); color: var(--color-text); }
 .sidebar-ajuda.active { color: var(--color-brand); background: var(--color-brand-dim); }
+
+/* Resposta à dúvida: vem antes das telas e se distingue delas — quem
+   pergunta quer a resposta, não uma lista para abrir uma a uma. */
+.ajuda-respostas { display: grid; gap: 10px; }
+.ajuda-resposta {
+  padding: 15px 17px;
+  background: var(--color-brand-dim);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-md);
+  max-width: 80ch;
+}
+.ajuda-resposta-topo { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 7px; }
+.ajuda-resposta-topo strong { font-size: 14px; line-height: 1.4; }
+.ajuda-resposta p { font-size: 13.5px; line-height: 1.7; color: var(--color-text); }
+.ajuda-resposta .btn { margin-top: 12px; }

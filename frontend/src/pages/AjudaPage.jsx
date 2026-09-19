@@ -4,7 +4,8 @@ import { Icon } from "../components/Icon";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";
 import { menuGroups, menuItems, podeVerItem } from "../config/menuConfig";
-import { ajudaPorTela, regrasDoSistema } from "../config/ajudaConfig";
+import { ajudaPorTela, regrasDoSistema, perguntasFrequentes } from "../config/ajudaConfig";
+import { perguntasQueCasam, telaCasa } from "../utils/buscaAjuda";
 
 /**
  * Tutorial do sistema.
@@ -66,20 +67,22 @@ export function AjudaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, permissoes.length]);
 
-  const termo = busca.trim().toLowerCase();
+  const termo = busca.trim();
+
+  /* A pergunta vem antes das telas: quem escreve "por que não consigo
+     entregar" quer a resposta, não uma lista de telas para abrir uma a uma. */
+  const respostas = useMemo(
+    () => (termo ? perguntasQueCasam(perguntasFrequentes, termo) : []),
+    [termo]
+  );
+
   const casa = (item) => {
     if (!termo) return true;
     const a = ajudaPorTela[item.path] || {};
-    const texto = [
-      item.label,
-      a.oQueE,
-      ...(a.comoUsar || []),
-      ...(a.regras || []),
-    ]
+    const texto = [item.label, a.oQueE, ...(a.comoUsar || []), ...(a.regras || [])]
       .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return texto.includes(termo);
+      .join(" ");
+    return telaCasa(texto, termo);
   };
 
   const porGrupo = useMemo(() => {
@@ -120,14 +123,42 @@ export function AjudaPage() {
               <input
                 id="ajuda-busca"
                 className="form-input"
-                placeholder="Ex.: restrição, excedente, quem pode buscar..."
+                placeholder="Escreva a sua dúvida. Ex.: por que não consigo entregar o aluno?"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
               />
+              <span className="form-hint">
+                Pode escrever como você falaria. A busca entende a pergunta e aponta a resposta.
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* --------------------------------------- resposta a duvida ---- */}
+      {termo && respostas.length > 0 && (
+        <section className="ajuda-secao">
+          <h2 className="ajuda-secao-titulo">
+            {respostas.length === 1 ? "Provavelmente é isto" : "Talvez seja um destes"}
+          </h2>
+          <div className="ajuda-respostas">
+            {respostas.map((r) => (
+              <div className="ajuda-resposta" key={r.pergunta}>
+                <div className="ajuda-resposta-topo">
+                  <Icon name="Info" size={16} className="ajuda-regra-icone" />
+                  <strong>{r.pergunta}</strong>
+                </div>
+                <p>{r.resposta}</p>
+                {r.tela && (
+                  <Link className="btn btn-secondary btn-sm" to={r.tela}>
+                    <Icon name="ArrowRight" size={13} /> Ir para a tela
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ------------------------------------------------ as telas ---- */}
       {menuGroups.map((grupo) => {
@@ -150,13 +181,19 @@ export function AjudaPage() {
         );
       })}
 
-      {termo && porGrupo.size === 0 && (
+      {termo && porGrupo.size === 0 && respostas.length === 0 && (
         <div className="empty-state">
           <div className="empty-state-icon">
             <Icon name="Search" size={28} />
           </div>
-          <h3>Nada encontrado para “{busca}”</h3>
-          <p>Tente outra palavra, ou limpe a busca para ver tudo.</p>
+          <h3>Não encontrei resposta para “{busca}”</h3>
+          {/* Dizer "não achei" é melhor do que devolver a resposta errada
+              com ar de certeza: quem lê está resolvendo um problema real. */}
+          <p>
+            Tente descrever de outro jeito, ou procure a tela pelo nome. Se a dúvida
+            persistir, fale com quem administra o sistema na escola — e diga qual tela
+            você estava usando.
+          </p>
         </div>
       )}
 

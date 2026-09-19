@@ -424,6 +424,258 @@ export const ajudaDoPortal = [
 ];
 
 /**
+ * Perguntas do jeito que elas aparecem de verdade.
+ *
+ * <h2>Por que isto existe</h2>
+ * A busca por palavra só acha quem já conhece o vocabulário do sistema.
+ * Quem digita "por que não consigo entregar o aluno" não acha nada, porque
+ * ninguém escreveu essa frase em lugar nenhum — e essa pessoa é justamente
+ * a que mais precisa de ajuda.
+ *
+ * <h2>Por que não é uma IA que responde</h2>
+ * Este sistema decide se uma criança pode sair com um adulto. Uma resposta
+ * inventada com confiança — "sim, a coordenação pode liberar" — é pior do
+ * que "não encontrei". Aqui cada resposta é escrita, conferida contra o
+ * comportamento real do sistema, e aponta para a tela onde se resolve.
+ *
+ * `sintomas` são as palavras que a pessoa usa quando NÃO sabe o nome
+ * técnico: "sumiu", "não deixa", "deu zero", "não aparece".
+ */
+export const perguntasFrequentes = [
+  {
+    pergunta: "Por que não consigo entregar o aluno / o sistema recusou a retirada?",
+    sintomas: ["nao consigo entregar", "recusou", "nao deixa entregar", "bloqueou a retirada",
+               "nao libera o aluno", "erro ao entregar", "403 retirada"],
+    resposta:
+      "Três motivos possíveis, nesta ordem: (1) existe restrição judicial vigente para a pessoa que veio " +
+      "buscar — essa não tem como liberar por nenhum caminho; (2) ninguém com permissão de entregar está " +
+      "confirmando; (3) o módulo de autorização está fora do ar, e nesse caso o sistema nega de propósito, " +
+      "porque na dúvida ele não abre a porta.",
+    tela: "/access/coordenacao",
+  },
+  {
+    pergunta: "A pessoa está autorizada, mas a portaria diz que não pode. Por quê?",
+    sintomas: ["autorizada mas nao pode", "esta autorizado e nao deixa", "autorizacao nao funciona",
+               "cadastrei e nao libera", "portaria nega"],
+    resposta:
+      "Cadastrar a pessoa não basta: a autorização precisa estar APROVADA, dentro da vigência, no dia da " +
+      "semana e na faixa de horário configurados. Pedido que chegou pelo portal nasce pendente. E se houver " +
+      "restrição judicial, nada disso importa — ela vence tudo.",
+    tela: "/access/autorizacoes",
+  },
+  {
+    pergunta: "Sumiu um menu / não encontro uma tela que eu via antes",
+    sintomas: ["sumiu o menu", "nao encontro a tela", "sumiu a opcao", "nao aparece mais",
+               "perdi o acesso", "nao vejo mais"],
+    resposta:
+      "O menu mostra só o que o seu perfil permite. Se mudou, alguém alterou a sua permissão — e a mudança " +
+      "só vale a partir do próximo login. Saia e entre de novo. Se continuar faltando, peça a quem administra " +
+      "os perfis: no fim desta página há a lista do que existe e você não alcança.",
+    tela: "/perfis",
+  },
+  {
+    pergunta: "Mudei a permissão de alguém e não mudou nada",
+    sintomas: ["mudei a permissao e nao mudou", "permissao nao aplicou", "alterei o perfil e continua igual",
+               "nao valeu a permissao"],
+    resposta:
+      "As permissões viajam no token do login. A alteração vale a partir do PRÓXIMO login de quem tem aquele " +
+      "perfil — peça à pessoa para sair e entrar novamente.",
+    tela: "/perfis",
+  },
+  {
+    pergunta: "O dia apareceu com zero minuto / a permanência não bateu",
+    sintomas: ["deu zero", "zero minuto", "permanencia errada", "nao contou o tempo",
+               "dia inconsistente", "faltou saida"],
+    resposta:
+      "Provavelmente faltou registrar uma saída: com marcação ímpar o dia fica INCONSISTENTE e não entra em " +
+      "nenhum total, porque o número seria fantasia. Corrija informando entrada e saída no extrato do aluno, " +
+      "sempre com motivo — o ajuste fica na auditoria.",
+    tela: "/access/permanencia",
+  },
+  {
+    pergunta: "O excedente não foi cobrado / não apareceu hora extra",
+    sintomas: ["nao cobrou excedente", "hora extra nao apareceu", "excedente zerado",
+               "nao calculou a hora extra"],
+    resposta:
+      "Confira três coisas: o aluno tem jornada vinculada? a jornada tem horário previsto e carga em minutos? " +
+      "o dia é letivo no calendário? Sem qualquer uma delas não há parâmetro para comparar. Dia inconsistente " +
+      "também fica de fora, de propósito — ele vira cobrança.",
+    tela: "/access/aluno-jornadas",
+  },
+  {
+    pergunta: "A TV da sala está em branco ou dizendo que não há comunicação",
+    sintomas: ["tv em branco", "sem comunicacao", "painel nao carrega", "tv nao mostra nada",
+               "tela da sala vazia", "painel offline"],
+    resposta:
+      "A TV se identifica por um código próprio. Se ela foi trocada, limpa ou aberta num navegador novo, o " +
+      "código se perdeu: abra o painel em Painéis e TVs, cadastre a TV e use o link gerado, que já vem com o " +
+      "código. Se a tela carrega mas está vazia, é porque ninguém está esperando naquela sala agora.",
+    tela: "/access/paineis",
+  },
+  {
+    pergunta: "A professora não consegue clicar em nada na TV da sala",
+    sintomas: ["tv nao tem botao", "nao clica na tv", "professora nao consegue preparar",
+               "sumiu o botao da tv", "tv nao faz nada"],
+    resposta:
+      "É assim de propósito: a TV só informa. Ela não tem botão e nada nela muda o estado de uma retirada. " +
+      "O cartão da criança sai da tela quando ela passa o rosto no leitor de saída.",
+    tela: "/access/paineis",
+  },
+  {
+    pergunta: "A foto não aparece na tela",
+    sintomas: ["foto nao aparece", "sem foto", "nao mostra a foto", "foto sumiu", "silhueta"],
+    resposta:
+      "Ou o painel está com 'exibir foto' desligada — e nesse caso a foto nem é enviada para aquela tela — ou " +
+      "a pessoa não tem foto cadastrada, e aí aparece a silhueta.",
+    tela: "/access/paineis",
+  },
+  {
+    pergunta: "O rosto não vai para o leitor / a biometria não sincroniza",
+    sintomas: ["biometria nao sincroniza", "rosto nao vai", "face recusada", "nao envia a foto",
+               "nao cadastra no leitor"],
+    resposta:
+      "O sistema recusa exportar biometria sem base legal declarada E consentimento registrado — é criança, e " +
+      "a lei exige os dois. Se a família revogou o consentimento, a recusa diz isso com todas as letras. " +
+      "Verifique também se o cadastro está ativo.",
+    tela: "/dispositivos",
+  },
+  {
+    pergunta: "A família quer retirar a autorização da biometria",
+    sintomas: ["revogar consentimento", "retirar autorizacao da foto", "apagar biometria",
+               "familia nao quer mais reconhecimento", "lgpd biometria"],
+    resposta:
+      "É um direito, exercível a qualquer momento e sem custo. Ao revogar, o sistema remove o rosto de cada " +
+      "leitor onde ele foi gravado e bloqueia novo envio. Se algum leitor estiver fora do ar, a revogação vale " +
+      "do mesmo jeito e o sistema informa quais equipamentos não confirmaram.",
+    tela: "/dispositivos",
+  },
+  {
+    pergunta: "A família pediu tudo o que a escola guarda sobre o filho",
+    sintomas: ["dados do aluno lgpd", "pedido de dados", "titular pediu", "relatorio lgpd",
+               "o que a escola guarda", "direito de acesso"],
+    resposta:
+      "A direção emite o relatório do titular, que reúne cadastro, responsáveis, autorizações, permanência, " +
+      "passagens na portaria, retiradas, ocorrências, avisos, notas e frequência. O template da biometria não " +
+      "entra — só o registro de que existe e em quais leitores está. A emissão fica na auditoria.",
+    tela: "/auditoria",
+  },
+  {
+    pergunta: "Excluí um registro e agora não consigo criar outro igual",
+    sintomas: ["nao consigo criar de novo", "ja existe mas eu excluí", "conflito apos excluir",
+               "409 depois de excluir"],
+    resposta:
+      "Isso era um defeito e foi corrigido: excluir é lógico, e a linha excluída deixou de ocupar a chave. " +
+      "Se ainda acontecer, o conflito é com um registro ATIVO — procure na lista sem filtro.",
+  },
+  {
+    pergunta: "Quero saber quem alterou uma nota, uma permanência ou uma permissão",
+    sintomas: ["quem alterou", "quem mudou", "historico de alteracao", "quem fez isso",
+               "rastrear alteracao"],
+    resposta:
+      "A Auditoria registra quem fez o quê, quando e de qual IP. Alteração de nota guarda também o valor " +
+      "anterior e o novo. Ajuste de permanência guarda o motivo que a pessoa escreveu.",
+    tela: "/auditoria",
+  },
+  {
+    pergunta: "Cancelei uma matrícula por engano",
+    sintomas: ["cancelei matricula", "desfazer cancelamento", "reativar matricula", "errei a matricula"],
+    resposta:
+      "Dá para reativar: a matrícula volta a ser ativa e o aluno reaparece nas listas. O período em que ela " +
+      "esteve cancelada continua registrado — o histórico não é reescrito.",
+    tela: "/matriculas",
+  },
+  {
+    pergunta: "Encerrei um contrato por engano",
+    sintomas: ["encerrei contrato", "desfazer contrato", "contrato encerrado errado"],
+    resposta:
+      "Não há desfazer pela tela. Seria preciso lançar um contrato novo. Por isso o encerramento pede " +
+      "confirmação antes.",
+    tela: "/financeiro",
+  },
+  {
+    pergunta: "Quero bloquear uma pessoa de retirar uma criança",
+    sintomas: ["bloquear pessoa", "medida protetiva", "ordem judicial", "impedir retirada",
+               "pai nao pode buscar", "guarda"],
+    resposta:
+      "Cadastre em Restrições Judiciais, com o número do processo e o órgão que expediu. Funciona mesmo " +
+      "contra quem ainda não está cadastrado, porque o bloqueio casa pelo CPF. Vale imediatamente e prevalece " +
+      "sobre qualquer autorização — inclusive na retirada manual.",
+    tela: "/access/restricoes",
+  },
+  {
+    pergunta: "Alguém não cadastrado veio buscar a criança",
+    sintomas: ["pessoa nao cadastrada", "veio buscar e nao esta no sistema", "retirada manual",
+               "excecao na portaria", "leitor quebrado"],
+    resposta:
+      "Use a retirada manual, na tela da Coordenação, informando quem é e o motivo. Ela sempre gera " +
+      "ocorrência, porque é o caminho que contorna o controle. Se houver restrição judicial, o sistema recusa " +
+      "mesmo assim.",
+    tela: "/access/coordenacao",
+  },
+  {
+    pergunta: "O responsável não recebeu o aviso",
+    sintomas: ["nao recebeu aviso", "notificacao nao chegou", "nao avisou a familia",
+               "whatsapp nao chegou", "email nao chegou"],
+    resposta:
+      "Confira se a pessoa tem a permissão de receber avisos — retirar, acessar o portal e receber " +
+      "notificação são três permissões independentes. Depois confira se há telefone ou e-mail cadastrado e se " +
+      "o canal está configurado.",
+    tela: "/access/pessoas-autorizadas",
+  },
+  {
+    pergunta: "Como coloco uma TV numa sala?",
+    sintomas: ["colocar tv", "instalar painel", "tv da sala", "configurar tela da sala", "link da tv"],
+    resposta:
+      "Em Painéis e TVs: crie o painel com o recorte (a turma ou a sala), cadastre uma TV nele e copie o " +
+      "link gerado — ele já vem com o código. Abra esse link na TV uma vez; o código fica guardado nela. " +
+      "Se a TV sumir ou for trocada, revogue o código dela.",
+    tela: "/access/paineis",
+  },
+  {
+    pergunta: "Um novo funcionário precisa de acesso ao sistema",
+    sintomas: ["criar usuario", "novo funcionario", "dar acesso", "cadastrar login",
+               "liberar acesso para alguem"],
+    resposta:
+      "Em Usuários: cadastre com e-mail e marque o perfil. Sem nenhum perfil marcado a pessoa entra e não vê " +
+      "nenhuma tela. A senha que você definir obriga a troca no primeiro acesso dela.",
+    tela: "/usuarios",
+  },
+  {
+    pergunta: "Não consigo desativar ou excluir o meu próprio usuário",
+    sintomas: ["nao consigo me excluir", "nao desativa meu usuario", "erro no meu proprio usuario"],
+    resposta:
+      "É proteção proposital. Se você for o único administrador e se desativar, a escola fica trancada para " +
+      "fora sem ninguém para devolver o acesso. Peça a outro administrador.",
+    tela: "/usuarios",
+  },
+  {
+    pergunta: "A busca não filtra / a lista volta inteira",
+    sintomas: ["busca nao funciona", "filtro nao filtra", "lista volta inteira", "pesquisa nao acha"],
+    resposta:
+      "Isso era um defeito em várias telas e foi corrigido. Se ainda acontecer numa tela específica, avise " +
+      "quem cuida do sistema dizendo QUAL tela — o comportamento certo é a lista diminuir.",
+  },
+  {
+    pergunta: "O aluno saiu e continua aparecendo como presente",
+    sintomas: ["continua presente", "nao saiu da lista", "aluno ja foi embora",
+               "cartao nao sai da tv", "ficou na fila"],
+    resposta:
+      "O aluno sai da lista quando passa o rosto no leitor de SAÍDA — não quando é entregue. Se ele saiu sem " +
+      "passar, o registro fica aberto de propósito: é o aviso de que faltou a leitura. Corrija pelo extrato " +
+      "de permanência.",
+    tela: "/access/presentes-agora",
+  },
+  {
+    pergunta: "O calendário está errado e a cobrança do mês saiu diferente",
+    sintomas: ["calendario errado", "feriado faltando", "dia letivo errado", "cobranca do mes errada"],
+    resposta:
+      "Dia não letivo não entra na apuração de permanência. Se um feriado ou recesso não estiver marcado, o " +
+      "sistema conta aquele dia como esperado e o excedente sai distorcido. Marque o dia e recalcule o período.",
+    tela: "/access/calendario",
+  },
+];
+
+/**
  * As regras que o sistema não deixa violar, em linguagem de quem opera.
  * Aparecem para todo mundo: elas explicam a maior parte dos "por que não
  * consigo fazer isso?".
