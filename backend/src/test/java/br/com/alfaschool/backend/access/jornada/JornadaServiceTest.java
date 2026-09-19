@@ -60,8 +60,12 @@ class JornadaServiceTest {
         alunoJornadaRepository = mock(AccAlunoJornadaRepository.class);
         excecaoRepository = mock(AccJornadaExcecaoRepository.class);
         MatriculaRepository matriculaRepository = mock(MatriculaRepository.class);
+        // Usado so' para resolver o NOME do aluno na listagem de vinculos;
+        // os testes de apuracao aqui nao consultam nome.
+        var alunoRepository = mock(
+                br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository.class);
         service = new JornadaService(jornadaRepository, jornadaDiaRepository, alunoJornadaRepository,
-                excecaoRepository, matriculaRepository);
+                excecaoRepository, matriculaRepository, alunoRepository);
 
         when(excecaoRepository.findByTenantIdAndAlunoIdAndDataAndDeletedFalse(any(), any(), any()))
                 .thenReturn(Optional.empty());

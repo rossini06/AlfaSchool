@@ -51,12 +51,12 @@ export function AlunoJornadasPage() {
       setCarregando(true);
       setErro("");
       const r = await accessApi.get(
-        `/access/aluno-jornadas?${qs({
+        `/access/jornadas/vinculos?${qs({
           page: p,
           size: PAGE_SIZE,
           turmaId: filtroTurma,
           jornadaId: filtroJornada,
-          search: busca,
+          q: busca,
         })}`
       );
       if (r.ok) {
@@ -139,8 +139,8 @@ export function AlunoJornadasPage() {
       vigenciaFim: form.vigenciaFim || null,
     };
     const r = editando
-      ? await accessApi.put(`/access/aluno-jornadas/${editando.id}`, corpo)
-      : await accessApi.post("/access/aluno-jornadas", corpo);
+      ? await accessApi.put(`/access/jornadas/vinculos/${editando.id}`, corpo)
+      : await accessApi.post("/access/jornadas/vinculos", corpo);
     setSalvando(false);
     if (!r.ok) {
       setErroForm(r.erro);
@@ -166,12 +166,30 @@ export function AlunoJornadasPage() {
     if (!validarLote()) return;
     setAplicando(true);
     setErroLote("");
-    const r = await accessApi.post("/access/aluno-jornadas/aplicar-turma", {
-      turmaId: lote.turmaId,
+    // A API aplica a jornada a uma LISTA de alunos, nao a uma turma: o
+    // recorte "turma" é da tela, e quem resolve quem está matriculado nela
+    // é um endpoint próprio. Mandar turmaId dava 404 e, antes disso, o
+    // caminho /aluno-jornadas/aplicar-turma nem existia.
+    const rAlunos = await accessApi.get(
+      `/access/jornadas/alunos-da-turma?turmaId=${lote.turmaId}`
+    );
+    if (!rAlunos.ok) {
+      setAplicando(false);
+      setErroLote(rAlunos.erro);
+      return;
+    }
+    const alunoIds = comoLista(rAlunos.data).map((a) => (typeof a === "string" ? a : a.id));
+    if (alunoIds.length === 0) {
+      setAplicando(false);
+      setErroLote("Esta turma não tem aluno matriculado — não há a quem aplicar a jornada.");
+      return;
+    }
+    const r = await accessApi.post("/access/jornadas/aplicar", {
       jornadaId: lote.jornadaId,
+      alunoIds,
       vigenciaInicio: lote.vigenciaInicio,
       vigenciaFim: lote.vigenciaFim || null,
-      encerrarVigentes: lote.encerrarVigentes,
+      encerrarVinculoAnterior: lote.encerrarVigentes,
     });
     setAplicando(false);
     if (!r.ok) {
@@ -193,7 +211,7 @@ export function AlunoJornadasPage() {
   const excluir = async () => {
     setExcluindo(true);
     setErroExcluir("");
-    const r = await accessApi.delete(`/access/aluno-jornadas/${excluirId}`);
+    const r = await accessApi.delete(`/access/jornadas/vinculos/${excluirId}`);
     setExcluindo(false);
     if (!r.ok) {
       setErroExcluir(r.erro);

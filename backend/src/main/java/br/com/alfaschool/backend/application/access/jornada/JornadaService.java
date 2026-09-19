@@ -52,17 +52,20 @@ public class JornadaService {
     private final AccAlunoJornadaRepository alunoJornadaRepository;
     private final AccJornadaExcecaoRepository excecaoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository alunoRepository;
 
     public JornadaService(AccJornadaRepository jornadaRepository,
                           AccJornadaDiaRepository jornadaDiaRepository,
                           AccAlunoJornadaRepository alunoJornadaRepository,
                           AccJornadaExcecaoRepository excecaoRepository,
-                          MatriculaRepository matriculaRepository) {
+                          MatriculaRepository matriculaRepository,
+                          br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository alunoRepository) {
         this.jornadaRepository = jornadaRepository;
         this.jornadaDiaRepository = jornadaDiaRepository;
         this.alunoJornadaRepository = alunoJornadaRepository;
         this.excecaoRepository = excecaoRepository;
         this.matriculaRepository = matriculaRepository;
+        this.alunoRepository = alunoRepository;
     }
 
     // ---------------------------------------------------------------- jornadas
@@ -210,10 +213,46 @@ public class JornadaService {
 
     // ---------------------------------------------------------------- vinculos
 
-    public Page<AlunoJornadaResponse> listarVinculos(UUID alunoId, Pageable pageable) {
+    /**
+     * Vinculos aluno-jornada, com os filtros que a tela oferece. O alunoId
+     * deixou de ser obrigatorio: sem ele a coordenacao consegue perguntar
+     * "quem esta em meio periodo?", que e' o uso principal da tela.
+     */
+    public Page<AlunoJornadaResponse> listarVinculos(UUID alunoId, UUID turmaId, UUID jornadaId,
+                                                     String q, Pageable pageable) {
         UUID tenantId = tenantObrigatorio();
-        return alunoJornadaRepository.findByTenantIdAndAlunoIdAndDeletedFalse(tenantId, alunoId, pageable)
-                .map(AlunoJornadaResponse::from);
+
+        List<UUID> alunosDaTurma = turmaId == null ? List.of() : alunosDaTurma(turmaId);
+        if (turmaId != null && alunosDaTurma.isEmpty()) {
+            // Turma sem aluno matriculado: nao ha vinculo possivel. Sem este
+            // desvio, o "in ()" vazio produziria erro de sintaxe no banco.
+            return Page.empty(pageable);
+        }
+
+        Page<AccAlunoJornada> pagina = alunoJornadaRepository.buscarVinculos(
+                tenantId, alunoId, jornadaId, turmaId == null, alunosDaTurma, pageable);
+
+        var alunoIds = pagina.getContent().stream().map(AccAlunoJornada::getAlunoId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+        var jornadaIds = pagina.getContent().stream().map(AccAlunoJornada::getJornadaId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
+
+        var alunos = alunoIds.isEmpty() ? java.util.Map.<UUID, String>of()
+                : alunoRepository.findAllById(alunoIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(a -> a.getId(), a -> a.getNome()));
+        var jornadas = jornadaIds.isEmpty() ? java.util.Map.<UUID, String>of()
+                : jornadaRepository.findAllById(jornadaIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(j -> j.getId(), j -> j.getNome()));
+
+        var linhas = pagina.getContent().stream()
+                .map(v -> AlunoJornadaResponse.from(v, alunos.get(v.getAlunoId()),
+                        jornadas.get(v.getJornadaId())))
+                .filter(r -> q == null || q.isBlank()
+                        || (r.alunoNome() != null && r.alunoNome().toLowerCase().contains(q.trim().toLowerCase())))
+                .toList();
+
+        return new org.springframework.data.domain.PageImpl<>(linhas, pageable,
+                (q == null || q.isBlank()) ? pagina.getTotalElements() : linhas.size());
     }
 
     @Transactional

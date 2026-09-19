@@ -79,12 +79,17 @@ public class JornadaController {
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
             + "and hasAuthority('PERM_ACESSO_JORNADAS_GERIR')")
     public ResponseEntity<ApiResponse<Page<AlunoJornadaResponse>>> listarVinculos(
-            @RequestParam UUID alunoId,
+            /* Deixou de ser obrigatorio: exigir alunoId impedia a pergunta
+               que a tela existe para responder — quem esta em meio periodo. */
+            @RequestParam(required = false) UUID alunoId,
+            @RequestParam(required = false) UUID turmaId,
+            @RequestParam(required = false) UUID jornadaId,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = Paginacao.de(page, size, Sort.by("vigenciaInicio").descending());
         return ResponseEntity.ok(ApiResponse.of(200, "Vínculos listados com sucesso",
-                jornadaService.listarVinculos(alunoId, pageable)));
+                jornadaService.listarVinculos(alunoId, turmaId, jornadaId, q, pageable)));
     }
 
     /** Qual jornada valia para o aluno naquela data — a base da apuracao. */

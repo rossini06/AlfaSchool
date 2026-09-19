@@ -58,6 +58,14 @@ export function CalendarioPage() {
   const [excluindo, setExcluindo] = useState(false);
   const [erroExcluir, setErroExcluir] = useState("");
   const [feedback, setFeedback] = useState(null);
+  /**
+   * Os dias do calendário não existem soltos: eles pertencem a um
+   * calendário do ano letivo. A tela buscava /access/calendario (singular,
+   * dias na raiz), rota que não existe — 404 em tudo, e a grade do mês
+   * abria sempre vazia.
+   */
+  const [calendarioId, setCalendarioId] = useState(null);
+  const [semCalendario, setSemCalendario] = useState(false);
 
   const primeiroDia = iso(ano, mes, 1);
   const ultimoDiaNum = new Date(ano, mes + 1, 0).getDate();
@@ -66,22 +74,49 @@ export function CalendarioPage() {
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro("");
-    const r = await accessApi.get(
-      `/access/calendario?${qs({ inicio: primeiroDia, fim: ultimoDia, unidadeId: filtroUnidade })}`
-    );
-    if (r.ok) setRegistros(comoLista(r.data));
-    else {
+    setSemCalendario(false);
+
+    // 1. qual calendário responde por este ano — e, quando há mais de um,
+    //    o da unidade escolhida; senão o global da escola.
+    const rc = await accessApi.get(`/access/calendarios/ano/${ano}`);
+    if (!rc.ok) {
+      setRegistros([]);
+      setErro(rc.erro);
+      setCarregando(false);
+      return;
+    }
+    const calendarios = comoLista(rc.data).filter((c) => c.ativo !== false);
+    const escolhido =
+      calendarios.find((c) => filtroUnidade && c.unitId === filtroUnidade) ||
+      calendarios.find((c) => c.global) ||
+      calendarios[0];
+
+    if (!escolhido) {
+      setCalendarioId(null);
+      setRegistros([]);
+      setSemCalendario(true);
+      setCarregando(false);
+      return;
+    }
+    setCalendarioId(escolhido.id);
+
+    // 2. o mês já vem montado: a API devolve TODOS os dias, com `letivo`
+    //    e `cadastrado` resolvidos, não só os que têm marcação.
+    const r = await accessApi.get(`/access/calendarios/${escolhido.id}/mes?ano=${ano}&mes=${mes + 1}`);
+    if (r.ok) {
+      setRegistros(comoLista(r.data?.dias ?? r.data));
+    } else {
       setRegistros([]);
       setErro(r.erro);
     }
     setCarregando(false);
-  }, [primeiroDia, ultimoDia, filtroUnidade]);
+  }, [ano, mes, filtroUnidade]);
 
   useEffect(() => {
     carregar();
     // recarrega ao trocar de mês ou de unidade
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [primeiroDia, ultimoDia, filtroUnidade]);
+  }, [ano, mes, filtroUnidade]);
 
   useEffect(() => {
     carregarAuxiliar("/unidades?size=200").then(setUnidades);
@@ -114,7 +149,7 @@ export function CalendarioPage() {
     setErroForm("");
     setEditor({
       ...EDITOR_VAZIO,
-      id: existente?.id || null,
+      id: existente?.diaId || null,
       data,
       tipo: existente?.tipo || "LETIVO",
       descricao: existente?.descricao || "",
@@ -155,12 +190,13 @@ export function CalendarioPage() {
     setErroForm("");
     let r;
     if (editor.intervalo) {
-      r = await accessApi.post("/access/calendario/intervalo", {
+      r = await accessApi.post(`/access/calendarios/${calendarioId}/dias/intervalo`, {
         dataInicio: editor.data,
         dataFim: editor.dataFim,
         tipo: editor.tipo,
         descricao: editor.descricao.trim() || null,
-        unidadeId: editor.unidadeId || null,
+        // A unidade é do CALENDÁRIO, não do dia — por isso não vai aqui.
+        apenasDiasUteis: false,
         sobrescrever: editor.sobrescrever,
       });
     } else {
@@ -168,11 +204,10 @@ export function CalendarioPage() {
         data: editor.data,
         tipo: editor.tipo,
         descricao: editor.descricao.trim() || null,
-        unidadeId: editor.unidadeId || null,
       };
       r = editor.id
-        ? await accessApi.put(`/access/calendario/${editor.id}`, corpo)
-        : await accessApi.post("/access/calendario", corpo);
+        ? await accessApi.put(`/access/calendarios/dias/${editor.id}`, corpo)
+        : await accessApi.post(`/access/calendarios/${calendarioId}/dias`, corpo);
     }
     setSalvando(false);
     if (!r.ok) {
@@ -191,10 +226,15 @@ export function CalendarioPage() {
     carregar();
   };
 
+  /**
+   * `cadastrado` distingue o dia que alguém marcou do dia que só segue o
+   * padrão da semana. Excluir só faz sentido no primeiro caso — daí o
+   * botão depender de `diaId`, e não de o dia existir na grade.
+   */
   const confirmarExclusao = async () => {
     setExcluindo(true);
     setErroExcluir("");
-    const r = await accessApi.delete(`/access/calendario/${excluir.id}`);
+    const r = await accessApi.delete(`/access/calendarios/dias/${excluir.id}`);
     setExcluindo(false);
     if (!r.ok) {
       setErroExcluir(r.erro);
@@ -264,6 +304,13 @@ export function CalendarioPage() {
 
           {carregando || erro ? (
             <BlocoEstado carregando={carregando} erro={erro} onTentarNovamente={carregar} />
+          ) : semCalendario ? (
+            <BlocoEstado
+              icone="Calendar"
+              tituloVazio={`Nenhum calendário para ${ano}`}
+              textoVazio="Cadastre o calendário do ano letivo para marcar feriados, recessos e dias letivos."
+              vazio
+            />
           ) : (
             <>
               <div className="ac-cal-grid">
@@ -282,10 +329,21 @@ export function CalendarioPage() {
                       type="button"
                       className={`ac-cal-cell ${data === hojeStr ? "hoje" : ""}`}
                       onClick={() => abrirDia(dia)}
-                      title={reg ? `${reg.tipo}${reg.descricao ? ` — ${reg.descricao}` : ""}` : "Sem marcação"}
+                      title={
+                        reg?.cadastrado
+                          ? `${reg.tipo}${reg.descricao ? ` — ${reg.descricao}` : ""}`
+                          : reg?.letivo === false
+                            ? "Não letivo pelo padrão da semana"
+                            : "Dia letivo comum"
+                      }
                     >
                       <span className="ac-cal-num">{dia}</span>
-                      {reg && (
+                      {/* A resposta traz TODOS os dias do mês, com `letivo` e
+                          `cadastrado` já resolvidos. Marcar cada um deles
+                          encheria a grade de etiquetas e apagaria o sinal:
+                          o que interessa é o dia que alguém marcou e o que
+                          foge do padrão da semana. */}
+                      {reg && (reg.cadastrado || reg.letivo === false) && (
                         <>
                           <span className={`ac-cal-tag ac-tipo-${reg.tipo}`}>
                             {TIPOS_DIA.find((t) => t.valor === reg.tipo)?.label || reg.tipo}

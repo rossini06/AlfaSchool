@@ -20,6 +20,25 @@ public interface AccAlunoJornadaRepository extends JpaRepository<AccAlunoJornada
 
     Page<AccAlunoJornada> findByTenantIdAndAlunoIdAndDeletedFalse(UUID tenantId, UUID alunoId, Pageable pageable);
 
+    /**
+     * Listagem geral dos vinculos. So' existia busca POR ALUNO, e o
+     * controller exigia alunoId — a tela de Aluno x Jornadas nao tinha como
+     * responder "quem esta em meio periodo?", que e' a pergunta que ela
+     * existe para responder.
+     */
+    @org.springframework.data.jpa.repository.Query(
+        "select v from AccAlunoJornada v where v.tenantId = :tenantId and v.deleted = false "
+      + "and (:alunoId is null or v.alunoId = :alunoId) "
+      + "and (:jornadaId is null or v.jornadaId = :jornadaId) "
+      + "and (:semFiltroDeTurma = true or v.alunoId in :alunosDaTurma)")
+    Page<AccAlunoJornada> buscarVinculos(
+            @org.springframework.data.repository.query.Param("tenantId") UUID tenantId,
+            @org.springframework.data.repository.query.Param("alunoId") UUID alunoId,
+            @org.springframework.data.repository.query.Param("jornadaId") UUID jornadaId,
+            @org.springframework.data.repository.query.Param("semFiltroDeTurma") boolean semFiltroDeTurma,
+            @org.springframework.data.repository.query.Param("alunosDaTurma") java.util.List<UUID> alunosDaTurma,
+            Pageable pageable);
+
     List<AccAlunoJornada> findByTenantIdAndAlunoIdAndDeletedFalseOrderByVigenciaInicioDesc(UUID tenantId, UUID alunoId);
 
     /**
