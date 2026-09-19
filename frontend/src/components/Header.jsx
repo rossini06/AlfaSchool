@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { api } from "../services/api";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { Icon } from "./Icon";
@@ -217,6 +217,18 @@ export function Header({ onMenuToggle }) {
       </div>
 
       <div className="header-right">
+        {/* Ajuda CONTEXTUAL: abre o tutorial já aberto na tela em que a
+            pessoa está. Um tutorial que obriga a procurar o próprio assunto
+            é lido uma vez e abandonado. */}
+        <Link
+          className="theme-toggle"
+          to={`/ajuda#${encodeURIComponent(location.pathname)}`}
+          title="Como usar esta tela"
+          aria-label="Como usar esta tela"
+        >
+          <Icon name="Info" size={18} />
+        </Link>
+
         <button
           className="theme-toggle"
           onClick={toggleTheme}

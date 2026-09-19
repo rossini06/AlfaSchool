@@ -158,7 +158,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
       </nav>
 
       <div className="sidebar-footer">
-        <p className="sidebar-footer-text">AlfaSchool v1.0</p>
+        {/* Fica no rodapé, sempre visível, e fora dos grupos: o tutorial não
+            é uma "tela do sistema", é como se aprende o sistema. */}
+        <NavLink to="/ajuda" className="sidebar-ajuda" title="Como usar o sistema">
+          <Icon name="Info" size={15} />
+          {!collapsed && <span>Como usar o sistema</span>}
+        </NavLink>
+        {!collapsed && <p className="sidebar-footer-text">AlfaSchool v1.0</p>}
       </div>
     </aside>
   );

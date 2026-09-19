@@ -14,6 +14,7 @@ const LINKS = [
   { to: "/portal/historico", label: "Histórico" },
   { to: "/portal/autorizacoes", label: "Autorizações" },
   { to: "/portal/notificacoes", label: "Avisos" },
+  { to: "/portal/ajuda", label: "Ajuda" },
 ];
 
 export function PortalLayout() {

@@ -3,6 +3,7 @@ import { useAuth } from "./contexts/AuthContext";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { AjudaPage } from "./pages/AjudaPage";
 import { RedesEnsinoPage } from "./pages/RedesEnsinoPage";
 import { EscolasPage } from "./pages/EscolasPage";
 import { SaasAdminPage } from "./pages/SaasAdminPage";
@@ -48,6 +49,7 @@ import { PortalHomePage } from "./pages/portal/PortalHomePage";
 import { PortalHistoricoPage } from "./pages/portal/PortalHistoricoPage";
 import { PortalAutorizacoesPage } from "./pages/portal/PortalAutorizacoesPage";
 import { PortalNotificacoesPage } from "./pages/portal/PortalNotificacoesPage";
+import { PortalAjudaPage } from "./pages/portal/PortalAjudaPage";
 
 function ProtectedRoute({ children, requiredRoles }) {
   const { isAuthenticated, user } = useAuth();
@@ -113,6 +115,9 @@ export default function App() {
       >
         <Route index element={<DashboardPage />} />
         {/* Acadêmico */}
+        {/* Sem `perm`: o tutorial é para todo mundo que entra — ele se
+            recorta sozinho pelas permissões de quem está logado. */}
+        <Route path="ajuda" element={<AjudaPage />} />
         <Route path="cursos" element={<CursosPage />} />
         <Route path="disciplinas" element={<DisciplinasPage />} />
         <Route path="turmas" element={<TurmasPage />} />
@@ -204,6 +209,7 @@ export default function App() {
         <Route path="historico" element={<PortalHistoricoPage />} />
         <Route path="autorizacoes" element={<PortalAutorizacoesPage />} />
         <Route path="notificacoes" element={<PortalNotificacoesPage />} />
+        <Route path="ajuda" element={<PortalAjudaPage />} />
       </Route>
 
       {/* Catch all */}
