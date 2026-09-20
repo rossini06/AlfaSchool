@@ -1,16 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="AlfaSchool">
-  <!--
-    Marca do AlfaSchool: um portao aberto com a silhueta de um aluno
-    passando. O modulo que da' identidade ao produto e' o controle de
-    acesso, e e' isso que a aba do navegador deve dizer.
-
-    Antes aqui estava o /vite.svg — o sistema se apresentava com a marca do
-    empacotador que o compila.
-  -->
-  <rect width="32" height="32" rx="7" fill="#1696a3"/>
-  <!-- batentes do portao -->
-  <path d="M7 8v16M25 8v16" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
-  <!-- aluno atravessando -->
-  <circle cx="16" cy="12" r="3.1" fill="#ffffff"/>
-  <path d="M10.4 25c0-3.4 2.5-6 5.6-6s5.6 2.6 5.6 6" fill="#ffffff"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="AlfaSchool"><title>AlfaSchool</title><rect x="4.5" y="3.4" width="39" height="41.2" rx="11.75" fill="none" stroke="#029CAF" stroke-width="5.9"></rect><path d="M24 13.3 L34.8 18.2 L24 23.1 L13.2 18.2 Z" fill="#F59E0B"></path><path d="M18.2 21.4 V28.2 C18.2 32 29.8 32 29.8 28.2 V21.4" fill="none" stroke="#F59E0B" stroke-width="3.9" stroke-linecap="round"></path></svg>

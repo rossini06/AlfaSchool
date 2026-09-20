@@ -3,7 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#1696a3" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <!--
+      Preload da marca: os <img> só nascem depois que o React monta, então sem
+      isto as imagens começam a baixar ~150ms depois do primeiro paint e a logo
+      "pisca" ao aparecer (visível no login). Com o preload elas descem em
+      paralelo com o bundle e já estão prontas na montagem.
+    -->
+    <link rel="preload" as="image" href="/alfaschool-icon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href="/alfaschool-logo.png" type="image/png" />
+    <!-- Teal da família Alfa. É a cor da marca, não a do botão: o botão usa
+         o tom clareado que passa no contraste (ver --color-brand). -->
+    <meta name="theme-color" content="#029CAF" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="AlfaSchool - Plataforma SaaS de Gestão Escolar" />
     <title>AlfaSchool - Gestão Escolar</title>

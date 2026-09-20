@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { Icon } from "../components/Icon";
+import icone from "/alfaschool-icon.svg";
+import wordmark from "/alfaschool-logo.png";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -47,18 +49,37 @@ export function LoginPage() {
       </div>
 
       <div className="login-card" style={{ position: "relative", zIndex: 1 }}>
-        {/* Logo */}
-        <div className="login-logo">
-          <div className="login-logo-icon">A</div>
-          <span className="login-logo-text">
-            Alfa<span>School</span>
-          </span>
-        </div>
+        {/*
+          Lockup da família Alfa: símbolo + wordmark, lado a lado.
 
-        {/* Header */}
-        <div className="login-header">
-          <h2>Acesse sua conta</h2>
-          <p>Gestão escolar inteligente e integrada</p>
+          As duas imagens vêm do disco em vez de serem desenhadas aqui —
+          é o mesmo arquivo que vai para o favicon e para qualquer material
+          impresso, então a marca não tem duas versões que podem divergir.
+
+          A proporção entre os dois segue a regra escrita em `.login-brand`
+          (ver brand/README.md). `width` e `height` explícitos no <img>
+          reservam a caixa antes de a imagem chegar: sem isso o card pinta
+          e a logo "pula" um frame depois.
+        */}
+        <div className="login-logo">
+          <div className="login-brand">
+            <img
+              src={icone}
+              alt=""
+              aria-hidden="true"
+              decoding="sync"
+              className="login-brand-icon"
+            />
+            <img
+              src={wordmark}
+              alt="AlfaSchool"
+              decoding="sync"
+              width={2053}
+              height={332}
+              className="login-brand-logo"
+            />
+          </div>
+          <p>Gestão escolar e controle de acesso</p>
         </div>
 
         {/* Error */}
