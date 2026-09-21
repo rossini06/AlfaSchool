@@ -12,9 +12,14 @@
  * cargos aqui obrigaria a reeditar esta lista toda vez que uma escola
  * organizasse o trabalho de um jeito diferente.
  *
- * Item sem `perm` aparece para qualquer pessoa autenticada (o Dashboard).
+  * Item sem `perm` aparece para qualquer pessoa autenticada (o Dashboard).
  * `perm` pode ser uma string ou um array — tendo QUALQUER uma, o item
  * aparece.
+ *
+ * MÓDULO — item de bloco contratável declara `modulo` (hoje só "ACCESS").
+ * Escola que não contratou não vê o item: sem isto o menu mostrava as
+ * telas do Access e cada uma respondia 403 no console. A lista de módulos
+ * vigentes vem do login, como as permissões.
  *
  * `role` existe só para o que é da Alfa, não da escola (painel SaaS).
  */
@@ -50,6 +55,7 @@ export const menuItems = [
     icon: "UserCheck",
     group: "operacao",
     perm: "ACESSO_PAINEL_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Presentes Agora",
@@ -57,6 +63,7 @@ export const menuItems = [
     icon: "Users",
     group: "operacao",
     perm: "ACESSO_PERMANENCIA_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Ocorrências",
@@ -64,6 +71,7 @@ export const menuItems = [
     icon: "AlertTriangle",
     group: "operacao",
     perm: "ACESSO_OCORRENCIAS_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Permanência",
@@ -71,6 +79,7 @@ export const menuItems = [
     icon: "Clock",
     group: "operacao",
     perm: "ACESSO_PERMANENCIA_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Relatórios de Acesso",
@@ -78,6 +87,7 @@ export const menuItems = [
     icon: "FileText",
     group: "operacao",
     perm: "ACESSO_RELATORIOS_VER",
+    modulo: "ACCESS",
   },
 
   // ------------------------------------------------ FAMÍLIAS E RETIRADA
@@ -87,6 +97,7 @@ export const menuItems = [
     icon: "ShieldCheck",
     group: "familias",
     perm: "ACESSO_AUTORIZACOES_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Pessoas Autorizadas",
@@ -94,6 +105,7 @@ export const menuItems = [
     icon: "UserPlus",
     group: "familias",
     perm: "ACESSO_AUTORIZACOES_VER",
+    modulo: "ACCESS",
   },
   {
     label: "Restrições Judiciais",
@@ -101,6 +113,7 @@ export const menuItems = [
     icon: "Gavel",
     group: "familias",
     perm: "ACESSO_RESTRICOES_VER",
+    modulo: "ACCESS",
   },
 
   // ----------------------------------------------------------- PESSOAS
@@ -125,26 +138,28 @@ export const menuItems = [
   { label: "Financeiro", path: "/financeiro", icon: "DollarSign", group: "financeiro", perm: "FINANCEIRO_VER" },
 
   // --------------------------------------------- JORNADAS E CALENDÁRIO
-  { label: "Jornadas", path: "/access/jornadas", icon: "Timer", group: "jornadas", perm: "ACESSO_JORNADAS_GERIR" },
+  { label: "Jornadas", path: "/access/jornadas", icon: "Timer", group: "jornadas", perm: "ACESSO_JORNADAS_GERIR", modulo: "ACCESS" },
   {
     label: "Jornadas dos Alunos",
     path: "/access/aluno-jornadas",
     icon: "UserClock",
     group: "jornadas",
     perm: "ACESSO_JORNADAS_GERIR",
+    modulo: "ACCESS",
   },
-  { label: "Calendário", path: "/access/calendario", icon: "Calendar", group: "jornadas", perm: "ACESSO_CALENDARIO_GERIR" },
+  { label: "Calendário", path: "/access/calendario", icon: "Calendar", group: "jornadas", perm: "ACESSO_CALENDARIO_GERIR", modulo: "ACCESS" },
 
   // ---------------------------------------------------- ESTRUTURA FÍSICA
-  { label: "Portarias", path: "/access/portarias", icon: "DoorOpen", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR" },
-  { label: "Zonas", path: "/access/zonas", icon: "Map", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR" },
-  { label: "Salas", path: "/access/salas", icon: "Home", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR" },
+  { label: "Portarias", path: "/access/portarias", icon: "DoorOpen", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR", modulo: "ACCESS" },
+  { label: "Zonas", path: "/access/zonas", icon: "Map", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR", modulo: "ACCESS" },
+  { label: "Salas", path: "/access/salas", icon: "Home", group: "estrutura", perm: "ACESSO_ESTRUTURA_GERIR", modulo: "ACCESS" },
   {
     label: "Turmas nas Salas",
     path: "/access/turma-salas",
     icon: "LayoutGrid",
     group: "estrutura",
     perm: "ACESSO_ESTRUTURA_GERIR",
+    modulo: "ACCESS",
   },
 
   // ----------------------------------------------- EQUIPAMENTOS E PAINÉIS
@@ -154,8 +169,9 @@ export const menuItems = [
     icon: "ScanFace",
     group: "equipamentos",
     perm: "ACESSO_EQUIPAMENTOS_GERIR",
+    modulo: "ACCESS",
   },
-  { label: "Painéis e TVs", path: "/access/paineis", icon: "Monitor", group: "equipamentos", perm: "ACESSO_ESTRUTURA_GERIR" },
+  { label: "Painéis e TVs", path: "/access/paineis", icon: "Monitor", group: "equipamentos", perm: "ACESSO_ESTRUTURA_GERIR", modulo: "ACCESS" },
   { label: "Dispositivos", path: "/dispositivos", icon: "Cpu", group: "equipamentos", perm: "ACESSO_EQUIPAMENTOS_GERIR" },
 
   // ----------------------------------------------------------- SISTEMA
@@ -176,7 +192,10 @@ export const menuItems = [
  * lado certo de errar — melhor esconder algo que a pessoa poderia usar do
  * que mostrar um botão que vai dar 403 na cara dela.
  */
-export function podeVerItem(item, { permissoes = [], roles = [] } = {}) {
+export function podeVerItem(item, { permissoes = [], roles = [], modulos = [] } = {}) {
+  if (item.modulo && !modulos.includes(item.modulo)) {
+    return false;
+  }
   if (item.role) {
     return roles.includes(item.role);
   }

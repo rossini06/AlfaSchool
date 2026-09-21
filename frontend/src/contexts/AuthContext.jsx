@@ -21,7 +21,17 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem("alfaschool_user");
-      return stored ? JSON.parse(stored) : null;
+      const salvo = stored ? JSON.parse(stored) : null;
+      // Sessao gravada antes de o login devolver `modulos`: sem essa lista o
+      // menu esconderia o Access inteiro (fail-closed) e a pessoa acharia
+      // que perdeu acesso. Um novo login resolve, e custa menos que explicar.
+      if (salvo && !Array.isArray(salvo.modulos)) {
+        localStorage.removeItem("alfaschool_token");
+        localStorage.removeItem("alfaschool_refresh_token");
+        localStorage.removeItem("alfaschool_user");
+        return null;
+      }
+      return salvo;
     } catch {
       return null;
     }
@@ -63,7 +73,7 @@ export function AuthProvider({ children }) {
 
       const {
         accessToken, refreshToken, userId, tenantId: tid, roles,
-        permissoes, mustChangePassword,
+        permissoes, modulos, mustChangePassword,
       } = data.data;
 
       const payload = decodeJwt(accessToken);
@@ -76,6 +86,9 @@ export function AuthProvider({ children }) {
         // que mostrar. Mudança de permissão só vale no próximo login —
         // elas viajam no token, e é o que mantém o filtro sem ida ao banco.
         permissoes: permissoes || payload.perms || [],
+        // Módulos contratados pelo tenant (ACCESS, PORTAL...). Menu e rotas
+        // escondem o que a escola não contratou em vez de mostrar 403.
+        modulos: Array.isArray(modulos) ? modulos : [],
         tenantId: tid || payload.tenantId,
         unitId: payload.unitId || null,
         unitNome: payload.unitNome || null,

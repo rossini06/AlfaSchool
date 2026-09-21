@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import { AdminLayout } from "./layouts/AdminLayout";
+import { ExigeModulo } from "./components/ExigeModulo";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AjudaPage } from "./pages/AjudaPage";
@@ -138,31 +139,34 @@ export default function App() {
         <Route path="financeiro" element={<FinanceiroPage />} />
         {/* Escola */}
         <Route path="dispositivos" element={<DispositivosPage />} />
-        {/* Controle de acesso */}
-        <Route path="access/coordenacao" element={<CoordenacaoPage />} />
-        {/* Controle de Acesso — cadastros, permanência e relatórios (fatia H) */}
-        <Route path="access/portarias" element={<PortariasPage />} />
-        <Route path="access/zonas" element={<ZonasPage />} />
-        <Route path="access/salas" element={<SalasPage />} />
-        <Route path="access/turma-salas" element={<TurmaSalasPage />} />
-        <Route path="access/jornadas" element={<JornadasPage />} />
-        <Route path="access/aluno-jornadas" element={<AlunoJornadasPage />} />
-        <Route path="access/calendario" element={<CalendarioPage />} />
-        <Route
-          path="access/pessoas-autorizadas"
-          element={<PessoasAutorizadasPage />}
-        />
-        <Route path="access/autorizacoes" element={<AutorizacoesPage />} />
-        <Route path="access/restricoes" element={<RestricoesPage />} />
-        <Route
-          path="access/equipamentos"
-          element={<EquipamentosAccessPage />}
-        />
-        <Route path="access/paineis" element={<PaineisPage />} />
-        <Route path="access/permanencia" element={<PermanenciaPage />} />
-        <Route path="access/presentes-agora" element={<PresentesAgoraPage />} />
-        <Route path="access/relatorios" element={<RelatoriosAccessPage />} />
-        <Route path="access/ocorrencias" element={<OcorrenciasPage />} />
+        {/* Controle de acesso — bloco contratável. A rota-mãe explica quando
+            a escola não tem o módulo, em vez de deixar cada tela dar 403. */}
+        <Route element={<ExigeModulo codigo="ACCESS" />}>
+          <Route path="access/coordenacao" element={<CoordenacaoPage />} />
+          {/* Cadastros, permanência e relatórios (fatia H) */}
+          <Route path="access/portarias" element={<PortariasPage />} />
+          <Route path="access/zonas" element={<ZonasPage />} />
+          <Route path="access/salas" element={<SalasPage />} />
+          <Route path="access/turma-salas" element={<TurmaSalasPage />} />
+          <Route path="access/jornadas" element={<JornadasPage />} />
+          <Route path="access/aluno-jornadas" element={<AlunoJornadasPage />} />
+          <Route path="access/calendario" element={<CalendarioPage />} />
+          <Route
+            path="access/pessoas-autorizadas"
+            element={<PessoasAutorizadasPage />}
+          />
+          <Route path="access/autorizacoes" element={<AutorizacoesPage />} />
+          <Route path="access/restricoes" element={<RestricoesPage />} />
+          <Route
+            path="access/equipamentos"
+            element={<EquipamentosAccessPage />}
+          />
+          <Route path="access/paineis" element={<PaineisPage />} />
+          <Route path="access/permanencia" element={<PermanenciaPage />} />
+          <Route path="access/presentes-agora" element={<PresentesAgoraPage />} />
+          <Route path="access/relatorios" element={<RelatoriosAccessPage />} />
+          <Route path="access/ocorrencias" element={<OcorrenciasPage />} />
+        </Route>
 
         {/* Sistema */}
         <Route path="usuarios" element={<UsuariosPage />} />

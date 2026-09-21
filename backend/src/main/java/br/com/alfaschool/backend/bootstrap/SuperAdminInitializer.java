@@ -4,6 +4,7 @@ import br.com.alfaschool.backend.domain.role.Role;
 import br.com.alfaschool.backend.domain.tenant.Tenant;
 import br.com.alfaschool.backend.domain.user.UserAccount;
 import br.com.alfaschool.backend.infrastructure.config.AdminProperties;
+import br.com.alfaschool.backend.application.modulo.ModuloService;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TenantRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
@@ -26,12 +27,15 @@ public class SuperAdminInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminProperties adminProperties;
+    private final ModuloService moduloService;
 
     public SuperAdminInitializer(TenantRepository tenantRepository,
                                  UserRepository userRepository,
                                  RoleRepository roleRepository,
                                  PasswordEncoder passwordEncoder,
-                                 AdminProperties adminProperties) {
+                                 AdminProperties adminProperties,
+                                 ModuloService moduloService) {
+        this.moduloService = moduloService;
         this.tenantRepository = tenantRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -43,6 +47,9 @@ public class SuperAdminInitializer implements CommandLineRunner {
     public void run(String... args) {
         Tenant masterTenant = tenantRepository.findByDocument(MASTER_DOCUMENT)
                 .orElseGet(this::createMasterTenant);
+        // O mestre nao e' escola: nao contrata nada, mas precisa ver tudo.
+        // Roda a cada boot, entao modulo novo no catalogo entra sozinho.
+        moduloService.garantirTodosVigentes(masterTenant.getTenantId());
 
         Role superAdminRole = roleRepository.findByTenantIdAndNameIgnoreCase(masterTenant.getTenantId(), "SUPER_ADMIN")
                 .orElseGet(() -> createSuperAdminRole(masterTenant.getTenantId()));

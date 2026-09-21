@@ -1602,3 +1602,32 @@ body {
 .ajuda-resposta-topo strong { font-size: 14px; line-height: 1.4; }
 .ajuda-resposta p { font-size: 13.5px; line-height: 1.7; color: var(--color-text); }
 .ajuda-resposta .btn { margin-top: 12px; }
+
+/* ── Módulo não contratado (ExigeModulo.jsx) ──
+   Tela inteira, centrada, no lugar do conteúdo: quem chegou por URL num
+   bloco que a escola não contratou entende na hora, em vez de ver uma
+   lista vazia e um 403 por requisição no console. */
+.modulo-ausente {
+  max-width: 460px;
+  margin: 12vh auto 0;
+  text-align: center;
+  color: var(--color-text-2);
+}
+.modulo-ausente-icone {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-brand-dim);
+  color: var(--color-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modulo-ausente h2 {
+  font-size: 1.15rem;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+.modulo-ausente p { font-size: 0.9rem; line-height: 1.55; }
+.modulo-ausente-dica { margin-top: 0.75rem; font-size: 0.82rem; }

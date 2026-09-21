@@ -27,6 +27,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const roles = useMemo(() => user?.roles ?? [], [user]);
 
   const alternarSecao = useCallback((chave) => {
+  const modulos = useMemo(() => user?.modulos ?? [], [user]);
     setSecoes((atual) => {
       const proximo = { ...atual, [chave]: !(chave in atual ? atual[chave] : true) };
       try {
@@ -41,7 +42,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const termo = busca.trim().toLowerCase();
 
   const gruposVisiveis = useMemo(() => {
-    const permitidos = menuItems.filter((item) => podeVerItem(item, { permissoes, roles }));
+    const permitidos = menuItems.filter((item) => podeVerItem(item, { permissoes, roles, modulos }));
     const filtrados = termo
       ? permitidos.filter((i) => i.label.toLowerCase().includes(termo))
       : permitidos;
@@ -55,7 +56,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
       // ao perfil sem nenhuma regra extra. O porteiro simplesmente não vê
       // "Financeiro" existir.
       .filter((grupo) => grupo.items.length > 0);
-  }, [permissoes, roles, termo]);
+  }, [permissoes, roles, modulos, termo]);
 
   // Recolhida, a barra é só ícones: acordeão ali não faria sentido, então
   // tudo fica aberto. Buscando, idem — esconder resultado seria perverso.

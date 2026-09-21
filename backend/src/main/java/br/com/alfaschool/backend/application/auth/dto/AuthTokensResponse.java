@@ -11,6 +11,12 @@ public record AuthTokensResponse(
         List<String> roles,
         /** Permissoes efetivas: e' o que a tela usa para montar o menu. */
         List<String> permissoes,
+        /**
+         * Codigos dos modulos vigentes no tenant (ACCESS, PORTAL...). O menu
+         * esconde o que a escola nao contratou em vez de deixar a pessoa
+         * descobrir pelo 403.
+         */
+        List<String> modulos,
         boolean mustChangePassword
 ) {
 }

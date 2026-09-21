@@ -2,6 +2,7 @@ package br.com.alfaschool.backend.application.auth;
 
 import br.com.alfaschool.backend.application.auth.dto.AuthTokensResponse;
 import br.com.alfaschool.backend.application.auth.dto.LoginRequest;
+import br.com.alfaschool.backend.application.modulo.ModuloService;
 import br.com.alfaschool.backend.application.shared.AuditService;
 import br.com.alfaschool.backend.domain.user.UserAccount;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
@@ -31,14 +32,17 @@ public class AuthApplicationService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuditService auditService;
     private final SuperAdminGuard superAdminGuard;
+    private final ModuloService moduloService;
 
     public AuthApplicationService(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder,
                                   JwtTokenProvider jwtTokenProvider,
                                   AuditService auditService,
                                   br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService,
-                                  SuperAdminGuard superAdminGuard) {
+                                  SuperAdminGuard superAdminGuard,
+                                  ModuloService moduloService) {
         this.permissaoService = permissaoService;
+        this.moduloService = moduloService;
         this.superAdminGuard = superAdminGuard;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -85,6 +89,7 @@ public class AuthApplicationService {
                 user.getTenantId(),
                 roles,
                 permissoes,
+                moduloService.codigosVigentes(user.getTenantId()),
                 user.isMustChangePassword()
         );
     }
@@ -117,6 +122,7 @@ public class AuthApplicationService {
                 user.getTenantId(),
                 roles,
                 permissoes,
+                moduloService.codigosVigentes(user.getTenantId()),
                 user.isMustChangePassword()
         );
     }
