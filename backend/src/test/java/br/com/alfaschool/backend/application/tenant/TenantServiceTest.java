@@ -12,6 +12,7 @@ import br.com.alfaschool.backend.application.tenant.dto.TenantUpdateRequest;
 import br.com.alfaschool.backend.domain.modulo.Modulo;
 import br.com.alfaschool.backend.domain.tenant.Tenant;
 import br.com.alfaschool.backend.domain.user.UserAccount;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AuditLogRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.ModuloRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TenantModuloRepository;
@@ -47,6 +48,7 @@ class TenantServiceTest {
     @Autowired private TenantModuloRepository tenantModuloRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtTokenProvider jwtTokenProvider;
+    @Autowired private AuditLogRepository auditLogRepository;
 
     /** A coluna document tem 40 caracteres; um UUID inteiro nao cabe. */
     private static String cnpjUnico() {
@@ -172,6 +174,10 @@ class TenantServiceTest {
         assertThat(dentro.permissoes()).contains("ALUNOS_VER", "ACESSO_PAINEL_VER");
         assertThat(jwtTokenProvider.parseToken(dentro.accessToken()).get("tenantId", String.class))
                 .isEqualTo(rede.tenantId().toString());
+        // A entrada fica na auditoria DA REDE. Com @Transactional(readOnly)
+        // o INSERT era descartado em silencio e a tabela ficava vazia.
+        assertThat(auditLogRepository.findByTenantIdAndAction(rede.tenantId(), "SAAS_ACESSO_REDE", PageRequest.of(0, 5)).getTotalElements())
+                .isEqualTo(1);
 
         SelecionarRedeResponse volta = authService.selecionarRede(superadmin.getId(), new SelecionarRedeRequest(null), "127.0.0.1");
         assertThat(volta.mestre()).isTrue();

@@ -151,7 +151,10 @@ public class AuthApplicationService {
      * Nao existe usuario do superadministrador dentro da rede — as
      * permissoes vao no token porque o filtro so' le claims.
      */
-    @Transactional(readOnly = true)
+    // NAO e' readOnly de proposito: o registro de auditoria "SAAS_ACESSO_REDE"
+    // e' um INSERT, e numa transacao somente-leitura o Hibernate descarta o
+    // flush em silencio — o log dizia que gravou e a tabela ficava vazia.
+    @Transactional
     public SelecionarRedeResponse selecionarRede(UUID userId, SelecionarRedeRequest request, String ipAddress) {
         UserAccount user = userRepository.findById(userId).orElseThrow(this::credenciaisInvalidas);
         if (!superAdminGuard.ehSuperAdmin(user)) {
