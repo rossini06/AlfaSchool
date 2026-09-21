@@ -65,7 +65,7 @@ function SearchGroup({ label, items, route }) {
             color: "var(--color-text)",
             textDecoration: "none",
             fontSize: 14,
-            borderRadius: 4,
+            borderRadius: "var(--radius-sm)",
             transition: "background 0.15s",
           }}
           onMouseDown={(e) => e.preventDefault()}
@@ -187,7 +187,7 @@ export function Header({ onMenuToggle }) {
                 right: 0,
                 background: "var(--color-bg-2)",
                 border: "1px solid var(--color-border)",
-                borderRadius: 8,
+                borderRadius: "var(--radius-md)",
                 zIndex: 1000,
                 boxShadow: "var(--shadow-md)",
                 maxHeight: 380,

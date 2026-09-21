@@ -44,6 +44,18 @@ ul, ol { list-style: none; }
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+  /* ── Escala de raio ──
+     Uma escala só, para o sistema inteiro:
+       xs   4px  detalhes: tag, amostra de cor, anel de foco, scrollbar
+       sm   6px  controles: input, botão, ícone pequeno, célula
+       md  10px  blocos internos: item de menu, chip, dropdown, aviso
+       lg  14px  superfícies: card, tabela, modal
+       xl  20px  destaque: card do login, sala de espera
+       full      pílula: badge, switch, barra de progresso
+     Valor literal (8px, 12px, 999px, 0.5rem) NÃO entra em regra nova. Cada
+     literal que existia fazia um canto diferente do vizinho, e a tela ficava
+     com cara de colagem. */
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -76,6 +88,7 @@ ul, ol { list-style: none; }
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --color-bg:        #f5f7fa;
   --color-bg-2:      #ffffff;
   --color-bg-3:      #edf0f5;
@@ -88,7 +101,6 @@ ul, ol { list-style: none; }
   --color-primary:   #2563eb;
   --color-success:   #16a34a;
   --color-danger:    #dc2626;
-  color-scheme: light;
   --color-warning:   #d97706;
   --color-info:      #2563eb;
   --color-success-dim: rgba(22,163,74,0.10);
@@ -149,21 +161,17 @@ body {
 .sidebar-brand-wrap {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 8px;
   min-width: 0;
   overflow: hidden;
 }
+/* Lockup da marca, na regra de brand/README.md: ícone = 1,8 × cap-height do
+   wordmark, gap = 25% do ícone. Wordmark a 124px → altura 20px, cap 17,8px,
+   ícone 32px, gap 8px. Os mesmos arquivos do login; a sidebar não tem uma
+   versão própria da marca que possa divergir. */
 .sidebar-brand-icon {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-sm);
-  background: var(--color-brand);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 16px;
   flex-shrink: 0;
 }
 .sidebar-brand-logo {
@@ -213,7 +221,7 @@ body {
   scrollbar-color: var(--color-border) transparent;
 }
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
-.sidebar-nav::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-xs); }
 
 .sidebar-group { display: flex; flex-direction: column; }
 /* Vira botao de acordeao: os grupos de configuracao nascem fechados, e e'
@@ -265,7 +273,7 @@ body {
      o placeholder a meia opacidade. Tokens funcionam nos dois temas. */
   background: var(--color-bg-3);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   outline: none;
 }
 .sidebar-busca input:focus {
@@ -302,7 +310,7 @@ body {
   gap: 0.75rem;
   position: relative;
   padding: 0.6rem 0.85rem;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   color: var(--color-text-2);
   text-decoration: none;
   background: transparent;
@@ -449,7 +457,7 @@ body {
 .header-search input {
   background: var(--color-bg-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   padding: 7px 12px 7px 34px;
   font-size: 13px;
   color: var(--color-text);
@@ -470,7 +478,7 @@ body {
   border: 1px solid var(--color-border);
   background: var(--color-bg-3);
   color: var(--color-text-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   width: 36px;
   height: 36px;
   cursor: pointer;
@@ -486,7 +494,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -845,7 +853,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 2px 9px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
@@ -1186,7 +1194,7 @@ body {
 }
 .saas-tab-btn {
   padding: 8px 18px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 600;
   border: 1px solid var(--color-border);
@@ -1394,7 +1402,7 @@ body {
 
 /* Agrupado por area: 46 checkboxes em lista unica seria ilegivel. */
 .perm-areas { display: flex; flex-direction: column; gap: 1.1rem; max-height: 60vh; overflow-y: auto; }
-.perm-area { border: 1px solid var(--color-border, rgba(255,255,255,0.1)); border-radius: 8px; padding: 0.75rem 0.9rem; }
+.perm-area { border: 1px solid var(--color-border, rgba(255,255,255,0.1)); border-radius: var(--radius-md); padding: 0.75rem 0.9rem; }
 .perm-area-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
 .perm-area-topo h3 { font-size: 0.9rem; margin: 0; }
 .perm-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.35rem 1rem; }
@@ -1420,7 +1428,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 .form-input:focus-visible,
 .form-select:focus-visible,
@@ -1550,7 +1558,7 @@ body {
   color: var(--color-text-2);
   background: var(--color-bg-3);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .ajuda-regras { display: grid; gap: 10px; }

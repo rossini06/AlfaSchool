@@ -102,7 +102,7 @@ function KpiCard({ icon, label, value, color, subtitle }) {
     <div className="card" style={{ flex: 1, minWidth: 0 }}>
       <div className="card-body" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <div style={{
-          width: 44, height: 44, borderRadius: "0.75rem",
+          width: 44, height: 44, borderRadius: "var(--radius-md)",
           background: `${color}18`, display: "flex", alignItems: "center",
           justifyContent: "center", flexShrink: 0, color
         }}>
@@ -270,7 +270,7 @@ function LancarNotasModal({ avaliacao, turmaLabel, disciplinaLabel, onClose, onS
       {!loading && alunos.length > 0 && (
         <div style={{
           display: "flex", gap: "1rem", padding: "0.75rem 1rem",
-          background: "var(--color-bg-secondary)", borderRadius: "0.5rem",
+          background: "var(--color-bg-secondary)", borderRadius: "var(--radius-md)",
           marginBottom: "1rem", flexWrap: "wrap"
         }}>
           {[
@@ -595,7 +595,7 @@ function AvaliacaoFormModal({ avaliacao, turmas, disciplinas, onClose, onSaved }
           )}
           <div style={{
             padding: "0.75rem 1rem", background: "var(--color-bg-secondary)",
-            borderRadius: "0.5rem", fontSize: "0.8rem", color: "var(--color-text-muted)"
+            borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "var(--color-text-muted)"
           }}>
             <Icon name="Info" size={13} style={{ marginRight: 4 }} />
             A nota mínima define o limiar de aprovação exibido na situação do aluno e nas estatísticas.
@@ -629,7 +629,7 @@ function AvaliacaoFormModal({ avaliacao, turmas, disciplinas, onClose, onSaved }
           </div>
           <div style={{
             padding: "0.75rem 1rem", background: "var(--color-bg-secondary)",
-            borderRadius: "0.5rem", fontSize: "0.8rem", color: "var(--color-text-muted)",
+            borderRadius: "var(--radius-md)", fontSize: "0.8rem", color: "var(--color-text-muted)",
             marginTop: "0.5rem"
           }}>
             <Icon name="Info" size={13} style={{ marginRight: 4 }} />

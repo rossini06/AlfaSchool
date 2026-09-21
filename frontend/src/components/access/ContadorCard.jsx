@@ -16,7 +16,7 @@ export function ContadorCard({ label, valor, icone, tom = "", loading = false, h
     <div className={`ac-contador ${tom ? `tom-${tom}` : ""}`}>
       <div className="ac-contador-topo">
         {loading ? (
-          <div className="skeleton" style={{ width: 72, height: 44, borderRadius: 8 }} />
+          <div className="skeleton" style={{ width: 72, height: 44, borderRadius: "var(--radius-sm)" }} />
         ) : (
           <div className="ac-contador-valor">{valor ?? "—"}</div>
         )}

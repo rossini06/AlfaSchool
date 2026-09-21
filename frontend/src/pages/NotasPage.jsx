@@ -123,7 +123,7 @@ export function NotasPage() {
           </div>
 
           {showNewAval && (
-            <div style={{ marginTop: "1rem", padding: "1rem", background: "var(--color-bg-secondary)", borderRadius: "0.5rem" }}>
+            <div style={{ marginTop: "1rem", padding: "1rem", background: "var(--color-bg-secondary)", borderRadius: "var(--radius-md)" }}>
               <div className="filter-bar">
                 <div className="form-field" style={{ flex: 2 }}>
                   <label className="form-label required">Nome da Avaliação</label>

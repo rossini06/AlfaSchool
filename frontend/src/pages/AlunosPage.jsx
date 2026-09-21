@@ -587,7 +587,7 @@ export function AlunosPage() {
                   <div style={{
                     textAlign: "center", padding: "32px 0",
                     color: "var(--color-text-2)", border: "2px dashed var(--color-border)",
-                    borderRadius: 8,
+                    borderRadius: "var(--radius-md)",
                   }}>
                     <Icon name="Users2" size={32} />
                     <p style={{ marginTop: 8, fontSize: 13 }}>
@@ -599,7 +599,7 @@ export function AlunosPage() {
                     {form.responsaveis.map((link, idx) => (
                       <div key={idx} style={{
                         display: "flex", alignItems: "center", gap: 12,
-                        padding: "10px 14px", borderRadius: 8,
+                        padding: "10px 14px", borderRadius: "var(--radius-md)",
                         background: "var(--color-bg-3)",
                         border: "1px solid var(--color-border)",
                       }}>
@@ -751,7 +751,7 @@ export function AlunosPage() {
                 key={resp.id}
                 style={{
                   display: "flex", alignItems: "center", gap: 12,
-                  padding: "10px 14px", borderRadius: 8,
+                  padding: "10px 14px", borderRadius: "var(--radius-md)",
                   background: "var(--color-bg-3)",
                   border: "1px solid var(--color-border)",
                   cursor: "pointer", textAlign: "left", width: "100%",
@@ -799,7 +799,7 @@ export function AlunosPage() {
         {selectedResp && (
           <div style={{
             display: "flex", alignItems: "center", gap: 12,
-            padding: "10px 14px", borderRadius: 8,
+            padding: "10px 14px", borderRadius: "var(--radius-md)",
             background: "var(--color-bg-3)", border: "1px solid var(--color-border)",
             marginBottom: 20,
           }}>
