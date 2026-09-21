@@ -1,0 +1,15 @@
+# Sobreposicao para rodar no Mac (colima), onde 3306 e 6379 ja' sao do
+# MySQL e do Redis do Homebrew, e 8083 e' um tunel SSH. Os containers se
+# falam pela rede do compose, entao a porta do host so' importa para
+# ferramentas de fora (DBeaver etc.).
+#
+# Uso:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.mac.yml \
+#   BACKEND_PORT=8093 ./scripts/dev.sh boot
+services:
+  mysql:
+    ports: !override
+      - "3316:3306"
+  redis:
+    ports: !override
+      - "6389:6379"
