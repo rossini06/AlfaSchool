@@ -1,5 +1,7 @@
 package br.com.alfaschool.backend.application.access.retirada;
 
+import br.com.alfaschool.backend.shared.TenantReferencia;
+
 import br.com.alfaschool.backend.application.access.retirada.dto.OcorrenciaRequest;
 import br.com.alfaschool.backend.application.access.retirada.dto.OcorrenciaResponse;
 import br.com.alfaschool.backend.application.access.retirada.dto.TratativaRequest;
@@ -68,7 +70,9 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
     /** Mesma resolucao da listagem, para uma ocorrencia so'. */
     private OcorrenciaResponse comNomes(AccOcorrencia o) {
         String alunoNome = o.getAlunoId() == null ? null
-                : alunoRepository.findById(o.getAlunoId()).map(a -> a.getNome()).orElse(null);
+                : alunoRepository.findById(o.getAlunoId())
+                        .filter(a -> o.getTenantId().equals(a.getTenantId()))
+                        .map(a -> a.getNome()).orElse(null);
         String tratadoPor = o.getTratadoPorUserId() == null ? null
                 : userRepository.findById(o.getTratadoPorUserId()).map(u -> u.getName()).orElse(null);
         return OcorrenciaResponse.from(o, alunoNome, tratadoPor);
@@ -183,6 +187,9 @@ public class OcorrenciaService implements OcorrenciaRegistroPort {
     @Transactional
     public OcorrenciaResponse criar(OcorrenciaRequest request) {
         UUID tenantId = ContextoAcesso.tenantObrigatorio();
+        // O aluno referenciado precisa ser desta escola: senao o nome da
+        // crianca de outro tenant vazava na resposta (comNomes) e nos paineis.
+        TenantReferencia.exigir(alunoRepository, request.alunoId(), "Aluno não encontrado nesta escola.");
         AccOcorrencia ocorrencia = new AccOcorrencia();
         ocorrencia.setTenantId(tenantId);
         ocorrencia.setUnitId(request.unitId());

@@ -4,6 +4,9 @@ import br.com.alfaschool.backend.application.avaliacao.dto.AvaliacaoRequest;
 import br.com.alfaschool.backend.application.avaliacao.dto.AvaliacaoResponse;
 import br.com.alfaschool.backend.domain.avaliacao.Avaliacao;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AvaliacaoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.DisciplinaRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
+import br.com.alfaschool.backend.shared.TenantReferencia;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +23,15 @@ import java.util.UUID;
 public class AvaliacaoService {
 
     private final AvaliacaoRepository avaliacaoRepository;
+    private final TurmaRepository turmaRepository;
+    private final DisciplinaRepository disciplinaRepository;
 
-    public AvaliacaoService(AvaliacaoRepository avaliacaoRepository) {
+    public AvaliacaoService(AvaliacaoRepository avaliacaoRepository,
+                            TurmaRepository turmaRepository,
+                            DisciplinaRepository disciplinaRepository) {
         this.avaliacaoRepository = avaliacaoRepository;
+        this.turmaRepository = turmaRepository;
+        this.disciplinaRepository = disciplinaRepository;
     }
 
     public Page<AvaliacaoResponse> list(Pageable pageable) {
@@ -85,6 +94,10 @@ public class AvaliacaoService {
     }
 
     private void applyRequest(Avaliacao a, AvaliacaoRequest req) {
+        // Turma e disciplina precisam ser desta escola (evita avaliacao que
+        // referencia dados de outro tenant e vaza nomes no recalculo/boletim).
+        TenantReferencia.exigir(turmaRepository, req.turmaId(), "Turma não encontrada nesta escola.");
+        TenantReferencia.exigir(disciplinaRepository, req.disciplinaId(), "Disciplina não encontrada nesta escola.");
         a.setTurmaId(req.turmaId());
         a.setDisciplinaId(req.disciplinaId());
         a.setNome(req.nome());

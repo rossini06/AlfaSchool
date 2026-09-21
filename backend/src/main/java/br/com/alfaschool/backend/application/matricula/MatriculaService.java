@@ -1,6 +1,10 @@
 package br.com.alfaschool.backend.application.matricula;
 
 import br.com.alfaschool.backend.application.matricula.dto.MatriculaRequest;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.UnitRepository;
+import br.com.alfaschool.backend.shared.TenantReferencia;
 import br.com.alfaschool.backend.application.matricula.dto.MatriculaResponse;
 import br.com.alfaschool.backend.domain.matricula.Matricula;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.MatriculaRepository;
@@ -21,9 +25,29 @@ import java.util.UUID;
 public class MatriculaService {
 
     private final MatriculaRepository matriculaRepository;
+    private final AlunoRepository alunoRepository;
+    private final TurmaRepository turmaRepository;
+    private final UnitRepository unitRepository;
 
-    public MatriculaService(MatriculaRepository matriculaRepository) {
+    public MatriculaService(MatriculaRepository matriculaRepository,
+                            AlunoRepository alunoRepository,
+                            TurmaRepository turmaRepository,
+                            UnitRepository unitRepository) {
         this.matriculaRepository = matriculaRepository;
+        this.alunoRepository = alunoRepository;
+        this.turmaRepository = turmaRepository;
+        this.unitRepository = unitRepository;
+    }
+
+    /**
+     * Aluno, turma e unidade precisam ser da propria escola. Sem isto, uma
+     * matricula nascia apontando para o aluno de outro tenant e o nome dele
+     * vazava no boletim/dashboard. Ver {@link TenantReferencia}.
+     */
+    private void exigirReferenciasDoTenant(MatriculaRequest request) {
+        TenantReferencia.exigir(alunoRepository, request.alunoId(), "Aluno não encontrado nesta escola.");
+        TenantReferencia.exigir(turmaRepository, request.turmaId(), "Turma não encontrada nesta escola.");
+        TenantReferencia.exigir(unitRepository, request.unitId(), "Unidade não encontrada nesta escola.");
     }
 
     public Page<MatriculaResponse> list(UUID alunoId, UUID turmaId, Pageable pageable) {
@@ -52,6 +76,7 @@ public class MatriculaService {
     @Transactional
     public MatriculaResponse create(MatriculaRequest request) {
         UUID tenantId = requiredTenant();
+        exigirReferenciasDoTenant(request);
         if (matriculaRepository.existsByTenantIdAndAlunoIdAndTurmaIdAndDeletedFalse(tenantId, request.alunoId(), request.turmaId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Aluno já matriculado nesta turma");
         }
@@ -77,6 +102,7 @@ public class MatriculaService {
         Matricula matricula = matriculaRepository.findById(id)
                 .filter(m -> tenantId.equals(m.getTenantId()) && !Boolean.TRUE.equals(m.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
+        exigirReferenciasDoTenant(request);
         matricula.setAlunoId(request.alunoId());
         matricula.setTurmaId(request.turmaId());
         matricula.setUnitId(request.unitId());

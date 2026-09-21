@@ -7,9 +7,12 @@ import br.com.alfaschool.backend.domain.diario.StatusFrequencia;
 import br.com.alfaschool.backend.domain.frequencia.Frequencia;
 import br.com.alfaschool.backend.domain.matricula.Matricula;
 import br.com.alfaschool.backend.domain.turma.Turma;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.AlunoRepository;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.DisciplinaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.FrequenciaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.MatriculaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.TurmaRepository;
+import br.com.alfaschool.backend.shared.TenantReferencia;
 import br.com.alfaschool.backend.security.filter.TenantContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,14 +30,20 @@ public class FrequenciaService {
     private final FrequenciaRepository frequenciaRepository;
     private final TurmaRepository turmaRepository;
     private final MatriculaRepository matriculaRepository;
+    private final AlunoRepository alunoRepository;
+    private final DisciplinaRepository disciplinaRepository;
 
     public FrequenciaService(
             FrequenciaRepository frequenciaRepository,
             TurmaRepository turmaRepository,
-            MatriculaRepository matriculaRepository) {
+            MatriculaRepository matriculaRepository,
+            AlunoRepository alunoRepository,
+            DisciplinaRepository disciplinaRepository) {
         this.frequenciaRepository = frequenciaRepository;
         this.turmaRepository = turmaRepository;
         this.matriculaRepository = matriculaRepository;
+        this.alunoRepository = alunoRepository;
+        this.disciplinaRepository = disciplinaRepository;
     }
 
     public List<FrequenciaResponse> listByAluno(UUID alunoId) {
@@ -64,6 +73,11 @@ public class FrequenciaService {
         Turma turma = turmaRepository.findById(request.turmaId())
                 .filter(t -> tenantId.equals(t.getTenantId()) && !Boolean.TRUE.equals(t.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma não encontrada"));
+
+        // Aluno e disciplina desta escola: sem isto a frequencia referenciava
+        // aluno de outro tenant e o nome vazava no boletim/relatorio.
+        TenantReferencia.exigir(alunoRepository, request.alunoId(), "Aluno não encontrado nesta escola.");
+        TenantReferencia.exigir(disciplinaRepository, request.disciplinaId(), "Disciplina não encontrada nesta escola.");
 
         // Validar se data está dentro do período da turma
         if (turma.getDataInicio() != null && request.data().isBefore(turma.getDataInicio())) {
@@ -122,6 +136,9 @@ public class FrequenciaService {
                 .filter(t -> tenantId.equals(t.getTenantId()) && !Boolean.TRUE.equals(t.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma não encontrada"));
 
+        // Disciplina desta escola (os alunos sao validados um a um no laco).
+        TenantReferencia.exigir(disciplinaRepository, request.disciplinaId(), "Disciplina não encontrada nesta escola.");
+
         // Validar período
         if (turma.getDataInicio() != null && request.data().isBefore(turma.getDataInicio())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data anterior ao início da turma");
@@ -134,6 +151,7 @@ public class FrequenciaService {
         List<FrequenciaResponse> resultado = new ArrayList<>();
 
         for (FrequenciaLoteRequest.FrequenciaAlunoItem item : request.frequencias()) {
+            TenantReferencia.exigir(alunoRepository, item.alunoId(), "Aluno não encontrado nesta escola.");
             // Verificar se já existe
             var existente = frequenciaRepository
                     .findByTenantIdAndAlunoIdAndTurmaIdAndDisciplinaIdAndDataAndNumeroAulaAndDeletedFalse(

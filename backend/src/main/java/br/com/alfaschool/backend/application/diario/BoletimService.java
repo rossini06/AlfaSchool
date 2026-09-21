@@ -77,18 +77,21 @@ public class BoletimService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
 
         // Buscar aluno
+        // Defesa em profundidade: findById nao passa pelo filtro de tenant do
+        // Hibernate, entao confirmamos o tenant na mao. A validacao na escrita
+        // ja impede a matricula cruzada; isto fecha a porta tambem na leitura.
         Aluno aluno = alunoRepository.findById(matricula.getAlunoId())
-                .filter(a -> !Boolean.TRUE.equals(a.getDeleted()))
+                .filter(a -> tenantId.equals(a.getTenantId()) && !Boolean.TRUE.equals(a.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado"));
 
         // Buscar turma
         Turma turma = turmaRepository.findById(matricula.getTurmaId())
-                .filter(t -> !Boolean.TRUE.equals(t.getDeleted()))
+                .filter(t -> tenantId.equals(t.getTenantId()) && !Boolean.TRUE.equals(t.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma não encontrada"));
 
         // Buscar curso
         Curso curso = cursoRepository.findById(turma.getCursoId())
-                .filter(c -> !Boolean.TRUE.equals(c.getDeleted()))
+                .filter(c -> tenantId.equals(c.getTenantId()) && !Boolean.TRUE.equals(c.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso não encontrado"));
 
         // Buscar disciplinas do curso
