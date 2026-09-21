@@ -4,7 +4,7 @@ import { Modal } from "../../components/Modal";
 import { Icon } from "../../components/Icon";
 import { Feedback } from "../../components/access/Feedback";
 import { ConfirmarModal } from "../../components/access/ConfirmarModal";
-import { MODULOS } from "../../utils/saas";
+import { MODULOS, rotuloModulo } from "../../utils/saas";
 import { ReguaModulos } from "./components/ReguaModulos";
 
 const FORM_VAZIO = {
@@ -133,75 +133,90 @@ export function SaasPlanosPage() {
       modulos: f.modulos.includes(codigo) ? f.modulos.filter((c) => c !== codigo) : [...f.modulos, codigo],
     }));
 
-  const limite = (n, singular, plural) => (Number(n) > 0 ? `${n} ${Number(n) === 1 ? singular : plural}` : `${plural} sem limite`);
+  const limite = (n, singular, plural) => (Number(n) > 0 ? `${n} ${Number(n) === 1 ? singular : plural}` : `sem limite de ${plural}`);
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Planos</h1>
-          <p className="page-subtitle">O que a Alfa oferece às redes: módulos incluídos, preço e limites.</p>
-        </div>
-        <button className="btn btn-brand" onClick={abrirNovo}>
-          <Icon name="Plus" size={14} /> Novo plano
-        </button>
-      </div>
-
+    <div>
       <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       {erro && (
         <div className="login-error"><Icon name="AlertCircle" size={14} /> {erro}</div>
       )}
 
-      {carregando ? (
-        <div className="saas-planos-grid">
-          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 230, borderRadius: "var(--radius-lg)" }} />)}
-        </div>
-      ) : planos.length === 0 ? (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon"><Icon name="Tag" size={28} /></div>
-            <h3>Nenhum plano cadastrado</h3>
-            <p>O plano é o que vai na proposta: módulos incluídos, preço mensal e limites.</p>
-            <button className="btn btn-brand" onClick={abrirNovo}><Icon name="Plus" size={14} /> Criar o primeiro plano</button>
-          </div>
-        </div>
-      ) : (
-        <div className="saas-planos-grid">
-          {planos.map((plano) => (
-            <article key={plano.id} className={`card saas-plano ${plano.ativo ? "" : "inativo"}`}>
-              <header className="saas-plano-topo">
-                <h2>{plano.nome}</h2>
-                <span className={`saas-status ${plano.ativo ? "ativa" : "suspensa"}`}>{plano.ativo ? "Ativo" : "Inativo"}</span>
-              </header>
-              <p className="saas-plano-preco">
-                <small>R$</small>
-                <strong>{moeda(plano.precoMensal)}</strong>
-                <small>/mês</small>
-              </p>
-              {plano.precoAnual > 0 && (
-                <p className="saas-plano-anual">ou R$ {moeda(plano.precoAnual)} por ano</p>
-              )}
-              <ReguaModulos contratados={modulosDe(plano)} />
-              <p className="saas-plano-desc">{plano.descricao || "Sem descrição."}</p>
-              <ul className="saas-plano-limites">
-                <li><Icon name="School" size={13} /> {limite(plano.maxEscolas, "escola", "escolas")}</li>
-                <li><Icon name="Users" size={13} /> {limite(plano.maxUsuarios, "usuário", "usuários")}</li>
-                <li><Icon name="ScanFace" size={13} /> {limite(plano.maxDispositivos, "leitor", "leitores")}</li>
-              </ul>
-              <footer className="saas-plano-rodape">
-                <div className="td-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(plano)}>
-                    <Icon name="Edit" size={13} /> Editar
-                  </button>
-                  <button className="btn btn-ghost btn-sm text-danger" onClick={() => setExcluindo(plano)} title="Excluir" aria-label="Excluir">
-                    <Icon name="Trash" size={13} />
-                  </button>
+      <div className="filter-bar saas-filter-bar">
+        <p className="saas-filter-nota">O que a Alfa oferece às redes: módulos incluídos, preço e limites.</p>
+        <button className="btn btn-brand" onClick={abrirNovo}>
+          <Icon name="Plus" size={16} /> Novo plano
+        </button>
+        <button className="btn btn-secondary" onClick={carregar} title="Atualizar" aria-label="Atualizar">
+          <Icon name="RefreshCw" size={15} />
+        </button>
+      </div>
+
+      <div className="table-wrapper">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Plano</th>
+              <th>Mensal</th>
+              <th>Anual</th>
+              <th>Módulos</th>
+              <th>Limites</th>
+              <th>Situação</th>
+              <th style={{ textAlign: "right" }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carregando ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j}><div className="skeleton" style={{ height: 16, width: "80%" }} /></td>)}</tr>
+              ))
+            ) : planos.length === 0 ? (
+              <tr><td colSpan={7}>
+                <div className="empty-state">
+                  <div className="empty-state-icon"><Icon name="Tag" size={28} /></div>
+                  <h3>Nenhum plano cadastrado</h3>
+                  <p>O plano é o que vai na proposta: módulos incluídos, preço mensal e limites.</p>
                 </div>
-              </footer>
-            </article>
-          ))}
-        </div>
-      )}
+              </td></tr>
+            ) : (
+              planos.map((plano) => (
+                <tr key={plano.id} className={plano.ativo ? "" : "saas-linha-suspensa"}>
+                  <td>
+                    <strong>{plano.nome}</strong>
+                    {plano.descricao && <div className="td-muted" style={{ fontSize: 12 }}>{plano.descricao}</div>}
+                  </td>
+                  <td className="saas-mono">R$ {moeda(plano.precoMensal)}</td>
+                  <td className="saas-mono td-muted">{plano.precoAnual > 0 ? `R$ ${moeda(plano.precoAnual)}` : "—"}</td>
+                  <td>
+                    <div className="saas-celula-modulos" title={modulosDe(plano).map(rotuloModulo).join(", ") || "Nenhum"}>
+                      <ReguaModulos contratados={modulosDe(plano)} compacta />
+                      <span>{modulosDe(plano).length} de {MODULOS.length}</span>
+                    </div>
+                  </td>
+                  <td className="td-muted" style={{ fontSize: 12.5 }}>
+                    {!plano.maxEscolas && !plano.maxUsuarios && !plano.maxDispositivos
+                      ? "Sem limites"
+                      : `${limite(plano.maxEscolas, "escola", "escolas")} · ${limite(plano.maxUsuarios, "usuário", "usuários")} · ${limite(plano.maxDispositivos, "leitor", "leitores")}`}
+                  </td>
+                  <td>
+                    <span className={`badge ${plano.ativo ? "badge-success" : "badge-danger"}`}>{plano.ativo ? "Ativo" : "Inativo"}</span>
+                  </td>
+                  <td>
+                    <div className="td-actions" style={{ justifyContent: "flex-end" }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(plano)} title="Editar" aria-label="Editar">
+                        <Icon name="Edit" size={13} />
+                      </button>
+                      <button className="btn btn-ghost btn-sm text-danger" onClick={() => setExcluindo(plano)} title="Excluir" aria-label="Excluir">
+                        <Icon name="Trash" size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <ConfirmarModal
         aberto={!!excluindo}

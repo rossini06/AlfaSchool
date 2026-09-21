@@ -7,16 +7,16 @@ import { Pagination } from "../../components/Pagination";
 import { Icon } from "../../components/Icon";
 import { Feedback } from "../../components/access/Feedback";
 import { ConfirmarModal } from "../../components/access/ConfirmarModal";
-import { MODULOS, formatarCnpj } from "../../utils/saas";
+import { MODULOS, formatarCnpj, rotuloModulo } from "../../utils/saas";
 import { Monograma } from "./components/Monograma";
 import { ReguaModulos } from "./components/ReguaModulos";
 
 const PAGE_SIZE = 24;
 
 const FILTROS = [
-  { key: "todas", rotulo: "Todas" },
-  { key: "ativas", rotulo: "Ativas" },
-  { key: "suspensas", rotulo: "Suspensas" },
+  { key: "todas", rotulo: "Todas as redes" },
+  { key: "ativas", rotulo: "Somente ativas" },
+  { key: "suspensas", rotulo: "Somente suspensas" },
   { key: "sem-modulo", rotulo: "Sem módulo" },
 ];
 
@@ -221,119 +221,117 @@ export function RedesEnsinoPage() {
   const totalPaginas = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Redes de ensino</h1>
-          <p className="page-subtitle">Cada rede é um cliente da Alfa, com seus próprios usuários e módulos.</p>
-        </div>
-        <button className="btn btn-brand" onClick={abrirNova}>
-          <Icon name="Plus" size={14} /> Nova rede
-        </button>
-      </div>
-
+    <div>
       <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       {erro && <div className="login-error"><Icon name="AlertCircle" size={14} /> {erro}</div>}
 
-      <div className="saas-filtros">
+      <div className="filter-bar saas-filter-bar">
         <div className="saas-busca">
-          <Icon name="Search" size={15} />
+          <Icon name="Search" size={16} />
           <input
             type="search"
             className="form-input"
-            placeholder="Buscar por nome ou CNPJ"
+            placeholder="Buscar por nome ou CNPJ..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar rede"
           />
         </div>
-        <div className="saas-chips" role="tablist" aria-label="Filtrar redes">
-          {FILTROS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              role="tab"
-              aria-selected={filtro === f.key}
-              className={`saas-chip ${filtro === f.key ? "ativo" : ""}`}
-              onClick={() => setFiltro(f.key)}
-            >
-              {f.rotulo}
-            </button>
-          ))}
-        </div>
+        <select className="form-select" value={filtro} onChange={(e) => setFiltro(e.target.value)} aria-label="Filtrar por situação">
+          {FILTROS.map((f) => <option key={f.key} value={f.key}>{f.rotulo}</option>)}
+        </select>
+        <button className="btn btn-brand" onClick={abrirNova}>
+          <Icon name="Plus" size={16} /> Nova rede
+        </button>
+        <button className="btn btn-secondary" onClick={() => carregar(pagina)} title="Atualizar" aria-label="Atualizar">
+          <Icon name="RefreshCw" size={15} />
+        </button>
       </div>
 
-      {carregando ? (
-        <div className="saas-redes-grid">
-          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 178, borderRadius: "var(--radius-lg)" }} />)}
-        </div>
-      ) : visiveis.length === 0 ? (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon"><Icon name="Network" size={28} /></div>
-            <h3>{itens.length === 0 ? "Nenhuma rede cadastrada" : "Nada com esse filtro"}</h3>
-            <p>{itens.length === 0 ? "Cadastre a primeira rede de ensino para começar." : "Tente outro termo ou limpe o filtro."}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="saas-redes-grid">
-          {visiveis.map((rede) => (
-            <article key={rede.id} className={`card saas-rede ${rede.active ? "" : "suspensa"} ${rede.mestre ? "mestre" : ""}`}>
-              <div className="saas-rede-topo">
-                <Monograma nome={rede.name} mestre={rede.mestre} />
-                <div className="saas-rede-nome">
-                  <h2>{rede.name}</h2>
-                  <span>{rede.mestre ? "Tenant da Alfa" : formatarCnpj(rede.document)}</span>
+      <div className="table-wrapper">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Rede</th>
+              <th>CNPJ</th>
+              <th>Módulos</th>
+              <th>Situação</th>
+              <th>Criada em</th>
+              <th style={{ textAlign: "right" }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carregando ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>{Array.from({ length: 6 }).map((_, j) => <td key={j}><div className="skeleton" style={{ height: 16, width: "80%" }} /></td>)}</tr>
+              ))
+            ) : visiveis.length === 0 ? (
+              <tr><td colSpan={6}>
+                <div className="empty-state">
+                  <div className="empty-state-icon"><Icon name="Network" size={28} /></div>
+                  <h3>{itens.length === 0 ? "Nenhuma rede cadastrada" : "Nenhuma rede encontrada"}</h3>
+                  <p>{itens.length === 0 ? "Cadastre a primeira rede de ensino." : "Tente outro termo ou limpe o filtro."}</p>
                 </div>
-                <span className={`saas-status ${rede.active ? "ativa" : "suspensa"}`}>
-                  {rede.active ? "Ativa" : "Suspensa"}
-                </span>
-              </div>
-
-              <ReguaModulos contratados={rede.modulos} todos={rede.mestre} />
-              <p className="saas-rede-nota">
-                {rede.mestre
-                  ? "Todos os módulos, sempre. É onde a Alfa demonstra e dá suporte."
-                  : (rede.modulos || []).length === 0
-                    ? "Nenhum módulo contratado: ninguém desta rede vê tela alguma."
-                    : ` de  módulos contratados`}
-              </p>
-
-              <div className="saas-rede-rodape">
-                <span className="saas-rede-desde">
-                  desde {rede.createdAt ? new Date(rede.createdAt).toLocaleDateString("pt-BR") : "—"}
-                </span>
-                {!rede.mestre && (
-                  <div className="td-actions">
-                    {rede.active && (
-                      <button className="btn btn-ghost btn-sm saas-entrar" onClick={() => entrar(rede)} disabled={entrando === rede.tenantId} title={`Entrar no painel de ${rede.name}`}>
-                        <Icon name="ArrowRight" size={13} /> Entrar
-                      </button>
+              </td></tr>
+            ) : (
+              visiveis.map((rede) => (
+                <tr key={rede.id} className={rede.active ? "" : "saas-linha-suspensa"}>
+                  <td>
+                    <div className="saas-celula-rede">
+                      <Monograma nome={rede.name} mestre={rede.mestre} tamanho={32} />
+                      <div>
+                        <strong>{rede.name}</strong>
+                        {rede.mestre && <span className="badge badge-secondary" style={{ marginLeft: 8 }}>Alfa</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="saas-mono">{rede.mestre ? "—" : formatarCnpj(rede.document)}</td>
+                  <td>
+                    <div className="saas-celula-modulos" title={rede.mestre ? "Todos os módulos" : (rede.modulos || []).map(rotuloModulo).join(", ") || "Nenhum"}>
+                      <ReguaModulos contratados={rede.modulos} todos={rede.mestre} compacta />
+                      <span>{rede.mestre ? "todos" : `${(rede.modulos || []).length} de ${MODULOS.length}`}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge ${rede.active ? "badge-success" : "badge-danger"}`}>
+                      {rede.active ? "Ativa" : "Suspensa"}
+                    </span>
+                  </td>
+                  <td className="td-muted">{rede.createdAt ? new Date(rede.createdAt).toLocaleDateString("pt-BR") : "—"}</td>
+                  <td>
+                    {!rede.mestre && (
+                      <div className="td-actions" style={{ justifyContent: "flex-end" }}>
+                        {rede.active && (
+                          <button className="btn btn-ghost btn-sm saas-entrar" onClick={() => entrar(rede)} disabled={entrando === rede.tenantId} title={`Entrar no painel de ${rede.name}`}>
+                            <Icon name="ArrowRight" size={13} /> Entrar
+                          </button>
+                        )}
+                        <button className="btn btn-ghost btn-sm" onClick={() => abrirModulos(rede)} title="Módulos contratados">
+                          <Icon name="LayoutGrid" size={13} /> Módulos
+                        </button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(rede)} title="Editar" aria-label="Editar">
+                          <Icon name="Edit" size={13} />
+                        </button>
+                        <button
+                          className={`btn btn-ghost btn-sm ${rede.active ? "text-danger" : ""}`}
+                          onClick={() => setMudandoStatus(rede)}
+                          title={rede.active ? "Suspender" : "Reativar"}
+                          aria-label={rede.active ? "Suspender" : "Reativar"}
+                        >
+                          <Icon name={rede.active ? "Lock" : "Unlock"} size={13} />
+                        </button>
+                      </div>
                     )}
-                    <button className="btn btn-ghost btn-sm" onClick={() => abrirModulos(rede)}>
-                      <Icon name="LayoutGrid" size={13} /> Módulos
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(rede)} title="Editar" aria-label="Editar">
-                      <Icon name="Edit" size={13} />
-                    </button>
-                    <button
-                      className={`btn btn-ghost btn-sm ${rede.active ? "text-danger" : ""}`}
-                      onClick={() => setMudandoStatus(rede)}
-                      title={rede.active ? "Suspender" : "Reativar"}
-                      aria-label={rede.active ? "Suspender" : "Reativar"}
-                    >
-                      <Icon name={rede.active ? "Lock" : "Unlock"} size={13} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-      {totalPaginas > 1 && (
-        <Pagination page={pagina} totalPages={totalPaginas} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => carregar(p)} />
-      )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        {totalPaginas > 1 && (
+          <Pagination page={pagina} totalPages={totalPaginas} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => carregar(p)} />
+        )}
+      </div>
 
       {/* Nova / editar */}
       <Modal

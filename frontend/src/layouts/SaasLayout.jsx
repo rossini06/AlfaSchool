@@ -18,7 +18,7 @@ import wordmark from "/alfaschool-logo.png";
  * a pessoa está antes de ela ler qualquer título.
  */
 const ABAS = [
-  { to: "/saas", label: "Visão geral", icone: "LayoutDashboard", fim: true },
+  { to: "/saas", label: "Dashboard", icone: "LayoutDashboard", fim: true },
   { to: "/saas/redes", label: "Redes de ensino", icone: "Network" },
   { to: "/saas/planos", label: "Planos", icone: "Tag" },
 ];
@@ -104,20 +104,6 @@ export function SaasLayout() {
           </Link>
           <span className="saas-badge">PAINEL SAAS</span>
         </div>
-
-        <nav className="saas-nav" aria-label="Seções do painel">
-          {ABAS.map((a) => (
-            <NavLink
-              key={a.to}
-              to={a.to}
-              end={a.fim}
-              className={({ isActive }) => `saas-nav-item ${isActive ? "ativo" : ""}`}
-            >
-              <Icon name={a.icone} size={16} />
-              <span>{a.label}</span>
-            </NavLink>
-          ))}
-        </nav>
 
         <div className="saas-header-dir">
           {/* Abre o painel de UMA escola, escolhida aqui. O tenant mestre
@@ -208,7 +194,31 @@ export function SaasLayout() {
       </header>
 
       <main className="saas-conteudo">
-        <Outlet />
+        {/* Mesma moldura do AlfaControl: título da página, abas sublinhadas
+            logo abaixo, e o conteúdo da aba. As abas são rotas, então cada
+            uma tem URL própria e o F5 volta onde estava. */}
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Painel SaaS</h1>
+            <p className="page-subtitle">Gerencie redes de ensino, módulos e planos da plataforma</p>
+          </div>
+        </div>
+        <nav className="saas-tabs" aria-label="Seções do painel">
+          {ABAS.map((a) => (
+            <NavLink
+              key={a.to}
+              to={a.to}
+              end={a.fim}
+              className={({ isActive }) => `saas-tab ${isActive ? "active" : ""}`}
+            >
+              <Icon name={a.icone} size={17} />
+              {a.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="saas-tab-content">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

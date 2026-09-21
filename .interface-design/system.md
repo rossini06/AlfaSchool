@@ -12,10 +12,17 @@ Dois painéis, uma família:
   acento. Quem usa está no balcão da secretaria, na portaria ou na
   coordenação, com pressa e interrupções. Nada grita; hierarquia por
   tamanho e peso, não por cor.
-- **Painel SaaS** (`/saas`) — a Alfa olhando a carteira. Mesmos tokens, mais
-  ar. O âmbar (`--color-warning`) marca a identidade do painel (badge
-  "PAINEL SAAS", monograma da Alfa) e **nada mais**; o teal continua sendo o
-  acento do que está contratado.
+- **Painel SaaS** (`/saas`) — a moldura é a do AlfaControl, para a família
+  ter uma cara só: cabeçalho com marca + badge + "Entrar numa escola" +
+  usuário; abaixo, `.page-title` "Painel SaaS" e as abas sublinhadas
+  (`.saas-tabs`/`.saas-tab`, rotas); dentro da aba, o conteúdo. Dashboard
+  em grupos de KPIs com título de seção em caixa alta (`.saas-kpi-secao`)
+  e KPI com ícone tingido à esquerda (`.saas-kpi`); listas em tabela
+  (`.table-wrapper` + `.data-table`) com `.filter-bar` (busca, select,
+  ação primária à direita, atualizar) e ações na linha. O âmbar
+  (`--color-warning`) marca a identidade do painel (badge, monograma da
+  Alfa) e **nada mais**; o teal continua sendo o acento do que está
+  contratado.
 
 Fonte: Inter Variable, carregada em `main.jsx`. Não trocar por tela.
 
@@ -82,8 +89,9 @@ alinhadas à direita (`.td-actions`). Grid `auto-fill, minmax(280–320px, 1fr)`
 **Régua de módulos** (`ReguaModulos.jsx`): cinco casas na ordem de
 `MODULOS` em `utils/saas.js`. Casa preenchida = `--color-brand-dim` +
 texto teal; vazia = borda tracejada a 55%. Estreita (<320px, container
-query) vira ícone; `compacta` vira cinco traços de 14×6px. Use sempre que
-a tela falar de módulos contratados.
+query) vira ícone; `compacta` vira cinco traços de 14×6px — é a forma
+usada nas tabelas do SaaS, ao lado de "3 de 5". Use sempre que a tela
+falar de módulos contratados.
 
 **Monograma** (`Monograma.jsx`): iniciais numa moeda tingida; cor estável
 pelo nome (`tomDoMonograma`). Substitui logo que não temos.
@@ -92,12 +100,15 @@ pelo nome (`tomDoMonograma`). Substitui logo que não temos.
 `--color-bg-3` de 6px, preenchimento teal, `--radius-full`. Sempre com o
 número ao lado; barra sem número não informa.
 
-**Números em linha** (`.saas-carteira-numeros`): três ou quatro números
-separados por filete vertical dentro de UM card. Não faça um card por
-número quando os números são poucos e pequenos.
+**KPI do SaaS** (`.saas-kpi`): ícone 46px tingido à esquerda, número
+24px/700 tabular, rótulo em `--color-text-2`. Agrupe por seção com
+`.saas-kpi-titulo` (12px, caixa alta, +0.05em). É o mesmo card do
+Dashboard do AlfaControl.
 
-**Filtros** (`.saas-filtros`): busca com ícone à esquerda + chips
-`--radius-full`; chip ativo inverte (`--color-text` sobre `--color-bg`).
+**Filtros** (`.saas-filter-bar`): `.saas-busca` (ícone à esquerda, até
+400px) + `form-select` + ação primária empurrada à direita + botão de
+atualizar. Chips ficam para filtros de estado dentro de uma tela; lista
+principal usa select.
 
 **Modal**: rodapé via prop `footer` do `Modal.jsx` (fica na barra com
 fundo `--color-bg-3`, ações à direita). Resumo do que está marcado à
@@ -117,7 +128,8 @@ fazer. Nunca lista vazia com 403 no console.
 - `alert()`/`confirm()` nativos; use `Modal.jsx`/`ConfirmarModal.jsx`.
 - Cor de fundo diferente para a sidebar.
 - Sombra em card. Gradiente decorativo. Segundo acento.
-- Tabela para menos de ~10 itens com poucos campos: card lê melhor.
+- Tabela para menos de ~10 itens com poucos campos no painel da ESCOLA:
+  card lê melhor. No SaaS a lista é tabela sempre, como no AlfaControl.
 - Badge colorido para situação: ponto + palavra.
 - Campo que a API não conhece (aconteceu duas vezes no SaaS). Leia o DTO
   antes de desenhar o formulário.
