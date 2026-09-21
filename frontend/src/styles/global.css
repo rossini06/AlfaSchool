@@ -257,14 +257,20 @@ body {
   justify-content: space-between;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem 0.85rem 0.35rem;
-  margin-top: 0.25rem;
-  background: none;
+  /* Faixa: o cabecalho de secao tem fundo proprio, entao le como um
+     rotulo de grupo, nao como mais um item da lista. */
+  padding: 0.4rem 0.7rem;
+  margin: 0.6rem 0 0.35rem;
+  background: var(--color-bg-3);
   border: 0;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-align: left;
   font: inherit;
+  transition: background var(--transition);
 }
+.sidebar-group:first-child .sidebar-group-header { margin-top: 0; }
+.sidebar-group-header:hover { background: var(--color-border); }
 .sidebar-group-header:hover .sidebar-group-label { color: var(--color-text-1, #fff); }
 .sidebar-group-chevron {
   flex-shrink: 0;
@@ -314,11 +320,12 @@ body {
   opacity: 0.6;
 }
 .sidebar-group-label {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--color-text-2);
+  color: var(--color-text);
+  opacity: 0.9;
   user-select: none;
   white-space: nowrap;
   overflow: hidden;
