@@ -15,6 +15,10 @@ ul, ol { list-style: none; }
 
 /* ── CSS Variables — Dark (default) ── */
 :root, [data-theme="dark"] {
+  /* Controles nativos (calendário do input[type=date], select, scrollbar)
+     seguem o tema. Sem isto o ícone do calendário saía preto sobre fundo
+     escuro e sumia. */
+  color-scheme: dark;
   --color-bg:        #0f1117;
   --color-bg-2:      #1a1d27;
   --color-bg-3:      #22263a;
@@ -84,6 +88,7 @@ ul, ol { list-style: none; }
   --color-primary:   #2563eb;
   --color-success:   #16a34a;
   --color-danger:    #dc2626;
+  color-scheme: light;
   --color-warning:   #d97706;
   --color-info:      #2563eb;
   --color-success-dim: rgba(22,163,74,0.10);
