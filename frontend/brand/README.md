@@ -20,9 +20,9 @@ A gramática é a mesma nos quatro; o que muda é o símbolo e a cor de acento.
 |---|---|
 | `alfaschool-logo.svg` | **Fonte da verdade.** Lockup completo, com a fonte embutida em base64 |
 | `alfaschool-simbolo.svg` | Só o símbolo, sem o wordmark |
-| `../public/alfaschool-icon.svg` | Símbolo usado pelo app (login) |
+| `../public/alfaschool-icon.svg` | Símbolo usado pelo app (login e sidebar) |
 | `../public/favicon.svg` | Símbolo com traço mais grosso, para sobreviver a 16px |
-| `../public/alfaschool-logo.png` | Wordmark 2053×332, usado no login |
+| `../public/alfaschool-logo.png` | Wordmark 2053×332, usado no login e na sidebar |
 
 Por que o favicon tem traço mais grosso: a 16px um traço de 5.5 some. O
 AlfaControl faz o mesmo (5.9 no favicon, 5.5 no ícone do app).
@@ -49,6 +49,7 @@ Medidas deste wordmark: PNG 2053×332 (6,184:1); a cap-height do "A" mede
 |---|---|---|---|---|
 | 220px (padrão) | 35,6px | 31,5px | **57px** | **14px** |
 | 178px (≤420px de tela) | 28,8px | 25,5px | **46px** | **12px** |
+| 124px (sidebar) | 20,1px | 17,8px | **32px** | **8px** |
 
 ## Como regerar o PNG
 

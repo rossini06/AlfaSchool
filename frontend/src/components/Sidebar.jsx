@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { menuGroups, menuItems, podeVerItem } from "../config/menuConfig";
 import { Icon } from "./Icon";
+import icone from "/alfaschool-icon.svg";
+import wordmark from "/alfaschool-logo.png";
 
 const CHAVE_SECOES = "alfaschool_menu_secoes";
 
@@ -25,9 +27,9 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
 
   const permissoes = useMemo(() => user?.permissoes ?? [], [user]);
   const roles = useMemo(() => user?.roles ?? [], [user]);
+  const modulos = useMemo(() => user?.modulos ?? [], [user]);
 
   const alternarSecao = useCallback((chave) => {
-  const modulos = useMemo(() => user?.modulos ?? [], [user]);
     setSecoes((atual) => {
       const proximo = { ...atual, [chave]: !(chave in atual ? atual[chave] : true) };
       try {
@@ -72,15 +74,24 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
       className={`sidebar ${collapsed ? "sidebar-collapsed" : ""} ${mobileOpen ? "sidebar-mobile-open" : ""}`}
     >
       <div className="sidebar-top">
-        <div className="sidebar-brand-wrap">
-          {collapsed ? (
-            <div className="sidebar-brand-icon">A</div>
-          ) : (
-            <span className="sidebar-brand-text">
-              Alfa<span>School</span>
-            </span>
+        {/* Mesmo lockup do login (símbolo + wordmark), na proporção de
+            brand/README.md: ícone = 1,8 × cap-height do wordmark, gap = 25%
+            do ícone. Recolhida, sobra só o símbolo — é ele que identifica a
+            marca a 32px. Os dois arquivos são os mesmos do login, então a
+            marca não tem duas versões que podem divergir. */}
+        <Link to="/" className="sidebar-brand-wrap" title="AlfaSchool">
+          <img src={icone} alt="" aria-hidden="true" decoding="sync" className="sidebar-brand-icon" />
+          {!collapsed && (
+            <img
+              src={wordmark}
+              alt="AlfaSchool"
+              decoding="sync"
+              width={2053}
+              height={332}
+              className="sidebar-brand-logo"
+            />
           )}
-        </div>
+        </Link>
         <button
           className="sidebar-collapse-toggle"
           onClick={onToggle}
