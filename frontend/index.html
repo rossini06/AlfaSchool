@@ -15,6 +15,13 @@
     -->
     <link rel="preload" as="image" href="/alfaschool-icon.svg" type="image/svg+xml" />
     <link rel="preload" as="image" href="/alfaschool-logo.png" type="image/png" />
+    <!--
+      Preload da fonte: sem isto o navegador so' descobre a Inter quando o
+      CSS do bundle chega e e' lido, e o texto do login troca de fonte na
+      frente da pessoa. `crossorigin` e' obrigatorio para fonte, mesmo no
+      mesmo dominio — sem ele o navegador baixa o arquivo duas vezes.
+    -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-variable-latin.woff2" crossorigin />
     <!-- Teal da família Alfa. É a cor da marca, não a do botão: o botão usa
          o tom clareado que passa no contraste (ver --color-brand). -->
     <meta name="theme-color" content="#029CAF" />
