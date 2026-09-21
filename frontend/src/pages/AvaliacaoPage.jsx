@@ -125,7 +125,6 @@ function LancarNotasModal({ avaliacao, turmaLabel, disciplinaLabel, onClose, onS
   const [notas, setNotas]   = useState({});
   const [obsMap, setObsMap] = useState({});
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState(null);
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
 
@@ -646,13 +645,14 @@ function AvaliacaoFormModal({ avaliacao, turmas, disciplinas, onClose, onSaved }
 
 function DeleteModal({ avaliacao, onClose, onDeleted }) {
   const [deleting, setDeleting] = useState(false);
+  const [erro, setErro] = useState("");
   const confirm = async () => {
-    setDeleting(true);
+    setDeleting(true); setErro("");
     try {
       await api.delete(`/avaliacoes/${avaliacao.id}`);
       onDeleted?.();
       onClose();
-    } catch (e) { setFeedback({ tipo: "erro", mensagem: e.message }); }
+    } catch (e) { setErro(e.message || "Não foi possível excluir a avaliação."); }
     finally { setDeleting(false); }
   };
   return (
@@ -680,6 +680,11 @@ function DeleteModal({ avaliacao, onClose, onDeleted }) {
           Esta ação é irreversível. Todas as notas lançadas para esta avaliação
           também serão excluídas logicamente.
         </p>
+        {erro && (
+          <p className="login-error" style={{ marginTop: "0.75rem" }}>
+            <Icon name="AlertCircle" size={13} style={{ marginRight: 4 }} />{erro}
+          </p>
+        )}
       </div>
     </Modal>
   );
@@ -710,6 +715,10 @@ export function AvaliacaoPage() {
 
   // UI state
   const [loading,    setLoading]    = useState(false);
+  // Mensagem de resultado no topo da página (erro ao excluir etc.). Ficava
+  // declarada no modal de notas e usada aqui: a página inteira quebrava
+  // ao renderizar com "feedback is not defined".
+  const [feedback,   setFeedback]   = useState(null);
   const [error,      setError]      = useState("");
 
   // Modals
@@ -784,7 +793,6 @@ export function AvaliacaoPage() {
       (notasCounts[a.id] ?? 0) < turmaAlunos
     ).length;
 
-    const corrected = avaliacoes.filter(a => a.status === "corrigida");
     // We'd need all notas for proper media — approximate from what we have
     // For simplicity show based on page data
     const mediaGeral = "—";
