@@ -104,6 +104,10 @@ public class AuthApplicationService {
         );
     }
 
+    // readOnly=true nao serve: o metodo le user.getRoles() (lazy) fora de
+    // sessao e dava LazyInitializationException (500 em todo refresh). Com a
+    // transacao a colecao carrega; de quebra, revalidamos o estado do usuario.
+    @Transactional
     public AuthTokensResponse refresh(String refreshToken) {
         if (!jwtTokenProvider.isRefreshToken(refreshToken)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido");
@@ -115,7 +119,16 @@ public class AuthApplicationService {
 
         UserAccount user = userRepository.findById(userId)
                 .filter(it -> it.getTenantId().equals(tenantId))
+                .filter(it -> !Boolean.TRUE.equals(it.getDeleted()))
                 .orElseThrow(this::credenciaisInvalidas);
+        // Renovar sessao de quem foi desativado/bloqueado/excluido nao vale:
+        // o refresh dura 7 dias e prolongaria o acesso de quem ja foi cortado.
+        if (!user.isActive()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário inativo");
+        }
+        if (user.isLocked()) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Conta bloqueada");
+        }
         exigirRedeAtiva(user);
 
         // Passa pelo guard: um perfil chamado SUPER_ADMIN fora do tenant

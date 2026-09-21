@@ -72,7 +72,7 @@ public class RestricaoController {
      */
     @GetMapping("/{id}/documento")
     @PreAuthorize("isAuthenticated() and @moduloGuard.has('ACCESS') "
-            + "and hasAuthority('PERM_ACESSO_RESTRICOES_VER')")
+            + "and hasAuthority('PERM_ACESSO_RESTRICOES_GERIR')")
     public ResponseEntity<ApiResponse<RestricaoDocumentoResponse>> documento(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Documento da restrição recuperado",
                 restricaoService.documento(id)));

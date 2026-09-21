@@ -64,8 +64,11 @@ public class PermissaoService {
             // Perfil de sistema sem vinculo gravado ainda assim vale pelo
             // catalogo: uma escola cujo seeder nao rodou nao pode ficar com
             // a coordenacao sem acesso a nada.
+            // Fallback so' para perfil de sistema NUNCA editado pela tela: a
+            // escola cujo seeder nao rodou nao pode ficar sem acesso. Depois
+            // de personalizado, uma matriz vazia e' vazia de verdade.
             PerfilEscolar perfil = PerfilEscolar.porNome(papel.getName());
-            if (perfil != null && papel.getPermissions().isEmpty()) {
+            if (perfil != null && !papel.isPersonalizado() && papel.getPermissions().isEmpty()) {
                 efetivas.addAll(perfil.getPermissoes());
             }
         }

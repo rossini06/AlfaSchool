@@ -79,9 +79,15 @@ public class PortalPermanenciaJpa implements PortalPermanenciaPort {
         // Com o aluno ainda dentro, o minutos_permanencia gravado esta
         // desatualizado: a familia quer ver o relogio correndo, nao o valor
         // do ultimo recalculo.
-        Integer permanenciaAtual = presenteAgora
-                ? (int) java.time.Duration.between(entrada, Instant.now()).toMinutes()
-                : permanencia;
+        // Sem o if, o ternario mistura int e Integer e desempacota o
+        // `permanencia` nulo (aluno sem registro do dia) -> NullPointerException
+        // (500 ao abrir o "hoje" do proprio filho).
+        Integer permanenciaAtual;
+        if (presenteAgora) {
+            permanenciaAtual = (int) java.time.Duration.between(entrada, Instant.now()).toMinutes();
+        } else {
+            permanenciaAtual = permanencia;
+        }
 
         Double percentual = null;
         if (previstos != null && previstos > 0 && permanenciaAtual != null) {

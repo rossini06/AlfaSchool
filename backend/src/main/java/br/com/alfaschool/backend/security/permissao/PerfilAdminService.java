@@ -120,6 +120,10 @@ public class PerfilAdminService {
         // proprio nao tem (senao concede a si por tabela e relogar).
         GuardaConcessao.exigirNaoAmpliar(validas.stream().map(Enum::name).toList());
 
+        // A partir da primeira edicao pela tela, o que estiver gravado e' o
+        // que vale — inclusive lista vazia. Sem isto, esvaziar um perfil de
+        // sistema o fazia voltar ao padrao (o fallback do PermissaoService).
+        role.setPersonalizado(true);
         role.getPermissions().clear();
         for (Permissao p : validas) {
             Permission entidade = permissionRepository

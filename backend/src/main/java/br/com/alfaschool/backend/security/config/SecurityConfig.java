@@ -67,6 +67,9 @@ public class SecurityConfig {
                     auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/api/v1/health").permitAll()
+                        // metrics e info expunham JVM/HTTP a qualquer autenticado
+                        // (ate a portaria e o token de agente). So' o superadmin.
+                        .requestMatchers("/actuator/**").hasRole("SUPER_ADMIN")
 
                         // O firmware Control iD nao emite JWT: ele so' faz POST
                         // no endereco configurado. A autenticacao acontece

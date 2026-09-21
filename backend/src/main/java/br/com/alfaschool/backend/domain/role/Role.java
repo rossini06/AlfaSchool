@@ -34,6 +34,15 @@ public class Role extends BaseEntity {
     @Column(nullable = false)
     private boolean sistema = false;
 
+    /**
+     * Perfil de sistema editado explicitamente pela tela ao menos uma vez.
+     * Enquanto for false, um perfil de sistema sem permissao gravada cai no
+     * conjunto padrao (fallback do PermissaoService). Depois de personalizado,
+     * o que estiver gravado — inclusive vazio — e' o que vale.
+     */
+    @jakarta.persistence.Column(nullable = false)
+    private boolean personalizado = false;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "role_permissions",
@@ -53,6 +62,8 @@ public class Role extends BaseEntity {
     public boolean isSistema() { return sistema; }
 
     public void setSistema(boolean sistema) { this.sistema = sistema; }
+    public boolean isPersonalizado() { return personalizado; }
+    public void setPersonalizado(boolean personalizado) { this.personalizado = personalizado; }
 
     public void setName(String name) {
         this.name = name;

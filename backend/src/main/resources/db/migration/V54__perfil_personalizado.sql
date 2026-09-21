@@ -1,0 +1,13 @@
+-- =====================================================================
+-- V54: perfil de sistema editado explicitamente deixa de cair no fallback
+--
+-- Um perfil de sistema (DIRETOR, COORDENACAO, ...) sem vinculo de permissao
+-- gravado recebe, no login, o conjunto padrao do catalogo — protecao para a
+-- escola cujo seeder nao rodou. O efeito colateral: zerar as permissoes de
+-- um perfil de sistema pela tela nao trancava nada, ele voltava ao padrao.
+--
+-- `personalizado` distingue "nunca configurado" (fallback vale) de
+-- "configurado, inclusive para vazio" (fallback nao vale). Nasce 0; a tela
+-- de Perfis marca 1 ao salvar a matriz.
+-- =====================================================================
+ALTER TABLE roles ADD COLUMN personalizado BOOLEAN NOT NULL DEFAULT FALSE;
