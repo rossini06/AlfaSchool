@@ -5,6 +5,26 @@ programa. Cada entrada diz o que a pessoa via antes, o que vê agora e por
 quê. O registro começa em 21/09/2026; o que veio antes está no histórico
 do repositório.
 
+## AlfaSchool — 21/09/2026 — Reforço de segurança: isolamento entre escolas, controle de permissões e trilha de auditoria
+
+Depois de uma verificação de segurança conduzida pela equipe Alfa, uma
+rodada de correções fecha problemas de isolamento entre escolas e de
+controle de acesso. Nenhum exige ação de quem usa; as mudanças valem assim
+que o sistema é atualizado.
+
+### Segurança
+- **Uma escola nunca mais enxerga dados de aluno de outra.** O sistema passou a conferir, em cada cadastro que aponta para um aluno, uma turma ou uma disciplina, que essa referência é da própria escola. Antes, uma matrícula ou ocorrência registrada com o identificador de um aluno de outra escola fazia o nome da criança, a turma e o curso aparecerem no boletim, no painel e nos relatórios da escola errada. Agora a operação é recusada na origem.
+- **Ninguém concede a si mesmo mais poder do que tem.** Quem administra usuários não consegue mais atribuir a si próprio — nem a outra pessoa — um perfil ou uma permissão que ele mesmo não possui. E o perfil de Super Administrador da plataforma deixou de ser atribuível pela tela: ele existe apenas para a administração da Alfa.
+- **As ações administrativas passam a deixar rastro.** Criar, editar, desativar e excluir usuário, redefinir a senha de outra pessoa, atribuir um perfil, mudar o que um perfil pode fazer, conceder permissões extras e, no lado da Alfa, criar ou suspender uma rede: tudo isso agora aparece na trilha de auditoria, com quem fez e de onde. Antes, várias dessas ações não ficavam registradas.
+- **Revogar todas as permissões de um perfil agora tranca de verdade.** Esvaziar as permissões de um perfil padrão pela tela deixava, por um efeito colateral, o perfil voltar ao conjunto original. Agora o que a escola define é o que vale, inclusive "nada".
+- **O documento de uma restrição judicial fica reservado à gestão.** A coordenação continua vendo que existe uma restrição sobre um aluno, mas ler o documento em si (o mandado, a decisão) passou a exigir perfil de gestão.
+- **Métricas internas do sistema deixaram de ficar visíveis a qualquer pessoa conectada.** Passaram a ser restritas à administração da plataforma. A verificação de "o sistema está no ar" continua pública.
+
+### Correções
+- **O portal da família não dá mais erro ao abrir o dia de um aluno sem movimento.** Ver o "hoje" de um filho que ainda não passou pela portaria naquele dia devolvia um erro; agora abre normalmente.
+- **A renovação de sessão voltou a funcionar** e passou a recusar quem foi desativado, excluído ou bloqueado, em vez de prolongar o acesso.
+- **A entrada da administração da Alfa numa escola agora fica registrada** na trilha daquela escola, o que antes falhava silenciosamente.
+
 ## AlfaSchool — 21/09/2026 — Painel SaaS próprio, redes que nascem prontas e o fim dos 403 do Controle de Acesso
 
 ### Novidades
