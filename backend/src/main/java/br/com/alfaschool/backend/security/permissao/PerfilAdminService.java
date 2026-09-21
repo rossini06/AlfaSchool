@@ -27,15 +27,18 @@ public class PerfilAdminService {
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
     private final UsuarioPermissaoExtraRepository extraRepository;
+    private final br.com.alfaschool.backend.application.shared.AuditService auditService;
 
     public PerfilAdminService(RoleRepository roleRepository,
                               PermissionRepository permissionRepository,
                               UserRepository userRepository,
-                              UsuarioPermissaoExtraRepository extraRepository) {
+                              UsuarioPermissaoExtraRepository extraRepository,
+                              br.com.alfaschool.backend.application.shared.AuditService auditService) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.userRepository = userRepository;
         this.extraRepository = extraRepository;
+        this.auditService = auditService;
     }
 
     private UUID tenant() {
@@ -126,6 +129,7 @@ public class PerfilAdminService {
             role.getPermissions().add(entidade);
         }
         roleRepository.save(role);
+        auditService.registrarAcao("PERFIL_PERMISSOES_ALTERADAS", "ROLE", role.getId());
         log.info("Perfil {} do tenant {} agora tem {} permissoes", role.getName(), tenantId, validas.size());
     }
 
@@ -200,6 +204,7 @@ public class PerfilAdminService {
             extra.setConcedidoEm(Instant.now());
             extraRepository.save(extra);
         }
+        auditService.registrarAcao("USUARIO_PERMISSOES_EXTRAS_ALTERADAS", "USER", usuario.getId());
         log.info("Permissoes extras do usuario {} atualizadas por {}", usuario.getId(), autor);
     }
 

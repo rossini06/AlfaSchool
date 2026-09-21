@@ -27,11 +27,14 @@ public class UserApplicationService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final br.com.alfaschool.backend.application.shared.AuditService auditService;
 
-    public UserApplicationService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserApplicationService(UserRepository userRepository, RoleRepository roleRepository,
+                                  PasswordEncoder passwordEncoder, br.com.alfaschool.backend.application.shared.AuditService auditService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -58,6 +61,7 @@ public class UserApplicationService {
         }
 
         UserAccount saved = userRepository.save(user);
+        auditService.registrarAcao("USUARIO_CRIADO", "USER", saved.getId());
         return map(saved);
     }
 
@@ -77,6 +81,7 @@ public class UserApplicationService {
         GuardaConcessao.exigirNaoAmpliar(role.getPermissions().stream().map(Permission::getName).toList());
 
         user.getRoles().add(role);
+        auditService.registrarAcao("USUARIO_PAPEL_ATRIBUIDO", "USER", user.getId());
         return map(userRepository.save(user));
     }
 
@@ -135,7 +140,12 @@ public class UserApplicationService {
             }
             aplicarPerfis(user, tenantId, request.perfis());
         }
-        return UserResponse.from(userRepository.save(user));
+        UserResponse resposta = UserResponse.from(userRepository.save(user));
+        if (request.senha() != null && !request.senha().isBlank()) {
+            auditService.registrarAcao("USUARIO_SENHA_REDEFINIDA", "USER", user.getId());
+        }
+        auditService.registrarAcao("USUARIO_ATUALIZADO", "USER", user.getId());
+        return resposta;
     }
 
     /**
@@ -153,6 +163,7 @@ public class UserApplicationService {
         user.setDeleted(true);
         user.setActive(false);
         userRepository.save(user);
+        auditService.registrarAcao("USUARIO_EXCLUIDO", "USER", user.getId());
     }
 
     private void aplicarPerfis(UserAccount user, UUID tenantId, List<UUID> perfisIds) {

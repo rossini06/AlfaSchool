@@ -49,13 +49,16 @@ public class TenantService {
     private final PasswordEncoder passwordEncoder;
     private final PermissaoSeeder permissaoSeeder;
     private final ModuloService moduloService;
+    private final br.com.alfaschool.backend.application.shared.AuditService auditService;
 
     public TenantService(TenantRepository tenantRepository,
                          RoleRepository roleRepository,
                          UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissaoSeeder permissaoSeeder,
-                         ModuloService moduloService) {
+                         ModuloService moduloService,
+                         br.com.alfaschool.backend.application.shared.AuditService auditService) {
+        this.auditService = auditService;
         this.tenantRepository = tenantRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -105,6 +108,7 @@ public class TenantService {
         Set<String> modulos = new HashSet<>(request.modulos() == null ? List.of() : request.modulos());
         moduloService.definir(tenantId, modulos);
 
+        auditService.registrarAcao(tenantId, "REDE_CRIADA", "TENANT", tenant.getId());
         return TenantResponse.from(tenant, moduloService.codigosVigentes(tenantId));
     }
 
@@ -124,6 +128,7 @@ public class TenantService {
         tenant.setName(request.name().trim());
         tenant.setDocument(documento);
         Tenant salvo = tenantRepository.save(tenant);
+        auditService.registrarAcao(salvo.getTenantId(), "REDE_ATUALIZADA", "TENANT", salvo.getId());
         return TenantResponse.from(salvo, moduloService.codigosVigentes(salvo.getTenantId()));
     }
 
@@ -134,6 +139,7 @@ public class TenantService {
             boolean active = "ATIVO".equalsIgnoreCase(status) || "ACTIVE".equalsIgnoreCase(status) || "true".equalsIgnoreCase(status);
             tenant.setActive(active);
             Tenant salvo = tenantRepository.save(tenant);
+            auditService.registrarAcao(salvo.getTenantId(), active ? "REDE_REATIVADA" : "REDE_SUSPENSA", "TENANT", salvo.getId());
             return TenantResponse.from(salvo, moduloService.codigosVigentes(salvo.getTenantId()));
         });
     }
@@ -147,7 +153,9 @@ public class TenantService {
     public List<ModuloContratacaoResponse> definirModulos(UUID id, List<String> codigos) {
         return TenantContext.semFiltro(() -> {
             Tenant tenant = buscarEditavel(id);
-            return moduloService.definir(tenant.getTenantId(), new HashSet<>(codigos));
+            var resultado = moduloService.definir(tenant.getTenantId(), new HashSet<>(codigos));
+            auditService.registrarAcao(tenant.getTenantId(), "REDE_MODULOS_ALTERADOS", "TENANT", tenant.getId());
+            return resultado;
         });
     }
 

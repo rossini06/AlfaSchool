@@ -17,9 +17,11 @@ import java.util.UUID;
 public class RoleApplicationService {
 
     private final RoleRepository roleRepository;
+    private final br.com.alfaschool.backend.application.shared.AuditService auditService;
 
-    public RoleApplicationService(RoleRepository roleRepository) {
+    public RoleApplicationService(RoleRepository roleRepository, br.com.alfaschool.backend.application.shared.AuditService auditService) {
         this.roleRepository = roleRepository;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -48,6 +50,7 @@ public class RoleApplicationService {
         role.setName(request.name().toUpperCase());
         role.setDescription(request.description());
         Role saved = roleRepository.save(role);
+        auditService.registrarAcao("PERFIL_CRIADO", "ROLE", saved.getId());
 
         return new RoleResponse(saved.getId(), saved.getTenantId(), saved.getName(), saved.getDescription());
     }
