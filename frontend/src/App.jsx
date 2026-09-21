@@ -2,12 +2,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { ExigeModulo } from "./components/ExigeModulo";
+import { SaasLayout } from "./layouts/SaasLayout";
+import { SaasVisaoGeralPage } from "./pages/saas/SaasVisaoGeralPage";
+import { SaasPlanosPage } from "./pages/saas/SaasPlanosPage";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AjudaPage } from "./pages/AjudaPage";
-import { RedesEnsinoPage } from "./pages/RedesEnsinoPage";
+import { RedesEnsinoPage } from "./pages/saas/RedesEnsinoPage";
 import { EscolasPage } from "./pages/EscolasPage";
-import { SaasAdminPage } from "./pages/SaasAdminPage";
 import { CursosPage } from "./pages/CursosPage";
 import { DisciplinasPage } from "./pages/DisciplinasPage";
 import { TurmasPage } from "./pages/TurmasPage";
@@ -173,31 +175,24 @@ export default function App() {
         <Route path="perfis" element={<PerfisPermissoesPage />} />
         <Route path="auditoria" element={<AuditoriaPage />} />
 
-        {/* SUPER_ADMIN only */}
-        <Route
-          path="redes"
-          element={
-            <ProtectedRoute requiredRoles={["SUPER_ADMIN"]}>
-              <RedesEnsinoPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="escolas"
-          element={
-            <ProtectedRoute requiredRoles={["SUPER_ADMIN"]}>
-              <EscolasPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="saas"
-          element={
-            <ProtectedRoute requiredRoles={["SUPER_ADMIN"]}>
-              <SaasAdminPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* Escolas (unidades) são da própria rede: quem tem ESCOLA_VER vê.
+            Ficavam presas ao SUPER_ADMIN por engano. */}
+        <Route path="escolas" element={<EscolasPage />} />
+      </Route>
+
+      {/* Painel SaaS — a administração da Alfa, fora do painel da escola.
+          Layout próprio, sem sidebar, como no AlfaControl. */}
+      <Route
+        path="/saas"
+        element={
+          <ProtectedRoute requiredRoles={["SUPER_ADMIN"]}>
+            <SaasLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<SaasVisaoGeralPage />} />
+        <Route path="redes" element={<RedesEnsinoPage />} />
+        <Route path="planos" element={<SaasPlanosPage />} />
       </Route>
 
       {/* Portal da Família — layout próprio, sem sidebar administrativa (fatia H) */}

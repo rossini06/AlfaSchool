@@ -21,7 +21,8 @@
  * telas do Access e cada uma respondia 403 no console. A lista de módulos
  * vigentes vem do login, como as permissões.
  *
- * `role` existe só para o que é da Alfa, não da escola (painel SaaS).
+ * O painel SaaS (administração da Alfa) NÃO está neste menu: tem layout e
+ * rota próprios em /saas. O superadmin chega lá pelo menu do perfil.
  */
 
 export const menuGroups = [
@@ -42,7 +43,6 @@ export const menuGroups = [
   { key: "estrutura", label: "ESTRUTURA FÍSICA", aberto: false },
   { key: "equipamentos", label: "EQUIPAMENTOS E PAINÉIS", aberto: false },
   { key: "sistema", label: "SISTEMA", aberto: false },
-  { key: "saas", label: "ADMINISTRAÇÃO ALFA", aberto: false },
 ];
 
 export const menuItems = [
@@ -178,11 +178,7 @@ export const menuItems = [
   { label: "Usuários", path: "/usuarios", icon: "UserCog", group: "sistema", perm: "USUARIOS_VER" },
   { label: "Perfis e Permissões", path: "/perfis", icon: "ShieldCheck", group: "sistema", perm: "PERFIS_GERIR" },
   { label: "Auditoria", path: "/auditoria", icon: "History", group: "sistema", perm: "AUDITORIA_VER" },
-
-  // --------------------------------------------------- ADMINISTRAÇÃO ALFA
-  { label: "Redes de Ensino", path: "/redes", icon: "Network", group: "saas", role: "SUPER_ADMIN" },
-  { label: "Escolas", path: "/escolas", icon: "School", group: "saas", role: "SUPER_ADMIN" },
-  { label: "Painel SaaS", path: "/saas", icon: "Settings", group: "saas", role: "SUPER_ADMIN" },
+  { label: "Escolas", path: "/escolas", icon: "School", group: "sistema", perm: "ESCOLA_VER" },
 ];
 
 /**

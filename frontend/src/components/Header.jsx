@@ -7,9 +7,7 @@ import { Icon } from "./Icon";
 
 const PAGE_TITLES = {
   "/":             "Dashboard",
-  "/redes":        "Redes de Ensino",
   "/escolas":      "Escolas",
-  "/saas":         "Painel SaaS",
   "/cursos":       "Cursos",
   "/disciplinas":  "Disciplinas",
   "/turmas":       "Turmas",
@@ -258,6 +256,13 @@ export function Header({ onMenuToggle }) {
               <button className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                 <Icon name="UserCog" size={16} /> Meu Perfil
               </button>
+              {/* O painel da Alfa fica fora da sidebar da escola; este é o
+                  caminho de volta para quem administra a plataforma. */}
+              {user?.roles?.includes("SUPER_ADMIN") && (
+                <Link className="dropdown-item" to="/saas" onClick={() => setDropdownOpen(false)}>
+                  <Icon name="Settings" size={16} /> Painel SaaS
+                </Link>
+              )}
               {/* Antes do Sair: e' onde a pessoa procura quando esta perdida,
                   e o tutorial se recorta sozinho pelo perfil dela. */}
               <Link

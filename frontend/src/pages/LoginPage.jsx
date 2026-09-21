@@ -24,8 +24,11 @@ export function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password, tenantId || undefined);
-      navigate("/", { replace: true });
+      const usuario = await login(email, password, tenantId || undefined);
+      // Superadmin é da Alfa: o lugar dele é o painel SaaS, não o Dashboard
+      // de uma escola. De lá ele abre o painel da escola quando quiser.
+      const destino = usuario?.roles?.includes("SUPER_ADMIN") ? "/saas" : "/";
+      navigate(destino, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

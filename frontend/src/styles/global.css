@@ -1186,25 +1186,122 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 14px;
 }
-.saas-tabs {
+/* ── Painel SaaS (SaasLayout.jsx) ──
+   Layout próprio, sem a sidebar do cliente: cabeçalho com a marca, o
+   badge "PAINEL SAAS" e as seções como abas. Mesmo desenho do AlfaControl,
+   com os tokens daqui. */
+.saas-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+.saas-header {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 1.5rem;
+  height: var(--header-height);
+  padding: 0 1.5rem;
+  background: var(--color-bg-2);
+  border-top: 3px solid var(--color-warning);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.saas-tab-btn {
-  padding: 8px 18px;
+.saas-header-esq { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+/* Lockup na regra de brand/README.md: wordmark 124px → ícone 32px, gap 8px. */
+.saas-brand { display: flex; align-items: center; gap: 8px; }
+.saas-brand-icon { width: 32px; height: 32px; flex-shrink: 0; }
+.saas-brand-logo { width: 124px; height: auto; aspect-ratio: 2053 / 332; }
+/* Âmbar, o acento do AlfaSchool: distingue de longe o painel da Alfa do
+   painel da escola, que usa o teal em tudo. */
+.saas-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text-2);
-  cursor: pointer;
-  transition: all var(--transition);
+  background: var(--color-warning-dim);
+  color: var(--color-warning);
+  white-space: nowrap;
 }
-.saas-tab-btn:hover { background: var(--color-bg-3); color: var(--color-text); }
-.saas-tab-btn.active { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.saas-nav {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 100%;
+  margin-left: 0.5rem;
+  overflow-x: auto;
+}
+.saas-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color var(--transition), border-color var(--transition);
+}
+.saas-nav-item:hover { color: var(--color-text); }
+.saas-nav-item.ativo { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+.saas-header-dir { display: flex; align-items: center; gap: 0.6rem; margin-left: auto; flex-shrink: 0; }
+.saas-ir-escola { gap: 6px; color: var(--color-text-2); }
+.saas-user { background: none; border: 1px solid transparent; }
+.saas-user:hover { background: var(--color-bg-3); }
+.saas-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-warning-dim);
+  color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.saas-user-cabecalho { padding: 6px 10px 8px; display: flex; flex-direction: column; gap: 2px; }
+.saas-user-cabecalho strong { font-size: 13px; color: var(--color-text); }
+.saas-user-cabecalho span { font-size: 12px; color: var(--color-text-2); }
+.saas-conteudo { padding: 24px; max-width: 1280px; margin: 0 auto; }
+
+/* Formulário de rede: seções com título curto, em vez de abas — são dois
+   blocos pequenos, e aba esconde campo obrigatório. */
+.saas-form-secao { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.saas-form-secao h3 { font-size: 13.5px; font-weight: 700; margin: 0 0 2px; }
+.saas-form-secao p { font-size: 12.5px; color: var(--color-text-2); margin: 0; }
+.saas-senha { display: flex; gap: 6px; align-items: center; }
+.saas-senha .form-input { flex: 1; }
+.saas-modulos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.saas-modulo {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+.saas-modulo:hover { border-color: var(--color-text-2); }
+.saas-modulo.marcado { border-color: var(--color-brand); background: var(--color-brand-dim); }
+.saas-modulo input { margin-top: 3px; accent-color: var(--color-brand); flex-shrink: 0; }
+.saas-modulo span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.saas-modulo strong { font-size: 13px; }
+.saas-modulo small { font-size: 12px; color: var(--color-text-2); line-height: 1.3; }
+.saas-modulos-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+@media (max-width: 860px) {
+  .saas-header { padding: 0 0.75rem; gap: 0.75rem; }
+  .saas-badge, .saas-ir-escola span, .saas-user .header-user-name { display: none; }
+  .saas-nav-item span { display: none; }
+  .saas-nav-item { padding: 0 10px; }
+  .saas-conteudo { padding: 16px; }
+}
 
 /* ── Dropdown menu ── */
 .dropdown {

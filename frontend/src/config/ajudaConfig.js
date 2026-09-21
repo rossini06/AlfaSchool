@@ -350,10 +350,14 @@ export const ajudaPorTela = {
     regras: ["A trilha não é editável. É o que responde à pergunta 'quem fez isso?' meses depois."],
   },
 
-  "/redes": {
-    oQueE: "As redes de ensino atendidas pela plataforma.",
-    comoUsar: ["Tela da administração da Alfa, não da escola."],
-    regras: [],
+  "/saas/redes": {
+    oQueE: "As redes de ensino atendidas pela plataforma, cada uma com seus módulos.",
+    comoUsar: [
+      "Tela da administração da Alfa, não da escola.",
+      "Criar uma rede já deixa ela pronta: perfis padrão, um administrador e os módulos marcados.",
+      "Suspender uma rede bloqueia o login de todo mundo dela; os dados ficam guardados.",
+    ],
+    regras: ["Módulo não contratado some do menu da escola no próximo login."],
   },
 
   "/escolas": {
@@ -363,8 +367,8 @@ export const ajudaPorTela = {
   },
 
   "/saas": {
-    oQueE: "O painel de administração da plataforma.",
-    comoUsar: ["Tela da Alfa: planos comerciais e visão geral das redes."],
+    oQueE: "O painel de administração da plataforma, fora do painel da escola.",
+    comoUsar: ["Tela da Alfa: visão geral das redes, planos comerciais e módulos contratados."],
     regras: [],
   },
 };
