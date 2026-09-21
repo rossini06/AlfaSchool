@@ -1383,34 +1383,118 @@ body {
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------------------------------------------------- Perfis e Permissoes */
-/* Cards em grade: um perfil por cartao, com a contagem visivel. Ver "23
-   permissoes" de relance e' mais util do que abrir cada um para descobrir. */
+/* Cards em grade: um perfil por cartao, com um medidor "23 de 46". Ver de
+   relance o quanto do sistema cada funcao enxerga e' mais util do que abrir
+   cada um para descobrir. */
 .perfis-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
 }
-.perfil-card { display: flex; flex-direction: column; gap: 0.5rem; }
-.perfil-card-topo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.perfil-card-topo h2 { font-size: 1rem; margin: 0; }
-.perfil-card-desc { font-size: 0.85rem; opacity: 0.75; margin: 0; min-height: 2.4em; }
-.perfil-card-contagem { font-size: 0.8rem; font-weight: 600; opacity: 0.9; margin: 0; }
+.perfil-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 18px 20px 14px;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.perfil-card:hover { border-color: var(--color-brand); }
+.perfil-card-topo { display: flex; align-items: center; gap: 0.75rem; }
+.perfil-card-titulo { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; min-width: 0; }
+.perfil-card-titulo h2 { font-size: 15px; font-weight: 700; margin: 0; }
+.perfil-card-desc {
+  font-size: 13px;
+  color: var(--color-text-2);
+  margin: 0;
+  /* Duas linhas reservadas: cards da mesma fileira ficam alinhados mesmo
+     quando uma descricao e' curta. */
+  min-height: 2.6em;
+  line-height: 1.3;
+}
+.perfil-card-medidor {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-3);
+  overflow: hidden;
+}
+.perfil-card-medidor span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  transition: width 0.3s ease;
+}
+.perfil-card-contagem { font-size: 12.5px; color: var(--color-text-2); margin: 0; }
+.perfil-card-contagem strong { color: var(--color-text); font-weight: 700; }
+.perfil-card-rodape {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+.perfil-card-rodape .btn { gap: 6px; }
 .perfil-card-travado {
-  display: flex; align-items: center; gap: 0.35rem;
-  font-size: 0.8rem; opacity: 0.6; margin: 0;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 12px; color: var(--color-text-2); padding: 5px 0;
 }
 
-/* Agrupado por area: 46 checkboxes em lista unica seria ilegivel. */
-.perm-areas { display: flex; flex-direction: column; gap: 1.1rem; max-height: 60vh; overflow-y: auto; }
-.perm-area { border: 1px solid var(--color-border, rgba(255,255,255,0.1)); border-radius: var(--radius-md); padding: 0.75rem 0.9rem; }
-.perm-area-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
-.perm-area-topo h3 { font-size: 0.9rem; margin: 0; }
-.perm-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.35rem 1rem; }
-.perm-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; }
-.perm-item input { margin-top: 0.2rem; flex-shrink: 0; }
+/* Modal: agrupado por area, duas colunas quando cabe. 46 checkboxes em
+   lista unica seria ilegivel, e 16 caixas empilhadas obrigavam a rolar a
+   tela inteira para achar "Financeiro". */
+.perm-hint { margin-bottom: 14px; }
+.perm-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+.perm-area {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px 8px;
+  background: var(--color-bg);
+  transition: border-color var(--transition);
+}
+/* Borda da marca quando a area esta toda marcada; meia intensidade quando
+   parcial. Da' para ler o perfil de longe, sem contar caixa por caixa. */
+.perm-area.completa { border-color: var(--color-brand); }
+.perm-area.parcial  { border-color: color-mix(in srgb, var(--color-brand) 45%, var(--color-border)); }
+.perm-area-topo { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 6px; }
+.perm-area-topo h3 { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; margin: 0; }
+.perm-area-contagem {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  background: var(--color-bg-3);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+.perm-area.completa .perm-area-contagem { background: var(--color-brand-dim); color: var(--color-brand); }
+.perm-itens { display: flex; flex-direction: column; gap: 2px; }
+.perm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 5px 7px;
+  margin: 0 -7px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-2);
+  transition: background var(--transition), color var(--transition);
+}
+.perm-item:hover { background: var(--color-bg-3); color: var(--color-text); }
+.perm-item.marcada { color: var(--color-text); }
+.perm-item input { margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; accent-color: var(--color-brand); cursor: pointer; }
 .perm-item.fixa { opacity: 0.65; cursor: not-allowed; }
 .perm-item-nota { font-size: 0.72rem; opacity: 0.7; display: block; }
-.btn-link { background: none; border: 0; padding: 0; font-size: 0.78rem; color: var(--color-brand, #2f8f9d); cursor: pointer; }
+.perm-resumo { margin-right: auto; font-size: 13px; color: var(--color-text-2); }
+.perm-resumo strong { color: var(--color-text); }
+.btn-link { background: none; border: 0; padding: 0; font-size: 12px; font-weight: 600; color: var(--color-brand); cursor: pointer; white-space: nowrap; }
+.btn-link:hover { text-decoration: underline; }
 
 
 /* =========================================================
