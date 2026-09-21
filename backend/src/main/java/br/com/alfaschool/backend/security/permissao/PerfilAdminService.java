@@ -113,6 +113,10 @@ public class PerfilAdminService {
             }
         }
 
+        // Quem edita a matriz nao pode dar a um perfil permissao que ele
+        // proprio nao tem (senao concede a si por tabela e relogar).
+        GuardaConcessao.exigirNaoAmpliar(validas.stream().map(Enum::name).toList());
+
         role.getPermissions().clear();
         for (Permissao p : validas) {
             Permission entidade = permissionRepository
@@ -169,6 +173,11 @@ public class PerfilAdminService {
 
         Set<String> doPerfil = (Set<String>) doUsuario(userId).get("doPerfil");
         UUID autor = br.com.alfaschool.backend.application.access.retirada.ContextoAcesso.userIdOuNulo();
+
+        // Extra e' concessao direta: mesma regra — nao se concede o que nao
+        // se tem. Fecha a via de dar PERFIS_GERIR/FINANCEIRO a si mesmo.
+        GuardaConcessao.exigirNaoAmpliar(chaves.stream()
+                .map(c -> c == null ? "" : c.toUpperCase()).toList());
 
         extraRepository.deleteByTenantIdAndUserId(tenantId, userId);
 

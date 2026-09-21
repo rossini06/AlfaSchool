@@ -3,7 +3,9 @@ package br.com.alfaschool.backend.application.user;
 import br.com.alfaschool.backend.application.user.dto.AtualizarUsuarioRequest;
 import br.com.alfaschool.backend.application.user.dto.CreateUserRequest;
 import br.com.alfaschool.backend.application.user.dto.UserResponse;
+import br.com.alfaschool.backend.domain.role.Permission;
 import br.com.alfaschool.backend.domain.role.Role;
+import br.com.alfaschool.backend.security.permissao.GuardaConcessao;
 import br.com.alfaschool.backend.domain.user.UserAccount;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.RoleRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
@@ -69,6 +71,10 @@ public class UserApplicationService {
         Role role = roleRepository.findById(roleId)
                 .filter(it -> tenantId.equals(it.getTenantId()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role não encontrada"));
+
+        // Ninguem se promove alem do que tem, nem atribui SUPER_ADMIN pela tela.
+        GuardaConcessao.exigirPapelConcedivel(role.getName());
+        GuardaConcessao.exigirNaoAmpliar(role.getPermissions().stream().map(Permission::getName).toList());
 
         user.getRoles().add(role);
         return map(userRepository.save(user));
@@ -151,14 +157,20 @@ public class UserApplicationService {
 
     private void aplicarPerfis(UserAccount user, UUID tenantId, List<UUID> perfisIds) {
         user.getRoles().clear();
+        java.util.Set<String> concedidas = new java.util.HashSet<>();
         for (UUID perfilId : perfisIds) {
             Role role = roleRepository.findById(perfilId)
                     .filter(r -> tenantId.equals(r.getTenantId()))
                     .filter(r -> !Boolean.TRUE.equals(r.getDeleted()))
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "Perfil não encontrado nesta escola."));
+            GuardaConcessao.exigirPapelConcedivel(role.getName());
+            role.getPermissions().forEach(perm -> concedidas.add(perm.getName()));
             user.getRoles().add(role);
         }
+        // Ninguem monta para outro (nem para si) um conjunto de perfis com
+        // mais permissoes do que quem esta atribuindo tem.
+        GuardaConcessao.exigirNaoAmpliar(concedidas);
     }
 
     private boolean ehOProprioUsuario(UUID id) {

@@ -47,6 +47,7 @@ class TenantServiceTest {
     @Autowired private ModuloRepository moduloRepository;
     @Autowired private TenantModuloRepository tenantModuloRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private br.com.alfaschool.backend.bootstrap.SuperAdminInitializer superAdminInitializer;
     @Autowired private JwtTokenProvider jwtTokenProvider;
     @Autowired private AuditLogRepository auditLogRepository;
 
@@ -57,6 +58,10 @@ class TenantServiceTest {
 
     @BeforeEach
     void catalogo() {
+        // O bootstrap (tenant mestre + superadmin) roda uma vez no contexto,
+        // mas outra classe de teste apaga users/tenants no proprio setup e a
+        // ordem do surefire nao e' garantida. Recria de forma idempotente.
+        superAdminInitializer.run();
         tenantModuloRepository.deleteAll();
         moduloRepository.deleteAll();
         for (String codigo : List.of("ACCESS", "PEDAGOGICO", "PORTAL")) {
