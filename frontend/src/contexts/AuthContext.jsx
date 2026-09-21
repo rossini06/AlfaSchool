@@ -117,6 +117,45 @@ export function AuthProvider({ children }) {
     window.location.href = "/login";
   }, []);
 
+  /**
+   * Superadmin entra numa rede específica (ou volta ao tenant mestre com
+   * `null`). Só o access token muda; o refresh continua o do login. É o
+   * "selecionar cliente" do AlfaControl: "Painel da escola" precisa dizer
+   * QUAL escola, porque o tenant mestre não é escola nenhuma.
+   */
+  const selecionarRede = useCallback(async (tenantId) => {
+    const tokenAtual = localStorage.getItem("alfaschool_token");
+    const res = await fetch("/api/v1/auth/selecionar-rede", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenAtual}` },
+      body: JSON.stringify({ tenantId: tenantId || null }),
+    });
+    const raw = await res.text();
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
+    if (!res.ok) {
+      throw new Error(data?.message || "Não foi possível entrar nesta rede.");
+    }
+    const r = data.data;
+    localStorage.setItem("alfaschool_token", r.accessToken);
+    setToken(r.accessToken);
+    setUser((prev) => {
+      const atualizado = {
+        ...prev,
+        tenantId: r.tenantId,
+        tenantNome: r.mestre ? null : r.tenantNome,
+        roles: r.roles || prev?.roles || [],
+        permissoes: r.permissoes || [],
+        modulos: r.modulos || [],
+        unitId: null,
+        unitNome: null,
+      };
+      localStorage.setItem("alfaschool_user", JSON.stringify(atualizado));
+      return atualizado;
+    });
+    return r;
+  }, []);
+
   const updateUserInfo = useCallback((updates) => {
     setUser((prev) => {
       const updated = { ...prev, ...updates };
@@ -135,6 +174,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     updateUserInfo,
+    selecionarRede,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

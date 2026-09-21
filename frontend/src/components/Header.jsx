@@ -78,7 +78,7 @@ function SearchGroup({ label, items, route }) {
 }
 
 export function Header({ onMenuToggle }) {
-  const { user, logout } = useAuth();
+  const { user, logout, selecionarRede } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -246,7 +246,9 @@ export function Header({ onMenuToggle }) {
             <div className="header-avatar">{getInitials(user?.nome)}</div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span className="header-user-name">{user?.nome || "Usuário"}</span>
-              <span className="header-user-role">{getRoleLabel(user?.roles)}</span>
+              <span className="header-user-role">
+                {user?.tenantNome ? `Super Admin · ${user.tenantNome}` : getRoleLabel(user?.roles)}
+              </span>
             </div>
             <Icon name="ChevronDown" size={16} style={{ color: "var(--color-text-2)" }} />
           </div>
@@ -259,9 +261,18 @@ export function Header({ onMenuToggle }) {
               {/* O painel da Alfa fica fora da sidebar da escola; este é o
                   caminho de volta para quem administra a plataforma. */}
               {user?.roles?.includes("SUPER_ADMIN") && (
-                <Link className="dropdown-item" to="/saas" onClick={() => setDropdownOpen(false)}>
-                  <Icon name="Settings" size={16} /> Painel SaaS
-                </Link>
+                <button
+                  className="dropdown-item"
+                  onClick={async () => {
+                    setDropdownOpen(false);
+                    // Volta ao tenant mestre antes de abrir o SaaS: o token da
+                    // rede visitada não deve seguir a pessoa para lá.
+                    try { await selecionarRede(null); } catch { /* segue mesmo assim */ }
+                    window.location.href = "/saas";
+                  }}
+                >
+                  <Icon name="Settings" size={16} /> {user?.tenantNome ? "Voltar ao painel SaaS" : "Painel SaaS"}
+                </button>
               )}
               {/* Antes do Sair: e' onde a pessoa procura quando esta perdida,
                   e o tutorial se recorta sozinho pelo perfil dela. */}

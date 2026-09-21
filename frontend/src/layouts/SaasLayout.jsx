@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { Monograma } from "../pages/saas/components/Monograma";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { Icon } from "../components/Icon";
@@ -22,18 +24,59 @@ const ABAS = [
 ];
 
 export function SaasLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, selecionarRede } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [menuAberto, setMenuAberto] = useState(false);
   const menuRef = useRef(null);
+
+  // Seletor de rede: "Painel da escola" precisa dizer QUAL escola.
+  const [seletorAberto, setSeletorAberto] = useState(false);
+  const [redes, setRedes] = useState(null);
+  const [buscaRede, setBuscaRede] = useState("");
+  const [entrando, setEntrando] = useState(null);
+  const [erroRede, setErroRede] = useState("");
+  const seletorRef = useRef(null);
 
   useEffect(() => {
     const fechar = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuAberto(false);
+      if (seletorRef.current && !seletorRef.current.contains(e.target)) setSeletorAberto(false);
     };
     document.addEventListener("mousedown", fechar);
     return () => document.removeEventListener("mousedown", fechar);
   }, []);
+
+  const abrirSeletor = async () => {
+    setSeletorAberto((v) => !v);
+    setErroRede("");
+    if (redes === null) {
+      try {
+        const data = await api.get("/tenants?page=0&size=200");
+        setRedes((data?.content || []).filter((r) => !r.mestre));
+      } catch (e) {
+        setErroRede(e.message);
+        setRedes([]);
+      }
+    }
+  };
+
+  const entrarNaRede = async (rede) => {
+    setEntrando(rede.tenantId);
+    setErroRede("");
+    try {
+      await selecionarRede(rede.tenantId);
+      setSeletorAberto(false);
+      navigate("/");
+    } catch (e) {
+      setErroRede(e.message);
+    } finally {
+      setEntrando(null);
+    }
+  };
+
+  const termo = buscaRede.trim().toLowerCase();
+  const redesVisiveis = (redes || []).filter((r) => !termo || (r.name || "").toLowerCase().includes(termo));
 
   const iniciais = (user?.nome || "?")
     .trim()
@@ -43,6 +86,7 @@ export function SaasLayout() {
     .join("")
     .toUpperCase();
 
+  // A ordem dos hooks precisa ser estável; `Link` continua importado para o lockup.
   return (
     <div className="saas-shell">
       <header className="saas-header">
@@ -76,12 +120,57 @@ export function SaasLayout() {
         </nav>
 
         <div className="saas-header-dir">
-          {/* O superadmin também usa o painel da escola (o tenant mestre tem
-              todos os módulos) para demonstrar e dar suporte. */}
-          <Link to="/" className="btn btn-ghost btn-sm saas-ir-escola" title="Abrir o painel da escola">
-            <Icon name="School" size={15} />
-            <span>Painel da escola</span>
-          </Link>
+          {/* Abre o painel de UMA escola, escolhida aqui. O tenant mestre
+              não é escola; entrar "no painel" sem dizer qual não faz sentido. */}
+          <div className="dropdown" ref={seletorRef}>
+            <button type="button" className="btn btn-ghost btn-sm saas-ir-escola" onClick={abrirSeletor} aria-expanded={seletorAberto} title="Entrar no painel de uma escola">
+              <Icon name="School" size={15} />
+              <span>Entrar numa escola</span>
+              <Icon name="ChevronDown" size={14} />
+            </button>
+            {seletorAberto && (
+              <div className="dropdown-menu saas-seletor">
+                <div className="saas-seletor-busca">
+                  <Icon name="Search" size={14} />
+                  <input
+                    autoFocus
+                    type="search"
+                    placeholder="Buscar rede"
+                    value={buscaRede}
+                    onChange={(e) => setBuscaRede(e.target.value)}
+                    aria-label="Buscar rede"
+                  />
+                </div>
+                {erroRede && <p className="saas-seletor-vazio">{erroRede}</p>}
+                {redes === null ? (
+                  <p className="saas-seletor-vazio">Carregando…</p>
+                ) : redesVisiveis.length === 0 ? (
+                  <p className="saas-seletor-vazio">{redes.length === 0 ? "Nenhuma rede cadastrada ainda." : "Nada com esse nome."}</p>
+                ) : (
+                  <ul className="saas-seletor-lista">
+                    {redesVisiveis.map((r) => (
+                      <li key={r.id}>
+                        <button
+                          type="button"
+                          className="saas-seletor-item"
+                          disabled={!r.active || entrando === r.tenantId}
+                          onClick={() => entrarNaRede(r)}
+                          title={r.active ? `Entrar em ${r.name}` : "Rede suspensa"}
+                        >
+                          <Monograma nome={r.name} tamanho={28} />
+                          <span className="saas-seletor-texto">
+                            <strong>{r.name}</strong>
+                            <small>{r.active ? `${(r.modulos || []).length} módulos` : "suspensa"}</small>
+                          </span>
+                          <Icon name={entrando === r.tenantId ? "Loader" : "ArrowRight"} size={14} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className="theme-toggle"

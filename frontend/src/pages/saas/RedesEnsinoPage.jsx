@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 import { Modal } from "../../components/Modal";
 import { Pagination } from "../../components/Pagination";
@@ -58,6 +59,21 @@ export function RedesEnsinoPage() {
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todas");
   const [params, setParams] = useSearchParams();
+  const { selecionarRede } = useAuth();
+  const navigate = useNavigate();
+  const [entrando, setEntrando] = useState(null);
+
+  const entrar = async (rede) => {
+    setEntrando(rede.tenantId);
+    try {
+      await selecionarRede(rede.tenantId);
+      navigate("/");
+    } catch (e) {
+      setFeedback({ tipo: "erro", mensagem: e.message });
+    } finally {
+      setEntrando(null);
+    }
+  };
 
   const carregar = useCallback(async (p = 0) => {
     setCarregando(true);
@@ -289,6 +305,11 @@ export function RedesEnsinoPage() {
                 </span>
                 {!rede.mestre && (
                   <div className="td-actions">
+                    {rede.active && (
+                      <button className="btn btn-ghost btn-sm saas-entrar" onClick={() => entrar(rede)} disabled={entrando === rede.tenantId} title={`Entrar no painel de ${rede.name}`}>
+                        <Icon name="ArrowRight" size={13} /> Entrar
+                      </button>
+                    )}
                     <button className="btn btn-ghost btn-sm" onClick={() => abrirModulos(rede)}>
                       <Icon name="LayoutGrid" size={13} /> Módulos
                     </button>

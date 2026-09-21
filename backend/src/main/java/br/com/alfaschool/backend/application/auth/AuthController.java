@@ -3,6 +3,10 @@ package br.com.alfaschool.backend.application.auth;
 import br.com.alfaschool.backend.application.auth.dto.AuthTokensResponse;
 import br.com.alfaschool.backend.application.auth.dto.LoginRequest;
 import br.com.alfaschool.backend.application.auth.dto.RefreshRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeResponse;
+import br.com.alfaschool.backend.security.jwt.AuthenticatedUser;
+import java.util.UUID;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +39,18 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthTokensResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
         AuthTokensResponse response = authApplicationService.refresh(request.refreshToken());
         return ResponseEntity.ok(ApiResponse.of(200, "Token renovado com sucesso", response));
+    }
+
+    /** Superadministrador escolhe em qual rede vai trabalhar (ver AuthApplicationService). */
+    @PostMapping("/auth/selecionar-rede")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<SelecionarRedeResponse>> selecionarRede(
+            @RequestBody SelecionarRedeRequest request,
+            org.springframework.security.core.Authentication authentication,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        UUID userId = ((AuthenticatedUser) authentication.getPrincipal()).userId();
+        SelecionarRedeResponse response = authApplicationService.selecionarRede(userId, request, httpRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.of(200, "Rede selecionada", response));
     }
 
     @GetMapping("/health")

@@ -2,6 +2,9 @@ package br.com.alfaschool.backend.application.tenant;
 
 import br.com.alfaschool.backend.application.auth.AuthApplicationService;
 import br.com.alfaschool.backend.application.auth.dto.LoginRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeResponse;
+import br.com.alfaschool.backend.security.jwt.JwtTokenProvider;
 import br.com.alfaschool.backend.application.modulo.ModuloService;
 import br.com.alfaschool.backend.application.tenant.dto.TenantCreateRequest;
 import br.com.alfaschool.backend.application.tenant.dto.TenantResponse;
@@ -43,6 +46,7 @@ class TenantServiceTest {
     @Autowired private ModuloRepository moduloRepository;
     @Autowired private TenantModuloRepository tenantModuloRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtTokenProvider jwtTokenProvider;
 
     /** A coluna document tem 40 caracteres; um UUID inteiro nao cabe. */
     private static String cnpjUnico() {
@@ -152,6 +156,48 @@ class TenantServiceTest {
 
         tenantService.changeStatus(rede.id(), "ATIVO");
         assertThat(authService.login(login, "127.0.0.1").accessToken()).isNotBlank();
+    }
+
+    @Test
+    void superadminEntraNaRedeEscolhidaEVoltaAoMestre() {
+        TenantResponse rede = tenantService.criar(new TenantCreateRequest(
+                "Escolhida", cnpjUnico(), "X", "x@escolhida.com", "12345678", List.of("ACCESS")));
+        UserAccount superadmin = userRepository.findAllByEmailIgnoreCase("superadmin@alfaschool.com").get(0);
+
+        SelecionarRedeResponse dentro = authService.selecionarRede(superadmin.getId(), new SelecionarRedeRequest(rede.tenantId()), "127.0.0.1");
+        assertThat(dentro.tenantId()).isEqualTo(rede.tenantId());
+        assertThat(dentro.mestre()).isFalse();
+        assertThat(dentro.modulos()).containsExactly("ACCESS");
+        assertThat(dentro.roles()).contains("SUPER_ADMIN");
+        assertThat(dentro.permissoes()).contains("ALUNOS_VER", "ACESSO_PAINEL_VER");
+        assertThat(jwtTokenProvider.parseToken(dentro.accessToken()).get("tenantId", String.class))
+                .isEqualTo(rede.tenantId().toString());
+
+        SelecionarRedeResponse volta = authService.selecionarRede(superadmin.getId(), new SelecionarRedeRequest(null), "127.0.0.1");
+        assertThat(volta.mestre()).isTrue();
+        assertThat(volta.tenantId()).isEqualTo(superadmin.getTenantId());
+    }
+
+    @Test
+    void quemNaoEhSuperadminNaoTrocaDeRede() {
+        TenantResponse rede = tenantService.criar(new TenantCreateRequest(
+                "Fechada", cnpjUnico(), "Ana", "ana@fechada.com", "12345678", List.of()));
+        UserAccount diretora = userRepository.findByTenantIdAndEmailIgnoreCase(rede.tenantId(), "ana@fechada.com").orElseThrow();
+
+        assertThatThrownBy(() -> authService.selecionarRede(diretora.getId(), new SelecionarRedeRequest(rede.tenantId()), "127.0.0.1"))
+                .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @Test
+    void redeSuspensaNaoRecebeOSuperadmin() {
+        TenantResponse rede = tenantService.criar(new TenantCreateRequest(
+                "Parada", cnpjUnico(), "X", "x@parada.com", "12345678", List.of()));
+        tenantService.changeStatus(rede.id(), "INATIVO");
+        UserAccount superadmin = userRepository.findAllByEmailIgnoreCase("superadmin@alfaschool.com").get(0);
+
+        assertThatThrownBy(() -> authService.selecionarRede(superadmin.getId(), new SelecionarRedeRequest(rede.tenantId()), "127.0.0.1"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("suspensa");
     }
 
     @Test

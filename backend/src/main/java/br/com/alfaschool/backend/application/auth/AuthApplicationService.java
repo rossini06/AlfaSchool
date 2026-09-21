@@ -2,6 +2,10 @@ package br.com.alfaschool.backend.application.auth;
 
 import br.com.alfaschool.backend.application.auth.dto.AuthTokensResponse;
 import br.com.alfaschool.backend.application.auth.dto.LoginRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeRequest;
+import br.com.alfaschool.backend.application.auth.dto.SelecionarRedeResponse;
+import br.com.alfaschool.backend.application.tenant.dto.TenantResponse;
+import br.com.alfaschool.backend.security.permissao.Permissao;
 import br.com.alfaschool.backend.application.modulo.ModuloService;
 import br.com.alfaschool.backend.application.shared.AuditService;
 import br.com.alfaschool.backend.domain.user.UserAccount;
@@ -132,6 +136,46 @@ public class AuthApplicationService {
                 moduloService.codigosVigentes(user.getTenantId()),
                 user.isMustChangePassword()
         );
+    }
+
+    /**
+     * Superadministrador entra numa rede especifica.
+     *
+     * O tenant mestre nao e' escola: "abrir o painel da escola" a partir do
+     * SaaS precisa dizer QUAL escola, como no AlfaControl. Emitimos um
+     * access token com o tenantId da rede escolhida e todas as permissoes
+     * do catalogo; o usuario continua sendo o superadministrador (mesmo
+     * userId, papel SUPER_ADMIN), entao a auditoria diz quem fez o que. O
+     * refresh token nao muda: expirado o acesso, a pessoa volta ao mestre.
+     *
+     * Nao existe usuario do superadministrador dentro da rede — as
+     * permissoes vao no token porque o filtro so' le claims.
+     */
+    @Transactional(readOnly = true)
+    public SelecionarRedeResponse selecionarRede(UUID userId, SelecionarRedeRequest request, String ipAddress) {
+        UserAccount user = userRepository.findById(userId).orElseThrow(this::credenciaisInvalidas);
+        if (!superAdminGuard.ehSuperAdmin(user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Só o superadministrador troca de rede");
+        }
+        UUID alvo = request.tenantId() != null ? request.tenantId() : user.getTenantId();
+        Tenant rede = br.com.alfaschool.backend.security.filter.TenantContext.semFiltro(
+                () -> tenantRepository.findByTenantId(alvo))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rede de ensino não encontrada"));
+        if (!rede.isActive()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Esta rede está suspensa. Reative antes de entrar.");
+        }
+
+        List<String> roles = superAdminGuard.papeisParaToken(user);
+        List<String> permissoes = java.util.Arrays.stream(Permissao.values()).map(Enum::name).toList();
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), alvo, null, roles, permissoes);
+
+        boolean mestre = TenantResponse.DOCUMENTO_DO_MESTRE.equals(rede.getDocument());
+        if (!mestre) {
+            auditService.register(alvo, user.getId(), "SAAS_ACESSO_REDE", "TENANT", alvo, ipAddress);
+        }
+        return new SelecionarRedeResponse(
+                accessToken, alvo, rede.getName(), mestre, roles, permissoes,
+                br.com.alfaschool.backend.security.filter.TenantContext.semFiltro(() -> moduloService.codigosVigentes(alvo)));
     }
 
     /**
