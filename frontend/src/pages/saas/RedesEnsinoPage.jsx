@@ -1,12 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../services/api";
 import { Modal } from "../../components/Modal";
 import { Pagination } from "../../components/Pagination";
 import { Icon } from "../../components/Icon";
 import { Feedback } from "../../components/access/Feedback";
 import { ConfirmarModal } from "../../components/access/ConfirmarModal";
+import { MODULOS, formatarCnpj } from "../../utils/saas";
+import { Monograma } from "./components/Monograma";
+import { ReguaModulos } from "./components/ReguaModulos";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
+
+const FILTROS = [
+  { key: "todas", rotulo: "Todas" },
+  { key: "ativas", rotulo: "Ativas" },
+  { key: "suspensas", rotulo: "Suspensas" },
+  { key: "sem-modulo", rotulo: "Sem módulo" },
+];
 
 const FORM_VAZIO = {
   name: "", document: "",
@@ -44,6 +55,10 @@ export function RedesEnsinoPage() {
   const [mudandoStatus, setMudandoStatus] = useState(null);
   const [processandoStatus, setProcessandoStatus] = useState(false);
 
+  const [busca, setBusca] = useState("");
+  const [filtro, setFiltro] = useState("todas");
+  const [params, setParams] = useSearchParams();
+
   const carregar = useCallback(async (p = 0) => {
     setCarregando(true);
     setErro("");
@@ -76,6 +91,30 @@ export function RedesEnsinoPage() {
   useEffect(() => {
     if (itens.length) carregarCatalogo(itens[0].id);
   }, [itens, carregarCatalogo]);
+
+  // "Nova rede" na visão geral chega com ?nova=1: abre o formulário e limpa
+  // a URL, para um F5 não reabrir o modal.
+  useEffect(() => {
+    if (params.get("nova") && catalogo.length) {
+      abrirNova();
+      setParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, catalogo.length]);
+
+  const visiveis = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return itens.filter((r) => {
+      if (filtro === "ativas" && !r.active) return false;
+      if (filtro === "suspensas" && r.active) return false;
+      if (filtro === "sem-modulo" && (r.mestre || (r.modulos || []).length > 0)) return false;
+      if (!termo) return true;
+      const digitos = termo.replace(/\D/g, "");
+      const porNome = (r.name || "").toLowerCase().includes(termo);
+      const porCnpj = digitos.length > 0 && String(r.document || "").replace(/\D/g, "").includes(digitos);
+      return porNome || porCnpj;
+    });
+  }, [itens, busca, filtro]);
 
   const abrirNova = () => {
     setEditando(null);
@@ -180,83 +219,100 @@ export function RedesEnsinoPage() {
       <Feedback tipo={feedback?.tipo} mensagem={feedback?.mensagem} onFechar={() => setFeedback(null)} />
       {erro && <div className="login-error"><Icon name="AlertCircle" size={14} /> {erro}</div>}
 
-      <div className="table-wrapper">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Rede</th>
-              <th>CNPJ</th>
-              <th>Módulos</th>
-              <th>Situação</th>
-              <th>Criada em</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {carregando ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i}>{Array.from({ length: 6 }).map((_, j) => <td key={j}><div className="skeleton skeleton-text" /></td>)}</tr>
-              ))
-            ) : itens.length === 0 ? (
-              <tr><td colSpan={6}>
-                <div className="empty-state">
-                  <div className="empty-state-icon"><Icon name="Network" size={28} /></div>
-                  <h3>Nenhuma rede cadastrada</h3>
-                  <p>Cadastre a primeira rede de ensino para começar.</p>
-                </div>
-              </td></tr>
-            ) : (
-              itens.map((rede) => (
-                <tr key={rede.id}>
-                  <td>
-                    <strong>{rede.name}</strong>
-                    {rede.mestre && <span className="badge badge-secondary" style={{ marginLeft: 8 }}>Alfa</span>}
-                  </td>
-                  <td className="td-muted">{rede.mestre ? "—" : rede.document}</td>
-                  <td>
-                    {rede.mestre ? (
-                      <span className="td-muted">todos</span>
-                    ) : (rede.modulos || []).length === 0 ? (
-                      <span className="badge badge-warning">nenhum</span>
-                    ) : (
-                      <div className="saas-modulos-chips">
-                        {rede.modulos.map((m) => <span key={m} className="badge badge-brand">{m}</span>)}
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`badge ${rede.active ? "badge-success" : "badge-danger"}`}>
-                      {rede.active ? "Ativa" : "Suspensa"}
-                    </span>
-                  </td>
-                  <td className="td-muted">{rede.createdAt ? new Date(rede.createdAt).toLocaleDateString("pt-BR") : "—"}</td>
-                  <td>
-                    {!rede.mestre && (
-                      <div className="td-actions">
-                        <button className="btn btn-ghost btn-sm" onClick={() => abrirModulos(rede)} title="Módulos contratados">
-                          <Icon name="LayoutGrid" size={13} /> Módulos
-                        </button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(rede)} title="Editar" aria-label="Editar">
-                          <Icon name="Edit" size={13} />
-                        </button>
-                        <button
-                          className={`btn btn-ghost btn-sm ${rede.active ? "text-danger" : ""}`}
-                          onClick={() => setMudandoStatus(rede)}
-                          title={rede.active ? "Suspender" : "Reativar"}
-                          aria-label={rede.active ? "Suspender" : "Reativar"}
-                        >
-                          <Icon name={rede.active ? "Lock" : "Unlock"} size={13} />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        <Pagination page={pagina} totalPages={totalPaginas} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => carregar(p)} />
+      <div className="saas-filtros">
+        <div className="saas-busca">
+          <Icon name="Search" size={15} />
+          <input
+            type="search"
+            className="form-input"
+            placeholder="Buscar por nome ou CNPJ"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label="Buscar rede"
+          />
+        </div>
+        <div className="saas-chips" role="tablist" aria-label="Filtrar redes">
+          {FILTROS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              role="tab"
+              aria-selected={filtro === f.key}
+              className={`saas-chip ${filtro === f.key ? "ativo" : ""}`}
+              onClick={() => setFiltro(f.key)}
+            >
+              {f.rotulo}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {carregando ? (
+        <div className="saas-redes-grid">
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 178, borderRadius: "var(--radius-lg)" }} />)}
+        </div>
+      ) : visiveis.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon"><Icon name="Network" size={28} /></div>
+            <h3>{itens.length === 0 ? "Nenhuma rede cadastrada" : "Nada com esse filtro"}</h3>
+            <p>{itens.length === 0 ? "Cadastre a primeira rede de ensino para começar." : "Tente outro termo ou limpe o filtro."}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="saas-redes-grid">
+          {visiveis.map((rede) => (
+            <article key={rede.id} className={`card saas-rede ${rede.active ? "" : "suspensa"} ${rede.mestre ? "mestre" : ""}`}>
+              <div className="saas-rede-topo">
+                <Monograma nome={rede.name} mestre={rede.mestre} />
+                <div className="saas-rede-nome">
+                  <h2>{rede.name}</h2>
+                  <span>{rede.mestre ? "Tenant da Alfa" : formatarCnpj(rede.document)}</span>
+                </div>
+                <span className={`saas-status ${rede.active ? "ativa" : "suspensa"}`}>
+                  {rede.active ? "Ativa" : "Suspensa"}
+                </span>
+              </div>
+
+              <ReguaModulos contratados={rede.modulos} todos={rede.mestre} />
+              <p className="saas-rede-nota">
+                {rede.mestre
+                  ? "Todos os módulos, sempre. É onde a Alfa demonstra e dá suporte."
+                  : (rede.modulos || []).length === 0
+                    ? "Nenhum módulo contratado: ninguém desta rede vê tela alguma."
+                    : ` de  módulos contratados`}
+              </p>
+
+              <div className="saas-rede-rodape">
+                <span className="saas-rede-desde">
+                  desde {rede.createdAt ? new Date(rede.createdAt).toLocaleDateString("pt-BR") : "—"}
+                </span>
+                {!rede.mestre && (
+                  <div className="td-actions">
+                    <button className="btn btn-ghost btn-sm" onClick={() => abrirModulos(rede)}>
+                      <Icon name="LayoutGrid" size={13} /> Módulos
+                    </button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => abrirEdicao(rede)} title="Editar" aria-label="Editar">
+                      <Icon name="Edit" size={13} />
+                    </button>
+                    <button
+                      className={`btn btn-ghost btn-sm ${rede.active ? "text-danger" : ""}`}
+                      onClick={() => setMudandoStatus(rede)}
+                      title={rede.active ? "Suspender" : "Reativar"}
+                      aria-label={rede.active ? "Suspender" : "Reativar"}
+                    >
+                      <Icon name={rede.active ? "Lock" : "Unlock"} size={13} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {totalPaginas > 1 && (
+        <Pagination page={pagina} totalPages={totalPaginas} total={total} pageSize={PAGE_SIZE} onPageChange={(p) => carregar(p)} />
+      )}
 
       {/* Nova / editar */}
       <Modal
