@@ -71,6 +71,36 @@ A 8083 e' a API REST: acessar ela direto so' devolve JSON.
 phpMyAdmin em http://localhost:8082.
 Usuario inicial: `superadmin@alfaschool.com`.
 
+### Sobe sozinho quando o Windows liga
+
+`~/projetos/.boot/subir-stacks.sh` (chamado pela tarefa agendada
+`VixCard-Boot`, no logon) roda `./scripts/dev.sh boot` para este projeto.
+
+`boot` nao e' `up`. Ele **nao recompila** se o jar e o `frontend/dist` ja
+existem — no boot isso derruba o tempo de minutos para ~30s — e **nao sobe
+o Vite**: o acesso de fora e' pela 8085, que serve o build estatico, e um
+servidor de desenvolvimento ligado o dia inteiro sem ninguem editando
+codigo e' so' memoria gasta. Se um artefato faltar, ele constroi.
+
+O boot **nao** usa `docker compose up -d` neste projeto, de proposito: o
+compose tem um servico `backend` que roda uma IMAGEM, e no WSL ela fica
+velha (ver "Armadilha do Docker no WSL", abaixo). Ja atendeu a 8083
+devolvendo 400 no login com o codigo do disco correto.
+
+### Acesso pelo Mac sem tunel (Tailscale)
+
+O Mac e a maquina Windows estao no mesmo tailnet, entao o caminho mais
+curto nao precisa de tunel nenhum:
+
+    http://home:8085        (ou http://100.94.208.80:8085)
+
+`home` e' o no Windows no Tailscale; o `portproxy` que o `dev.sh` refaz
+encaminha a 8085 para o WSL. Funciona depois de qualquer reinicio, sem
+abrir terminal em lugar nenhum.
+
+O tunel SSH continua valendo para quem quiser `localhost` no Mac — ver
+abaixo.
+
 ### Acesso pelo navegador no Mac
 
 O Mac chega nesta maquina por **tunel SSH**, nao por localhost. As portas

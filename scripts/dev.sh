@@ -19,6 +19,7 @@
 #   ./scripts/dev.sh down      derruba tudo
 #   ./scripts/dev.sh portproxy refaz o encaminhamento para o Windows
 #   ./scripts/dev.sh remoto    UMA porta so' (8085), para acesso por tunel
+#   ./scripts/dev.sh boot      o que roda sozinho no logon do Windows
 # =====================================================================
 set -euo pipefail
 
@@ -208,8 +209,59 @@ web() {
   return 1
 }
 
+# =====================================================================
+# boot — o que roda sozinho quando o Windows liga
+#
+# Diferente de `up` em duas coisas, e as duas importam num boot:
+#
+#   1. NAO recompila se o artefato ja existe. `up` sempre roda maven e npm,
+#      o que leva minutos e exige rede. No boot o jar e o dist do disco
+#      servem; se faltarem, ai sim constroi.
+#   2. Nao sobe o Vite (porta 5173). O acesso de fora e' pela 8085, que
+#      serve o build estatico — um servidor de desenvolvimento ligado o dia
+#      inteiro sem ninguem editando codigo e' so' memoria gasta.
+#
+# Nao use `docker compose up -d` para este projeto: o compose tem um
+# servico `backend` que roda uma IMAGEM, e no WSL ela fica velha (ver a
+# armadilha do Docker no CLAUDE.md). A api sobe do jar do disco.
+# =====================================================================
+boot() {
+  infra
+
+  if [ -f "$RAIZ/backend/target/$JAR" ]; then
+    echo ">> jar ja existe — pulando a compilacao"
+  else
+    echo ">> jar ausente — compilando"
+    build
+  fi
+  api
+
+  if [ -f "$RAIZ/frontend/dist/index.html" ]; then
+    echo ">> build do frontend ja existe — apenas servindo"
+    docker rm -f "$REMOTO" >/dev/null 2>&1 || true
+    docker run -d --name "$REMOTO" \
+      --network "$REDE" \
+      -p "$PORTA_REMOTA":80 \
+      -v "$RAIZ/frontend/dist":/usr/share/nginx/html:ro \
+      -v "$RAIZ/infra/nginx/default.remoto.conf":/etc/nginx/conf.d/default.conf:ro \
+      nginx:1.27-alpine >/dev/null
+    portproxy
+  else
+    echo ">> build do frontend ausente — gerando"
+    remoto
+  fi
+
+  sleep 2
+  if curl -sf "http://localhost:$PORTA_REMOTA/" >/dev/null 2>&1; then
+    echo ">> AlfaSchool no ar em http://localhost:$PORTA_REMOTA"
+  else
+    echo "!! a porta $PORTA_REMOTA nao respondeu"; docker logs --tail 15 "$REMOTO"; return 1
+  fi
+}
+
 case "${1:-up}" in
   up)       infra; build; api; web; portproxy; resumo ;;
+  boot)     boot ;;
   build)    build ;;
   restart)  build; api ;;
   web)      web ;;
