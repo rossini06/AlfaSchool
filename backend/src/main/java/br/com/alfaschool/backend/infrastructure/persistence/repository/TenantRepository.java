@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface TenantRepository extends JpaRepository<Tenant, UUID> {
     Optional<Tenant> findByDocument(String document);
+    boolean existsByDocument(String document);
+    Optional<Tenant> findByTenantId(UUID tenantId);
+    long countByActiveTrue();
 }

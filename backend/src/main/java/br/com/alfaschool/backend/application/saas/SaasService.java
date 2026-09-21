@@ -62,12 +62,15 @@ public class SaasService {
     }
 
     public SaasMetricasResponse metricas() {
-        long totalTenants = tenantRepository.count();
-        long tenantsAtivos = tenantRepository.findAll().stream()
-                .filter(t -> t.isActive() && !Boolean.TRUE.equals(t.getDeleted()))
-                .count();
-        long totalPlanos = saasPlanRepository.findByDeletedFalse().size();
-        return new SaasMetricasResponse(totalTenants, tenantsAtivos, 0L, totalPlanos);
+        // Cross-tenant por definicao: com o filtro, "total de redes" dava 1.
+        return TenantContext.semFiltro(() -> {
+            long totalTenants = tenantRepository.count();
+            long tenantsAtivos = tenantRepository.findAll().stream()
+                    .filter(t -> t.isActive() && !Boolean.TRUE.equals(t.getDeleted()))
+                    .count();
+            long totalPlanos = saasPlanRepository.findByDeletedFalse().size();
+            return new SaasMetricasResponse(totalTenants, tenantsAtivos, 0L, totalPlanos);
+        });
     }
 
     private void applyRequest(SaasPlan plan, SaasPlanRequest request) {

@@ -5,6 +5,8 @@ import br.com.alfaschool.backend.application.auth.dto.LoginRequest;
 import br.com.alfaschool.backend.application.modulo.ModuloService;
 import br.com.alfaschool.backend.application.shared.AuditService;
 import br.com.alfaschool.backend.domain.user.UserAccount;
+import br.com.alfaschool.backend.domain.tenant.Tenant;
+import br.com.alfaschool.backend.infrastructure.persistence.repository.TenantRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.UserRepository;
 import br.com.alfaschool.backend.security.jwt.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
@@ -33,6 +35,7 @@ public class AuthApplicationService {
     private final AuditService auditService;
     private final SuperAdminGuard superAdminGuard;
     private final ModuloService moduloService;
+    private final TenantRepository tenantRepository;
 
     public AuthApplicationService(UserRepository userRepository,
                                   PasswordEncoder passwordEncoder,
@@ -40,9 +43,11 @@ public class AuthApplicationService {
                                   AuditService auditService,
                                   br.com.alfaschool.backend.security.permissao.PermissaoService permissaoService,
                                   SuperAdminGuard superAdminGuard,
-                                  ModuloService moduloService) {
+                                  ModuloService moduloService,
+                                  TenantRepository tenantRepository) {
         this.permissaoService = permissaoService;
         this.moduloService = moduloService;
+        this.tenantRepository = tenantRepository;
         this.superAdminGuard = superAdminGuard;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -57,6 +62,7 @@ public class AuthApplicationService {
         if (!user.isActive()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário inativo");
         }
+        exigirRedeAtiva(user);
 
         if (user.isLocked()) {
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Conta bloqueada por tentativas inválidas");
@@ -106,6 +112,7 @@ public class AuthApplicationService {
         UserAccount user = userRepository.findById(userId)
                 .filter(it -> it.getTenantId().equals(tenantId))
                 .orElseThrow(this::credenciaisInvalidas);
+        exigirRedeAtiva(user);
 
         // Passa pelo guard: um perfil chamado SUPER_ADMIN fora do tenant
         // mestre nao pode virar authority ROLE_SUPER_ADMIN no token.
@@ -125,6 +132,21 @@ public class AuthApplicationService {
                 moduloService.codigosVigentes(user.getTenantId()),
                 user.isMustChangePassword()
         );
+    }
+
+    /**
+     * Rede suspensa pela Alfa (inadimplencia, encerramento) nao aceita
+     * login nem refresh. O usuario continua "ativo" na tabela dele; o
+     * bloqueio e' da rede, e volta sozinho quando ela for reativada.
+     */
+    private void exigirRedeAtiva(UserAccount user) {
+        boolean ativa = tenantRepository.findByTenantId(user.getTenantId())
+                .map(Tenant::isActive)
+                .orElse(false);
+        if (!ativa) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Esta rede de ensino está suspensa. Fale com a Alfa para reativar.");
+        }
     }
 
     private void registerFailedAttempt(UserAccount user, String ipAddress) {

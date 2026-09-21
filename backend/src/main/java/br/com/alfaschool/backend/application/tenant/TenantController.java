@@ -1,6 +1,10 @@
 package br.com.alfaschool.backend.application.tenant;
 
+import br.com.alfaschool.backend.application.modulo.dto.ModuloContratacaoResponse;
+import br.com.alfaschool.backend.application.tenant.dto.TenantCreateRequest;
+import br.com.alfaschool.backend.application.tenant.dto.TenantModulosRequest;
 import br.com.alfaschool.backend.application.tenant.dto.TenantResponse;
+import br.com.alfaschool.backend.application.tenant.dto.TenantUpdateRequest;
 import br.com.alfaschool.backend.application.tenant.dto.TenantStatusRequest;
 import br.com.alfaschool.backend.shared.response.ApiResponse;
 import br.com.alfaschool.backend.shared.web.Paginacao;
@@ -8,10 +12,12 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,6 +43,35 @@ public class TenantController {
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<TenantResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.of(200, "Rede de ensino encontrada", tenantService.findById(id)));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<TenantResponse>> criar(@Valid @RequestBody TenantCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.of(201, "Rede de ensino criada com sucesso", tenantService.criar(request)));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<TenantResponse>> atualizar(@PathVariable UUID id,
+                                                                  @Valid @RequestBody TenantUpdateRequest request) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Rede de ensino atualizada com sucesso",
+                tenantService.atualizar(id, request)));
+    }
+
+    @GetMapping("/{id}/modulos")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<List<ModuloContratacaoResponse>>> modulos(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Módulos da rede", tenantService.listarModulos(id)));
+    }
+
+    @PutMapping("/{id}/modulos")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<List<ModuloContratacaoResponse>>> definirModulos(
+            @PathVariable UUID id, @Valid @RequestBody TenantModulosRequest request) {
+        return ResponseEntity.ok(ApiResponse.of(200, "Módulos atualizados com sucesso",
+                tenantService.definirModulos(id, request.modulos())));
     }
 
     @PutMapping("/{id}/status")
