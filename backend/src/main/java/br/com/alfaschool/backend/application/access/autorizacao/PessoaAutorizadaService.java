@@ -2,6 +2,7 @@ package br.com.alfaschool.backend.application.access.autorizacao;
 
 import br.com.alfaschool.backend.application.access.autorizacao.dto.PessoaAutorizadaRequest;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.PessoaAutorizadaResponse;
+import br.com.alfaschool.backend.application.access.biometria.FotoUrlAssinada;
 import br.com.alfaschool.backend.domain.access.autorizacao.PessoaAutorizada;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AccPessoaAutorizadaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.ResponsavelRepository;
@@ -26,11 +27,14 @@ public class PessoaAutorizadaService {
 
     private final AccPessoaAutorizadaRepository pessoaRepository;
     private final ResponsavelRepository responsavelRepository;
+    private final FotoUrlAssinada fotoUrlAssinada;
 
     public PessoaAutorizadaService(AccPessoaAutorizadaRepository pessoaRepository,
-                                   ResponsavelRepository responsavelRepository) {
+                                   ResponsavelRepository responsavelRepository,
+                                   FotoUrlAssinada fotoUrlAssinada) {
         this.pessoaRepository = pessoaRepository;
         this.responsavelRepository = responsavelRepository;
+        this.fotoUrlAssinada = fotoUrlAssinada;
     }
 
     /**
@@ -46,7 +50,7 @@ public class PessoaAutorizadaService {
                 ? pessoaRepository.findByTenantIdAndDeletedFalse(tenantId, pageable)
                 : pessoaRepository.search(tenantId, q.trim(), pageable);
 
-        Page<PessoaAutorizadaResponse> resposta = pagina.map(PessoaAutorizadaResponse::from);
+        Page<PessoaAutorizadaResponse> resposta = pagina.map(p -> PessoaAutorizadaResponse.from(p, fotoUrlAssinada));
         if (permissao == null || permissao.isBlank()) {
             return resposta;
         }
@@ -62,7 +66,7 @@ public class PessoaAutorizadaService {
     }
 
     public PessoaAutorizadaResponse findById(UUID id) {
-        return PessoaAutorizadaResponse.from(carregar(id, ContextoAtual.tenantObrigatorio()));
+        return PessoaAutorizadaResponse.from(carregar(id, ContextoAtual.tenantObrigatorio()), fotoUrlAssinada);
     }
 
     @Transactional
@@ -71,7 +75,7 @@ public class PessoaAutorizadaService {
         PessoaAutorizada pessoa = new PessoaAutorizada();
         pessoa.setTenantId(tenantId);
         aplicar(pessoa, request, tenantId, null);
-        return PessoaAutorizadaResponse.from(pessoaRepository.save(pessoa));
+        return PessoaAutorizadaResponse.from(pessoaRepository.save(pessoa), fotoUrlAssinada);
     }
 
     @Transactional
@@ -79,7 +83,7 @@ public class PessoaAutorizadaService {
         UUID tenantId = ContextoAtual.tenantObrigatorio();
         PessoaAutorizada pessoa = carregar(id, tenantId);
         aplicar(pessoa, request, tenantId, id);
-        return PessoaAutorizadaResponse.from(pessoaRepository.save(pessoa));
+        return PessoaAutorizadaResponse.from(pessoaRepository.save(pessoa), fotoUrlAssinada);
     }
 
     /**

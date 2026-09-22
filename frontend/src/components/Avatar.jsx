@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function initials(nome) {
   if (!nome) return "?";
   const parts = nome.trim().split(" ");
@@ -7,14 +9,25 @@ function initials(nome) {
 }
 
 export function Avatar({ foto, nome, size = 28, fallback }) {
+  // Guardamos QUAL url falhou, nao um booleano: assim uma foto nova volta a
+  // tentar carregar em vez de ficar presa nas iniciais.
+  const [urlQueFalhou, setUrlQueFalhou] = useState(null);
+  const falhou = Boolean(foto) && urlQueFalhou === foto;
   const letter = fallback ?? initials(nome);
   const style = {
     width: size, height: size, borderRadius: "50%",
     flexShrink: 0, objectFit: "cover",
   };
 
-  if (foto) {
-    return <img src={foto} alt="" style={style} />;
+  if (foto && !falhou) {
+    return (
+      <img
+        src={foto}
+        alt=""
+        style={style}
+        onError={() => setUrlQueFalhou(foto)}
+      />
+    );
   }
 
   return (

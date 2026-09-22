@@ -4,6 +4,7 @@ import br.com.alfaschool.backend.application.access.autorizacao.CpfUtils;
 import br.com.alfaschool.backend.application.access.autorizacao.PessoaAutorizadaService;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.PessoaAutorizadaRequest;
 import br.com.alfaschool.backend.application.access.autorizacao.dto.PessoaAutorizadaResponse;
+import br.com.alfaschool.backend.application.access.biometria.FotoUrlAssinada;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.AccPessoaAutorizadaRepository;
 import br.com.alfaschool.backend.infrastructure.persistence.repository.ResponsavelRepository;
 import br.com.alfaschool.backend.security.filter.TenantContext;
@@ -34,12 +35,13 @@ class PessoaAutorizadaServiceTest {
 
     @Mock private AccPessoaAutorizadaRepository pessoaRepository;
     @Mock private ResponsavelRepository responsavelRepository;
+    @Mock private FotoUrlAssinada fotoUrlAssinada;
 
     private PessoaAutorizadaService service;
 
     @BeforeEach
     void setUp() {
-        service = new PessoaAutorizadaService(pessoaRepository, responsavelRepository);
+        service = new PessoaAutorizadaService(pessoaRepository, responsavelRepository, fotoUrlAssinada);
         TenantContext.setTenantId(TENANT);
         when(pessoaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }

@@ -296,7 +296,7 @@ export function PessoasAutorizadasPage() {
                 <tr key={item.id}>
                   <td>
                     <div className="flex items-center gap-2">
-                      <Avatar foto={item.fotoKey} nome={item.nome} />
+                      <Avatar foto={item.fotoUrl} nome={item.nome} />
                       <strong>{item.nome}</strong>
                     </div>
                   </td>
