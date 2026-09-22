@@ -43,6 +43,25 @@ services:
         aliases: [redis]
     restart: unless-stopped
 
+  # Object storage das fotos (FotoStorage em modo minio). Fica na mesma rede
+  # do backend, entao o acesso e' local (nao passa pelo funnel). O console web
+  # (9001) so' escuta em 127.0.0.1 do LXC — nao e' exposto pela internet.
+  staging-minio:
+    image: minio/minio:latest
+    container_name: staging-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?defina MINIO_ROOT_USER no .env.staging}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?defina MINIO_ROOT_PASSWORD no .env.staging}
+    networks:
+      default:
+        aliases: [minio]
+    ports:
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - staging_minio_data:/data
+    restart: unless-stopped
+
   staging-backend:
     image: ghcr.io/rossini06/alfaschool-backend:${ALFASCHOOL_BACKEND_TAG:-latest}
     container_name: staging-backend
@@ -68,8 +87,14 @@ services:
       # hardware. Os endpoints /access/simulador/* exigem token — nao ha rota
       # anonima. Em producao isto NUNCA deve estar true.
       ACCESS_SIMULADOR: "true"
-      # Fotos (rostos dos paineis) vivem em disco no FotoStorage; volume nomeado
-      # para sobreviver ao recreate do container (deploy/auto-deploy).
+      # Fotos em object storage (MinIO), na mesma rede do backend. O acesso e'
+      # local ao LXC (nao passa pelo funnel), entao a latencia extra e' de ~ms.
+      ACCESS_STORAGE: minio
+      ACCESS_MINIO_ENDPOINT: http://minio:9000
+      ACCESS_MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:?defina MINIO_ROOT_USER no .env.staging}
+      ACCESS_MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?defina MINIO_ROOT_PASSWORD no .env.staging}
+      ACCESS_MINIO_BUCKET: alfaschool-fotos
+      # foto-dir do storage local fica de fallback (nao usado com storage=minio).
       ACCESS_FOTO_DIR: /var/lib/alfaschool-fotos
     volumes:
       - staging_fotos:/var/lib/alfaschool-fotos
@@ -77,6 +102,8 @@ services:
       staging-mysql:
         condition: service_healthy
       staging-redis:
+        condition: service_started
+      staging-minio:
         condition: service_started
     restart: unless-stopped
 
@@ -96,3 +123,4 @@ networks:
 volumes:
   staging_mysql_data:
   staging_fotos:
+  staging_minio_data:
