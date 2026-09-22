@@ -36,3 +36,4 @@ redis_data/
 # Worktrees temporarios de agentes
 .claude/worktrees/
 .data/
+!.env.staging.example

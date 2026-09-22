@@ -1,0 +1,82 @@
+# Staging do AlfaSchool (LXC 118) — imagens puxadas do GHCR (publicadas pelo CI).
+# Exposto de FORA da tailnet pelo Tailscale Funnel do proprio LXC:
+#   tailscale funnel --bg --https=443 http://localhost:80
+# Publico em https://alfaschool.tail0939dd.ts.net
+#
+# Requer .env.staging (copie de .env.staging.example). Suba com:
+#   docker compose --env-file .env.staging -f docker-compose.staging.yml up -d
+#
+# FUSO: MySQL e backend ficam em UTC (nao definimos TZ) para casar com
+# serverTimezone=UTC do JDBC — o horario local (America/Sao_Paulo) e'
+# resolvido na EXIBICAO, no frontend. Trocar isso reintroduz datas deslocadas.
+
+services:
+  staging-mysql:
+    image: mysql:8
+    container_name: staging-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no .env.staging}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-alfaschool}
+    networks:
+      default:
+        aliases: [mysql]
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - staging_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  staging-redis:
+    image: redis:7-alpine
+    container_name: staging-redis
+    networks:
+      default:
+        aliases: [redis]
+    restart: unless-stopped
+
+  staging-backend:
+    image: ghcr.io/rossini06/alfaschool-backend:${ALFASCHOOL_BACKEND_TAG:-latest}
+    container_name: staging-backend
+    networks:
+      default:
+        # "backend" e' o nome que o nginx da imagem do frontend proxeia.
+        aliases: [backend]
+    environment:
+      # O perfil "docker" (fixado no ENTRYPOINT da imagem) usa
+      # jdbc:mysql://mysql:3306/alfaschool e redis em "redis".
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no .env.staging}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?defina APP_JWT_SECRET no .env.staging (>=32 chars, openssl rand -base64 48)}
+      APP_SECRET_KEY: ${APP_SECRET_KEY:?defina APP_SECRET_KEY no .env.staging (>=32 chars)}
+      APP_SUPERADMIN_EMAIL: ${APP_SUPERADMIN_EMAIL:-superadmin@alfaschool.com}
+      APP_SUPERADMIN_NAME: ${APP_SUPERADMIN_NAME:-Super Admin}
+      APP_SUPERADMIN_PASSWORD: ${APP_SUPERADMIN_PASSWORD:?defina APP_SUPERADMIN_PASSWORD no .env.staging}
+      CORS_ALLOWED_ORIGINS: "https://${APP_DOMAIN:?defina APP_DOMAIN no .env.staging}"
+      # SEM APP_PERMITIR_SEGREDOS_PADRAO: em ambiente exposto o backend recusa
+      # subir com segredo padrao — por isso os segredos acima sao obrigatorios.
+    depends_on:
+      staging-mysql:
+        condition: service_healthy
+      staging-redis:
+        condition: service_started
+    restart: unless-stopped
+
+  staging-frontend:
+    image: ghcr.io/rossini06/alfaschool-frontend:${ALFASCHOOL_FRONTEND_TAG:-latest}
+    container_name: staging-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - staging-backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: alfaschool-staging
+
+volumes:
+  staging_mysql_data:
