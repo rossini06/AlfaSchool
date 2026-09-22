@@ -155,7 +155,7 @@ export function FinanceiroPage() {
               </div></td></tr>
             ) : tab === 0 ? items.map(item => (
               <tr key={item.id}>
-                <td className="td-muted">{item.alunoId?.substring(0, 8)}...</td>
+                <td>{alunos.find(a => a.id === item.alunoId)?.nome || item.alunoId?.substring(0, 8)}</td>
                 <td>{item.descricao || "—"}</td>
                 <td><strong>{formatCurrency(item.valor)}</strong></td>
                 <td className="td-muted">{item.vencimento}</td>
@@ -172,7 +172,7 @@ export function FinanceiroPage() {
               </tr>
             )) : tab === 1 ? items.map(item => (
               <tr key={item.id}>
-                <td className="td-muted">{item.alunoId?.substring(0, 8)}...</td>
+                <td>{alunos.find(a => a.id === item.alunoId)?.nome || item.alunoId?.substring(0, 8)}</td>
                 <td className="td-muted">{item.planoId?.substring(0, 8)}...</td>
                 <td className="td-muted">{item.dataInicio}</td>
                 <td className="td-muted">{item.dataFim || "—"}</td>
