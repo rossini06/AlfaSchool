@@ -30,7 +30,7 @@ DISP_ENTRADA="b1000000-0000-0000-0000-000000019001"  # Catraca 1 - Entrada
 PORTARIA="b1000000-0000-0000-0000-000000002001"      # Portaria Principal
 POR_TURMA="${POR_TURMA:-12}"                      # alunos por turma
 
-sql(){ docker exec -i "$MYSQL_CONT" mysql -uroot -palfaschool123 alfaschool -N -e "$1" 2>/dev/null; }
+sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool -N -e "$1" 2>/dev/null; }
 tok=$(curl -s -X POST "$B/auth/login" -H 'Content-Type: application/json' \
       -d '{"email":"diretor@mundodosaber.com","password":"100%Alfa@"}' | sed -nE 's/.*"accessToken":"([^"]+)".*/\1/p')
 [ -n "$tok" ] || { echo "!! login do diretor falhou (o seed base foi carregado?)"; exit 1; }
@@ -46,7 +46,7 @@ SOBRE="Silva Souza Oliveira Santos Lima Costa Pereira Almeida Nunes Rocha Gomes 
 arr_m=($NOMES_M); arr_f=($NOMES_F); arr_s=($SOBRE)
 # nomes de adultos (responsaveis e pessoas autorizadas)
 ADULTOS="Mariana Fernanda Patricia Juliana Adriana Simone Cristina Vanessa Renata Luciana Roberto Carlos Marcelo Fernando Ricardo Andre Paulo Rogerio Sergio Eduardo"
-PARENTES="Avo Avoo Tia Tio Madrinha Padrinho Vizinha Motorista"
+PARENTES="Avó Avô Tia Tio Madrinha Padrinho Vizinha Motorista"
 arr_ad=($ADULTOS); arr_pt=($PARENTES)
 adulto(){ echo "${arr_ad[$((RANDOM%${#arr_ad[@]}))]} ${arr_s[$((RANDOM%${#arr_s[@]}))]}"; }
 NOME=""; SEXO="M"
