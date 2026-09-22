@@ -63,10 +63,16 @@ infra() {
 api() {
   echo ">> (re)iniciando a api na porta $PORTA"
   docker rm -f "$API" >/dev/null 2>&1 || true
+  # As fotos do Access (FotoStorage) ficam em disco. Sem este bind mount elas
+  # vivem no /tmp EFEMERO do container e somem a cada restart/boot — deixando
+  # paineis, fila, TV e pessoas autorizadas com silhueta ate' rodar o seed de
+  # novo. Persistimos no host para sobreviver a recriacao do container.
+  mkdir -p "$RAIZ/.data/fotos"
   docker run -d --name "$API" \
     --network "$REDE" \
     -p "$PORTA":8080 \
     -v "$RAIZ/backend/target":/app \
+    -v "$RAIZ/.data/fotos":/tmp/alfaschool-fotos \
     -w /app \
     -e SPRING_PROFILES_ACTIVE=docker \
     -e MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-alfaschool123}" \
