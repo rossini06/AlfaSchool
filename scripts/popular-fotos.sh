@@ -28,7 +28,8 @@
 set -uo pipefail
 
 MYSQL_CONT="${MYSQL_CONT:-alfaschool-mysql}"
-API_CONT="${API_CONT:-$(docker ps --format '{{.Names}}' 2>/dev/null | grep -Ei 'alfaschool.*(api|backend)' | head -1)}"
+MYSQL_PW="${MYSQL_PW:-alfaschool123}"   # staging usa senha propria; passe MYSQL_PW=...
+API_CONT="${API_CONT:-$(docker ps --format '{{.Names}}' 2>/dev/null | grep -Ei 'alfaschool.*(api|backend)|staging-backend' | head -1)}"
 API_CONT="${API_CONT:-alfaschool-api-dev}"
 TENANT="${TENANT:-b1000000-0000-0000-0000-000000000001}"
 FOTO_DIR="${ACCESS_FOTO_DIR:-/tmp/alfaschool-fotos}"
@@ -42,7 +43,7 @@ printf 'SET NAMES utf8mb4;\n' > "$SQLF"
 : > "$PARF"
 trap 'rm -rf "$OUT"' EXIT
 
-sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool -N -e "$1" 2>/dev/null; }
+sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -p"$MYSQL_PW" alfaschool -N -e "$1" 2>/dev/null; }
 
 # Conjunto feminino explicito (nomes reais do seed); o resto e' masculino.
 FEM=" Adriana Alice Ana Antonella Aurora Beatriz Cecilia Cristina Eloa Fernanda Helena Heloisa Isabella Julia Juliana Laura Liz Livia Luciana Luiza Maite Maitê Manuela Maria Mariana Patricia Renata Simone Sofia Sophia Valentina Vanessa "
@@ -175,7 +176,7 @@ printf "UPDATE aluno_responsaveis ar JOIN responsaveis r ON r.id=ar.responsavel_
 cat "$PARF" >> "$SQLF"
 
 echo ">> aplicando UPDATEs no banco ($MYSQL_CONT)"
-docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool < "$SQLF"
+docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -p"$MYSQL_PW" alfaschool < "$SQLF"
 
 echo ">> copiando arquivos para o FotoStorage ($API_CONT:$FOTO_DIR)"
 if docker exec "$API_CONT" mkdir -p "$FOTO_DIR" 2>/dev/null; then
