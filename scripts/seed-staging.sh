@@ -88,6 +88,21 @@ echo "== 6/6  garante que o backend le as fotos do volume =="
 UIDBE=$(docker exec "$BACKEND_CONT" id -u 2>/dev/null)
 docker exec -u 0 "$BACKEND_CONT" sh -c "chown -R ${UIDBE:-0} '$FOTO_DIR' 2>/dev/null; chmod -R a+rX '$FOTO_DIR' 2>/dev/null" || true
 
+# Se o storage e' MinIO, as fotos que o popular-fotos gravou no disco NAO sao
+# lidas pelo backend (ele le do bucket). Espelha o disco -> bucket.
+if [ "$(docker exec "$BACKEND_CONT" printenv ACCESS_STORAGE 2>/dev/null)" = "minio" ]; then
+  echo "== extra  espelhando as fotos para o bucket do MinIO =="
+  MU=$(grep '^MINIO_ROOT_USER=' "$ENV_FILE" | cut -d= -f2-)
+  MP=$(grep '^MINIO_ROOT_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
+  MB=$(grep '^ACCESS_MINIO_BUCKET=' "$ENV_FILE" | cut -d= -f2-); MB="${MB:-alfaschool-fotos}"
+  docker run --rm --network alfaschool-staging -v alfaschool_staging_fotos:/src:ro \
+    --entrypoint sh quay.io/minio/mc -c "
+      mc alias set m http://minio:9000 '$MU' '$MP' >/dev/null &&
+      mc mb --ignore-existing m/$MB >/dev/null &&
+      mc cp --recursive /src/ m/$MB/ >/dev/null 2>&1 &&
+      echo \"   objetos no bucket: \$(mc ls m/$MB | wc -l)\"" || echo "   (falha ao espelhar; verifique o MinIO)"
+fi
+
 echo
 echo "================= PRONTO ================="
 echo "Logins demo (senha 100%Alfa@):"
