@@ -86,6 +86,18 @@ function RotaPorPerfil({ children }) {
   if (soResponsavel) {
     return <Navigate to="/portal" replace />;
   }
+
+  // O superadmin vive no tenant MESTRE, que não é escola: o Dashboard da escola
+  // sai vazio (sem alunos/turmas) e parece sistema quebrado — o mesmo motivo do
+  // desvio do responsável acima. O lugar dele é o painel SaaS (/saas), de onde
+  // ele entra numa rede. Só desvia ENQUANTO está no mestre: ao "entrar numa
+  // rede" (selecionar-rede) o tenantNome passa a existir e ele vê o Dashboard
+  // daquela escola normalmente. Sem isto, logar como superadmin caía num
+  // Dashboard vazio e dava a impressão de "não tenho acesso a nada".
+  const superAdminNoMestre = roles.includes("SUPER_ADMIN") && !user?.tenantNome;
+  if (superAdminNoMestre) {
+    return <Navigate to="/saas" replace />;
+  }
   return children;
 }
 
