@@ -133,19 +133,26 @@ if [ -n "$AUTFACE_SQL" ]; then
 fi
 ok "pessoas autorizadas" "${#PESSOAS[@]}"
 
-echo ">> pedagogico: conteudo, frequencia, avaliacoes, notas"
+echo ">> pedagogico: conteudo, frequencia, avaliacoes, notas (todas as disciplinas)"
 for tu in "$TURMA_A" "$TURMA_B"; do
   if [ "$tu" = "$TURMA_A" ]; then als=("${AL_A[@]}"); else als=("${AL_B[@]}"); fi
   itens=$(printf '{"alunoId":"%s"},' "${als[@]}"); itens="[${itens%,}]"
-  for dia in 2026-08-04 2026-08-05 2026-08-06 2026-08-07; do
-    post /frequencias/lote "{\"turmaId\":\"$tu\",\"disciplinaId\":\"${DISC[0]}\",\"data\":\"$dia\",\"numeroAula\":1,\"frequencias\":$itens}" >/dev/null
-  done
   post /conteudos-ministrados "{\"turmaId\":\"$tu\",\"disciplinaId\":\"${DISC[0]}\",\"data\":\"2026-08-04\",\"descricao\":\"Roda de conversa e leitura compartilhada\",\"objetivos\":\"Oralidade\"}" >/dev/null
-  for av in "Sondagem 1o Bimestre|1BIMESTRE" "Portfolio 2o Bimestre|2BIMESTRE"; do
-    aid=$(post /avaliacoes "{\"turmaId\":\"$tu\",\"disciplinaId\":\"${DISC[0]}\",\"nome\":\"${av%%|*}\",\"tipo\":\"PROVA\",\"periodo\":\"${av##*|}\",\"dataAvaliacao\":\"2026-08-20\",\"notaMaxima\":10,\"notaMinima\":6,\"peso\":1}" | idof)
+  # Avalia TODAS as disciplinas para o boletim sair cheio (nota vira conceito
+  # no infantil). Uma avaliacao por disciplina + frequencia de alguns dias.
+  for di in "${DISC[@]}"; do
+    for dia in 2026-08-04 2026-08-05 2026-08-06 2026-08-07; do
+      post /frequencias/lote "{\"turmaId\":\"$tu\",\"disciplinaId\":\"$di\",\"data\":\"$dia\",\"numeroAula\":1,\"frequencias\":$itens}" >/dev/null
+    done
+    aid=$(post /avaliacoes "{\"turmaId\":\"$tu\",\"disciplinaId\":\"$di\",\"nome\":\"Sondagem 1o Bimestre\",\"tipo\":\"PROVA\",\"periodo\":\"1BIMESTRE\",\"dataAvaliacao\":\"2026-08-20\",\"notaMaxima\":10,\"notaMinima\":6,\"peso\":1}" | idof)
     for al in "${als[@]}"; do post /notas "{\"alunoId\":\"$al\",\"avaliacaoId\":\"$aid\",\"nota\":$((6+RANDOM%4)).$((RANDOM%10))}" >/dev/null; done
   done
 done
+# O boletim/media casam a nota pela MATRICULA; /notas e /frequencias gravam so'
+# o alunoId. Sem matricula_id a media/conceito nao computa e o boletim fica "—".
+# Backfill pela matricula do aluno.
+sql "UPDATE notas n JOIN matriculas m ON m.aluno_id=n.aluno_id AND m.tenant_id=n.tenant_id AND (m.deleted=FALSE OR m.deleted IS NULL) SET n.matricula_id=m.id WHERE n.tenant_id='$TENANT' AND (n.matricula_id IS NULL OR n.matricula_id='')"
+sql "UPDATE frequencias f JOIN matriculas m ON m.aluno_id=f.aluno_id AND m.tenant_id=f.tenant_id AND (m.deleted=FALSE OR m.deleted IS NULL) SET f.matricula_id=m.id WHERE f.tenant_id='$TENANT' AND (f.matricula_id IS NULL OR f.matricula_id='')"
 ok "frequencia/avaliacoes/notas" "ok"
 
 echo ">> restricao judicial"
