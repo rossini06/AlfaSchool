@@ -134,6 +134,17 @@ export function AuthProvider({ children }) {
     let data = null;
     try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
     if (!res.ok) {
+      // Sessão inválida/velha: 401 sempre, e 403 aqui também — selecionar-rede
+      // é ação de superadmin, então um 403 significa que o token não vale mais
+      // (usuário/rede recriados, deploy, etc.). Derruba a sessão e manda pro
+      // login em vez de deixar a tela presa num erro que não se recupera.
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("alfaschool_token");
+        localStorage.removeItem("alfaschool_refresh_token");
+        localStorage.removeItem("alfaschool_user");
+        window.location.href = "/login";
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
       throw new Error(data?.message || "Não foi possível entrar nesta rede.");
     }
     const r = data.data;
