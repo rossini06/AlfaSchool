@@ -77,7 +77,7 @@ export function AuditoriaPage() {
 
   const formatDateTime = (dt) => {
     if (!dt) return "—";
-    try { return new Date(dt).toLocaleString("pt-BR"); } catch { return dt; }
+    try { return new Date(dt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }); } catch { return dt; }
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
