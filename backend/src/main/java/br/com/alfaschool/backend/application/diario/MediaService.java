@@ -103,20 +103,30 @@ public class MediaService {
         // Calcular frequência
         calcularFrequencia(media, tenantId, matriculaId, disciplinaId);
 
-        // Calcular média das notas
+        // Coleta as notas com peso uma vez. A media NUMERICA e' a do nivel
+        // (infantil devolve null de proposito); a `base` e' uma media ponderada
+        // auxiliar para derivar conceito e situacao mesmo no infantil — sem ela
+        // o boletim do infantil ficava totalmente vazio (media e conceito nulos).
+        List<EducationRuleStrategy.NotaComPeso> notasComPeso =
+                coletarNotasComPeso(tenantId, matriculaId, disciplinaId, turma.getId(), periodo);
+        BigDecimal mediaNotas = notasComPeso.isEmpty() ? null : strategy.calcularMedia(notasComPeso);
+        BigDecimal base = mediaNotas != null
+                ? mediaNotas
+                : (notasComPeso.isEmpty() ? null : mediaBase(notasComPeso));
+
         if (strategy.usaNotaNumerica(regra)) {
-            calcularMediaNotas(media, tenantId, matriculaId, disciplinaId, turma.getId(), periodo, strategy);
+            media.setMedia(mediaNotas);
         }
 
         // Determinar situação
         media.setSituacao(strategy.determinarSituacao(
-                media.getMedia(),
+                base,
                 media.getPercentualFrequencia(),
                 regra));
 
         // Converter para conceito se necessário
         if (!strategy.usaNotaNumerica(regra) || (regra.getUsaConceito() != null && regra.getUsaConceito())) {
-            media.setConceito(strategy.converterParaConceito(media.getMedia(), regra));
+            media.setConceito(strategy.converterParaConceito(base, regra));
         }
 
         return MediaResponse.from(mediaRepository.save(media));
@@ -227,51 +237,59 @@ public class MediaService {
         media.setPercentualFrequencia(percentual);
     }
 
-    private void calcularMediaNotas(Media media, UUID tenantId, UUID matriculaId,
-                                     UUID disciplinaId, UUID turmaId, String periodo,
-                                     EducationRuleStrategy strategy) {
+    /** Junta as notas do aluno com o peso/nota-maxima de cada avaliacao da
+     *  disciplina/turma/periodo. Lista vazia = sem avaliacao ou sem nota. */
+    private List<EducationRuleStrategy.NotaComPeso> coletarNotasComPeso(
+            UUID tenantId, UUID matriculaId, UUID disciplinaId, UUID turmaId, String periodo) {
 
-        // Buscar avaliações da disciplina/turma/período
         List<Avaliacao> avaliacoes = avaliacaoRepository
                 .findByTenantIdAndTurmaIdAndDisciplinaIdAndDeletedFalse(tenantId, turmaId, disciplinaId)
                 .stream()
                 .filter(a -> periodo == null || periodo.equals(a.getPeriodo()))
                 .toList();
-
         if (avaliacoes.isEmpty()) {
-            media.setMedia(null);
-            return;
+            return List.of();
         }
 
-        // Buscar notas do aluno para essas avaliações
         List<UUID> avaliacaoIds = avaliacoes.stream().map(Avaliacao::getId).toList();
         List<Nota> notas = notaRepository.findByMatriculaAndAvaliacoes(tenantId, matriculaId, avaliacaoIds);
 
-        if (notas.isEmpty()) {
-            media.setMedia(null);
-            return;
-        }
-
-        // Criar lista de notas com pesos
         List<EducationRuleStrategy.NotaComPeso> notasComPeso = new ArrayList<>();
         for (Nota nota : notas) {
             Avaliacao av = avaliacoes.stream()
                     .filter(a -> a.getId().equals(nota.getAvaliacaoId()))
                     .findFirst()
                     .orElse(null);
-
             if (av != null && nota.getNotaFinal() != null) {
                 notasComPeso.add(new EducationRuleStrategy.NotaComPeso(
-                        nota,
-                        av.getPeso(),
-                        av.getNotaMaxima()
-                ));
+                        nota, av.getPeso(), av.getNotaMaxima()));
             }
         }
+        return notasComPeso;
+    }
 
-        // Calcular média usando a estratégia
-        BigDecimal mediaCalculada = strategy.calcularMedia(notasComPeso);
-        media.setMedia(mediaCalculada);
+    /** Media ponderada normalizada para 0-10. Base para derivar CONCEITO e
+     *  situacao quando o nivel nao usa nota numerica (ex.: infantil). */
+    private BigDecimal mediaBase(List<EducationRuleStrategy.NotaComPeso> notas) {
+        BigDecimal somaPonderada = BigDecimal.ZERO;
+        BigDecimal somaPesos = BigDecimal.ZERO;
+        for (EducationRuleStrategy.NotaComPeso item : notas) {
+            if (item == null || item.nota() == null || item.nota().getNotaFinal() == null || item.peso() == null) {
+                continue;
+            }
+            BigDecimal nota = item.nota().getNotaFinal();
+            if (item.notaMaxima() != null
+                    && item.notaMaxima().compareTo(BigDecimal.ZERO) > 0
+                    && item.notaMaxima().compareTo(BigDecimal.TEN) != 0) {
+                nota = nota.multiply(BigDecimal.TEN).divide(item.notaMaxima(), 2, RoundingMode.HALF_UP);
+            }
+            somaPonderada = somaPonderada.add(nota.multiply(item.peso()));
+            somaPesos = somaPesos.add(item.peso());
+        }
+        if (somaPesos.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        return somaPonderada.divide(somaPesos, 2, RoundingMode.HALF_UP);
     }
 
     private RegraAprovacao obterRegraAprovacao(UUID tenantId, String nivel) {
@@ -309,6 +327,7 @@ public class MediaService {
         if (tipo == TipoEnsino.INFANTIL) {
             regra.setUsaNotaNumerica(false);
             regra.setUsaConceito(true);
+            regra.setConceitosPossiveis("Ótimo,Bom,Regular");
             regra.setUsaAvaliacaoDescritiva(true);
             regra.setPermiteRecuperacao(false);
         }
