@@ -41,7 +41,10 @@ public class FotoStorageLocal implements FotoStorage {
     public String salvar(UUID tenantId, byte[] conteudo) {
         ImagemValidador.Formato formato = ImagemValidador.validar(conteudo, tamanhoMaximo);
         String extensao = formato == ImagemValidador.Formato.PNG ? "png" : "jpg";
-        String chave = tenantId + "/" + UUID.randomUUID() + "." + extensao;
+        // Chave PLANA (sem "/"): URLEncoder transformaria a barra em %2F e o
+        // StrictHttpFirewall/Tomcat rejeitam a URL da foto com 400. O tenant
+        // vai no nome do arquivo, nao num subdiretorio.
+        String chave = tenantId + "_" + UUID.randomUUID() + "." + extensao;
         Path destino = resolver(chave);
         try {
             Files.createDirectories(destino.getParent());

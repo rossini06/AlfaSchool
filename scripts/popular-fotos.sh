@@ -124,8 +124,10 @@ while IFS=$'\t' read -r id sexo nome; do
   [ "$sx" = "M" ] || [ "$sx" = "F" ] || sx=$(sexo_nome "$first")
   f="$DEMO/aluno-${id}.${ALUNO_EXT}"
   if ! foto_aluno "$sx" "$f" "$id"; then echo "  WARN aluno $id ($first) sem foto"; warn=$((warn+1)); continue; fi
-  b64=$(openssl base64 -A -in "$f")
-  printf "UPDATE alunos SET foto='data:%s;base64,%s' WHERE id='%s';\n" "$ALUNO_MIME" "$b64" "$id" >> "$SQLF"
+  # A foto vai para o FotoStorage (o arquivo aluno-<id>.<ext> e' copiado
+  # para o FOTO_DIR mais abaixo) e a linha guarda so' a chave plana. A lista
+  # de alunos passa a servir a foto por URL assinada, nao mais base64 inline.
+  printf "UPDATE alunos SET foto_key='aluno-%s.%s', foto=NULL WHERE id='%s';\n" "$id" "$ALUNO_EXT" "$id" >> "$SQLF"
   na=$((na+1))
 done < <(sql "SELECT id, COALESCE(sexo,''), nome FROM alunos WHERE tenant_id='$TENANT' AND (deleted=FALSE OR deleted IS NULL)")
 echo "  $na alunos"

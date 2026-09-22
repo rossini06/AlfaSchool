@@ -1,0 +1,13 @@
+-- Foto do aluno por CHAVE, nao por base64 embutido.
+--
+-- A coluna `foto` (TEXT) guardava o data-URI base64 inteiro na linha do
+-- aluno. A listagem devolvia isso em cada item: /alunos com 20 alunos
+-- passava de 300 KB, e cada foto viajava toda vez, inclusive em quem so'
+-- queria a lista. Agora a foto vive no FotoStorage (disco/S3) e a linha
+-- guarda so' a chave opaca; o JSON expoe uma URL assinada que a <img>
+-- carrega sob demanda, em paralelo — o mesmo esquema do acc_faces.
+--
+-- A coluna `foto` continua existindo por ora: e' a origem do backfill
+-- (decodifica o base64 e grava no FotoStorage). Uma migration futura pode
+-- derruba-la depois que ninguem mais ler dela.
+ALTER TABLE alunos ADD COLUMN foto_key VARCHAR(255) NULL AFTER foto;

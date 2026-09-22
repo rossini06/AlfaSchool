@@ -1,5 +1,7 @@
 package br.com.alfaschool.backend.application.aluno;
 
+import br.com.alfaschool.backend.application.access.biometria.FotoStorage;
+import br.com.alfaschool.backend.application.access.biometria.FotoUrlAssinada;
 import br.com.alfaschool.backend.application.aluno.dto.AlunoRequest;
 import br.com.alfaschool.backend.application.aluno.dto.AlunoResponse;
 import br.com.alfaschool.backend.domain.aluno.Aluno;
@@ -12,23 +14,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Base64;
 import java.util.UUID;
 
 @Service
 public class AlunoService {
 
     private final AlunoRepository alunoRepository;
+    private final FotoStorage fotoStorage;
+    private final FotoUrlAssinada fotoUrlAssinada;
 
-    public AlunoService(AlunoRepository alunoRepository) {
+    public AlunoService(AlunoRepository alunoRepository, FotoStorage fotoStorage, FotoUrlAssinada fotoUrlAssinada) {
         this.alunoRepository = alunoRepository;
+        this.fotoStorage = fotoStorage;
+        this.fotoUrlAssinada = fotoUrlAssinada;
     }
 
     public Page<AlunoResponse> list(String q, Pageable pageable) {
         UUID tenantId = requiredTenant();
         if (q != null && !q.isBlank()) {
-            return alunoRepository.search(tenantId, q, pageable).map(AlunoResponse::from);
+            return alunoRepository.search(tenantId, q, pageable).map(a -> AlunoResponse.from(a, fotoUrlAssinada));
         }
-        return alunoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(AlunoResponse::from);
+        return alunoRepository.findByTenantIdAndDeletedFalse(tenantId, pageable).map(a -> AlunoResponse.from(a, fotoUrlAssinada));
     }
 
     public AlunoResponse findById(UUID id) {
@@ -36,7 +43,7 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id)
                 .filter(a -> tenantId.equals(a.getTenantId()) && !Boolean.TRUE.equals(a.getDeleted()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado"));
-        return AlunoResponse.from(aluno);
+        return AlunoResponse.from(aluno, fotoUrlAssinada);
     }
 
     @Transactional
@@ -50,7 +57,7 @@ public class AlunoService {
         Aluno aluno = new Aluno();
         aluno.setTenantId(tenantId);
         applyRequest(aluno, request);
-        return AlunoResponse.from(alunoRepository.save(aluno));
+        return AlunoResponse.from(alunoRepository.save(aluno), fotoUrlAssinada);
     }
 
     @Transactional
@@ -65,7 +72,7 @@ public class AlunoService {
             });
         }
         applyRequest(aluno, request);
-        return AlunoResponse.from(alunoRepository.save(aluno));
+        return AlunoResponse.from(alunoRepository.save(aluno), fotoUrlAssinada);
     }
 
     @Transactional
@@ -93,11 +100,61 @@ public class AlunoService {
         aluno.setNomeResponsavel(request.nomeResponsavel());
         aluno.setTelefoneResponsavel(request.telefoneResponsavel());
         aluno.setEmailResponsavel(request.emailResponsavel());
-        aluno.setFoto(request.foto());
+        aplicarFoto(aluno, request.foto());
         aluno.setObservacoesMedicas(request.observacoesMedicas());
         aluno.setUnitId(request.unitId());
         if (request.ativo() != null) {
             aluno.setAtivo(request.ativo());
+        }
+    }
+
+    /**
+     * A foto entra pelo corpo como data-URI base64 (como o cadastro sempre
+     * mandou) e sai gravada no FotoStorage; a linha guarda so' a chave.
+     *
+     * null = edicao que nao mexe na foto, preserva a atual. Em branco =
+     * remover. Data-URI/base64 = nova foto (valida formato e tamanho no
+     * FotoStorage.salvar e apaga a anterior).
+     */
+    private void aplicarFoto(Aluno aluno, String fotoEntrada) {
+        if (fotoEntrada == null) {
+            return;
+        }
+        if (fotoEntrada.isBlank()) {
+            if (aluno.getFotoKey() != null) {
+                fotoStorage.remover(aluno.getFotoKey());
+                aluno.setFotoKey(null);
+            }
+            aluno.setFoto(null);
+            return;
+        }
+        byte[] bytes = decodificarBase64(fotoEntrada);
+        String chaveAntiga = aluno.getFotoKey();
+        String chave;
+        try {
+            chave = fotoStorage.salvar(aluno.getTenantId(), bytes);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        aluno.setFotoKey(chave);
+        aluno.setFoto(null); // nao guarda mais base64 na linha do aluno
+        if (chaveAntiga != null && !chaveAntiga.equals(chave)) {
+            fotoStorage.remover(chaveAntiga);
+        }
+    }
+
+    /** Aceita "data:image/...;base64,XXXX" ou base64 puro. */
+    private static byte[] decodificarBase64(String valor) {
+        String limpo = valor;
+        int virgula = limpo.indexOf(',');
+        if (limpo.startsWith("data:") && virgula > 0) {
+            limpo = limpo.substring(virgula + 1);
+        }
+        limpo = limpo.replaceAll("\\s", "");
+        try {
+            return Base64.getDecoder().decode(limpo);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Foto em base64 inválida.");
         }
     }
 
