@@ -54,8 +54,14 @@ public class Aluno extends BaseEntity {
     @Column(name = "email_responsavel", length = 160)
     private String emailResponsavel;
 
+    // Legado: base64 embutido. Continua aqui so' para o backfill migrar dele
+    // para o FotoStorage. A foto servida hoje vem de fotoKey, nao daqui.
     @Column(columnDefinition = "TEXT")
     private String foto;
+
+    /** Chave opaca no FotoStorage (arquivo/objeto S3). Serve por URL assinada. */
+    @Column(name = "foto_key", length = 255)
+    private String fotoKey;
 
     @Column(name = "observacoes_medicas", columnDefinition = "TEXT")
     private String observacoesMedicas;
@@ -95,6 +101,8 @@ public class Aluno extends BaseEntity {
     public void setEmailResponsavel(String v) { this.emailResponsavel = v; }
     public String getFoto() { return foto; }
     public void setFoto(String foto) { this.foto = foto; }
+    public String getFotoKey() { return fotoKey; }
+    public void setFotoKey(String fotoKey) { this.fotoKey = fotoKey; }
     public String getObservacoesMedicas() { return observacoesMedicas; }
     public void setObservacoesMedicas(String v) { this.observacoesMedicas = v; }
     public boolean isAtivo() { return ativo; }

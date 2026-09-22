@@ -22,7 +22,9 @@ const EMPTY_FORM = {
   dataNascimento: "", sexo: "", ativo: true,
   endereco: "", cidade: "", estado: "", cep: "",
   nomeResponsavel: "", telefoneResponsavel: "", emailResponsavel: "",
-  foto: "", observacoesMedicas: "",
+  // foto = nova foto escolhida (base64); fotoUrlAtual = a foto ja gravada
+  // (URL assinada, so' pra preview); removerFoto = pediu pra apagar.
+  foto: "", fotoUrlAtual: "", removerFoto: false, observacoesMedicas: "",
   responsaveis: [],
 };
 
@@ -140,7 +142,9 @@ export function AlunosPage() {
       nomeResponsavel: item.nomeResponsavel || "",
       telefoneResponsavel: item.telefoneResponsavel || "",
       emailResponsavel: item.emailResponsavel || "",
-      foto: item.foto || "",
+      foto: "",
+      fotoUrlAtual: item.fotoUrl || "",
+      removerFoto: false,
       observacoesMedicas: item.observacoesMedicas || "",
       responsaveis,
     });
@@ -162,6 +166,19 @@ export function AlunosPage() {
       let savedAluno;
       const payload = { ...form };
       delete payload.responsaveis;
+      // Campos so' de UI, nao vao pro backend.
+      delete payload.fotoUrlAtual;
+      delete payload.removerFoto;
+      // A foto so' viaja quando muda: nova (base64), "" para remover, ou
+      // omitida (o backend mantem a atual). Sem isto, toda edicao reenviaria
+      // a foto — e agora nem temos mais o base64 no form pra reenviar.
+      if (form.foto) {
+        payload.foto = form.foto;
+      } else if (form.removerFoto) {
+        payload.foto = "";
+      } else {
+        delete payload.foto;
+      }
       if (editItem) {
         savedAluno = await api.put(`/alunos/${editItem.id}`, payload);
       } else {
@@ -212,7 +229,7 @@ export function AlunosPage() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => setForm((prev) => ({ ...prev, foto: ev.target.result }));
+    reader.onload = (ev) => setForm((prev) => ({ ...prev, foto: ev.target.result, removerFoto: false }));
     reader.readAsDataURL(file);
   };
 
@@ -406,7 +423,7 @@ export function AlunosPage() {
                 <tr key={item.id}>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <Avatar foto={item.foto} nome={item.nome} />
+                      <Avatar foto={item.fotoUrl} nome={item.nome} />
                       <strong>{item.nome}</strong>
                     </div>
                   </td>
@@ -663,8 +680,8 @@ export function AlunosPage() {
 
             {activeTab === "foto" && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, padding: "20px 0" }}>
-                {form.foto ? (
-                  <img src={form.foto} alt="Foto do aluno" style={{
+                {(form.foto || (form.fotoUrlAtual && !form.removerFoto)) ? (
+                  <img src={form.foto || form.fotoUrlAtual} alt="Foto do aluno" style={{
                     width: 120, height: 120, borderRadius: "50%", objectFit: "cover",
                     border: "3px solid var(--color-brand)",
                   }} />
@@ -682,12 +699,12 @@ export function AlunosPage() {
                 <div>
                   <label className="btn btn-secondary" style={{ cursor: "pointer" }}>
                     <Icon name="Upload" size={14} />
-                    {form.foto ? "Alterar foto" : "Adicionar foto"}
+                    {(form.foto || (form.fotoUrlAtual && !form.removerFoto)) ? "Alterar foto" : "Adicionar foto"}
                     <input type="file" accept="image/*" onChange={handleFotoChange} style={{ display: "none" }} />
                   </label>
                 </div>
-                {form.foto && (
-                  <button className="btn btn-ghost btn-sm text-danger" onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}>
+                {(form.foto || (form.fotoUrlAtual && !form.removerFoto)) && (
+                  <button className="btn btn-ghost btn-sm text-danger" onClick={() => setForm((prev) => ({ ...prev, foto: "", fotoUrlAtual: "", removerFoto: true }))}>
                     <Icon name="Trash" size={13} />
                     Remover foto
                   </button>
