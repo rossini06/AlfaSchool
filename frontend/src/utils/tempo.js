@@ -52,20 +52,40 @@ export function formatarData(iso) {
   return `${d[2]}/${d[1]}/${d[0]}`;
 }
 
-/** "2026-09-18T07:03:11" -> "18/09/2026 07:03" */
+// A API serializa os instantes em UTC (com "Z"). Exibimos no fuso da escola.
+const FUSO_BR = "America/Sao_Paulo";
+/** Um instante ISO tem marcacao de fuso (Z ou +hh:mm)? Se sim, e' UTC e deve
+ *  ser convertido; um datetime "naive" (sem fuso) ja vem no horario local. */
+function ehInstante(s) {
+  return /[zZ]$|[+-]\d{2}:?\d{2}$/.test(s);
+}
+function horaBR(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso).slice(11, 16);
+  return d.toLocaleTimeString("pt-BR", { timeZone: FUSO_BR, hour: "2-digit", minute: "2-digit" });
+}
+
+/** "2026-09-18T07:03:11Z" -> "18/09/2026 04:03" (horario de Sao Paulo) */
 export function formatarDataHora(iso) {
   if (!iso) return "—";
   const s = String(iso);
+  if (s.includes("T") && ehInstante(s)) {
+    const d = new Date(s);
+    if (!Number.isNaN(d.getTime())) {
+      const data = d.toLocaleDateString("pt-BR", { timeZone: FUSO_BR, day: "2-digit", month: "2-digit", year: "numeric" });
+      return `${data} ${horaBR(s)}`;
+    }
+  }
   const data = formatarData(s.slice(0, 10));
   const hora = s.slice(11, 16);
   return hora ? `${data} ${hora}` : data;
 }
 
-/** "07:03:11" ou ISO -> "07:03" */
+/** "07:03:11" ou ISO -> "07:03"; instante UTC vira horario de Sao Paulo. */
 export function formatarHora(valor) {
   if (!valor) return "—";
   const s = String(valor);
-  if (s.includes("T")) return s.slice(11, 16);
+  if (s.includes("T")) return ehInstante(s) ? horaBR(s) : s.slice(11, 16);
   return s.slice(0, 5);
 }
 

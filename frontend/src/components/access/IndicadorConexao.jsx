@@ -35,7 +35,7 @@ export function IndicadorConexao({ estado, ultimaAtualizacao, tv = false, style,
 
 function formatarHora(data) {
   try {
-    return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return data.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   } catch {
     return "—";
   }

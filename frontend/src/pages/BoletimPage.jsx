@@ -526,8 +526,8 @@ export function BoletimPage() {
                 fontSize: 12,
               }}
             >
-              Documento gerado em {new Date().toLocaleDateString("pt-BR")} às{" "}
-              {new Date().toLocaleTimeString("pt-BR")}
+              Documento gerado em {new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })} às{" "}
+              {new Date().toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo" })}
             </div>
           </div>
         </div>

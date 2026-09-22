@@ -267,7 +267,7 @@ export function PainelSalaPage() {
         </div>
         <div className="painel-tv-header-dir">
           <div className="painel-tv-relogio">
-            {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            {agora.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" })}
           </div>
           <IndicadorConexao estado={conexao} ultimaAtualizacao={ultimaAtualizacao} tv />
         </div>
@@ -488,7 +488,7 @@ function horaDe(iso) {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
 }
 
 function rotuloParentesco(parentesco) {

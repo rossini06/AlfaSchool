@@ -90,7 +90,7 @@ export function PresentesAgoraPage() {
           <h1 className="page-title">Presentes Agora</h1>
           <p className="page-subtitle">
             Quem está na unidade neste momento
-            {atualizadoEm && ` · atualizado às ${atualizadoEm.toLocaleTimeString("pt-BR").slice(0, 5)}`}
+            {atualizadoEm && ` · atualizado às ${atualizadoEm.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" })}`}
           </p>
         </div>
         <div className="ac-linha-acoes">
@@ -107,7 +107,7 @@ export function PresentesAgoraPage() {
       </div>
 
       <div className="ac-print-cabecalho">
-        <h2>Lista de presentes — {new Date().toLocaleString("pt-BR")}</h2>
+        <h2>Lista de presentes — {new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</h2>
         <p>
           {filtrados.length} aluno(s)
           {filtroTurma ? ` · turma ${turmas.find((t) => t.id === filtroTurma)?.nome || ""}` : ""}
