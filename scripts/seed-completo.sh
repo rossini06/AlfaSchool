@@ -185,4 +185,10 @@ curl -s -o /dev/null -H "$AUTH" -H 'Content-Type: application/json' -X POST "$B/
 curl -s -o /dev/null -H "$AUTH" -H 'Content-Type: application/json' -X POST "$B/access/simulador/pessoa-desconhecida" -d "{\"dispositivoId\":\"$DISP_ENTRADA\"}"
 ok "ocorrencias" "2"
 
+echo ">> fotos (avatar ilustrado p/ alunos, foto real p/ adultos e paineis)"
+# Best-effort: depende de rede (dicebear/randomuser). Se falhar, o seed
+# continua valido — so' fica sem foto. Reaproveita MYSQL_CONT e TENANT.
+MYSQL_CONT="$MYSQL_CONT" TENANT="$TENANT" bash "$(dirname "$0")/popular-fotos.sh" \
+  || echo "  (fotos: pulado — rode ./scripts/popular-fotos.sh depois)"
+
 echo ">> pronto. Alunos: ${#ALL_AL[@]} | Presentes: $p"
