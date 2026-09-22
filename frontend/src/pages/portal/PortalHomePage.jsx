@@ -86,8 +86,9 @@ export function PortalHomePage() {
         filhos.map((filho) => {
           const realizado = minutosAtuais(filho);
           const contratado = filho.minutosContratados ?? null;
+          // Piso em 0: tempo/percentual nunca deve aparecer negativo na tela.
           const percentual =
-            realizado !== null && contratado ? Math.min(999, Math.round((realizado / contratado) * 100)) : null;
+            realizado !== null && contratado ? Math.max(0, Math.min(999, Math.round((realizado / contratado) * 100))) : null;
           const excedeu = percentual !== null && percentual > 100;
           const eventos = comoLista(filho.eventos);
 

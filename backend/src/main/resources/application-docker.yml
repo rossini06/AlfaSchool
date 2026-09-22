@@ -1,6 +1,10 @@
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/alfaschool?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo
+    # serverTimezone DEVE bater com o fuso real do MySQL (o container roda em
+    # UTC). Quando divergia (America/Sao_Paulo), as leituras JDBC cruas das
+    # colunas DATETIME(6) zoneless deslocavam ~+3h por hop e a permanencia/portal
+    # calculava tempo NEGATIVO (entrada aparecia "no futuro").
+    url: jdbc:mysql://mysql:3306/alfaschool?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: ${MYSQL_ROOT_PASSWORD:alfaschool123}
     driver-class-name: com.mysql.cj.jdbc.Driver
