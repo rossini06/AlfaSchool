@@ -97,8 +97,15 @@ app:
     # NUNCA habilitar em producao: ele expoe endpoints .fcgi publicos que
     # imitam o firmware e aceitam comando sem autenticar.
     simulador-habilitado: ${ACCESS_SIMULADOR:false}
-    # Fotos de referencia enviadas aos leitores. Trocar por S3/MinIO depois
-    # e' so' outra implementacao de FotoStorage.
+    # Backend do FotoStorage: "local" (disco, padrao) ou "minio" (object
+    # storage, para mais de uma replica de backend). So' um bean e' criado.
+    storage: ${ACCESS_STORAGE:local}
+    minio:
+      endpoint: ${ACCESS_MINIO_ENDPOINT:http://minio:9000}
+      access-key: ${ACCESS_MINIO_ACCESS_KEY:}
+      secret-key: ${ACCESS_MINIO_SECRET_KEY:}
+      bucket: ${ACCESS_MINIO_BUCKET:alfaschool-fotos}
+    # Fotos de referencia enviadas aos leitores. Usado pelo storage local.
     foto-dir: ${ACCESS_FOTO_DIR:/tmp/alfaschool-fotos}
     foto-max-bytes: ${ACCESS_FOTO_MAX_BYTES:2097152}
     controlid:
