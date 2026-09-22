@@ -5,6 +5,17 @@ programa. Cada entrada diz o que a pessoa via antes, o que vê agora e por
 quê. O registro começa em 21/09/2026; o que veio antes está no histórico
 do repositório.
 
+## AlfaSchool — 22/09/2026 — Horários no fuso certo, foto que carrega, nome no financeiro e boletim do Infantil
+
+Uma rodada de correções deixa a exibição mais fiel ao que acontece na escola: os horários passam a seguir o fuso de Brasília, o boletim do Ensino Infantil deixa de sair vazio e algumas telas voltam a mostrar o que deviam. Nada exige ação de quem usa; as mudanças valem assim que o sistema é atualizado.
+
+### Correções
+- **Os horários voltaram a bater com o relógio de Brasília.** Em várias telas — a fila de retirada e o Painel de Coordenação, o painel de sala na TV, Presentes Agora, Permanência, o Portal da Família e ainda Usuários e Auditoria — os horários apareciam adiantados em algumas horas. Agora mostram o horário local correto.
+- **O Portal da Família parou de mostrar tempo negativo.** O "tempo do dia" de um aluno presente e o percentual da jornada podiam aparecer negativos (algo como "-5h59" e "-120% cumprido"). Agora mostram o tempo real de permanência, contado desde a entrada registrada na portaria.
+- **A foto da pessoa autorizada agora aparece.** Na tela de Pessoas Autorizadas a foto ficava quebrada; passou a carregar normalmente. E, em qualquer tela, quando uma foto não carrega, aparecem as iniciais da pessoa no lugar da imagem quebrada.
+- **O Financeiro mostra o nome do aluno.** Nas cobranças e nos contratos aparecia um código no lugar do nome; agora aparece o nome do aluno.
+- **O boletim do Ensino Infantil deixou de sair vazio.** Como o Infantil é avaliado por conceito, e não por nota numérica, o boletim não trazia nada nas disciplinas. Agora mostra o conceito de cada disciplina (Ótimo, Bom, Regular), a frequência e a situação do aluno.
+
 ## AlfaSchool — 21/09/2026 — Reforço de segurança: isolamento entre escolas, controle de permissões e trilha de auditoria
 
 Depois de uma verificação de segurança conduzida pela equipe Alfa, uma
