@@ -46,8 +46,10 @@ services:
   # Object storage das fotos (FotoStorage em modo minio). Fica na mesma rede
   # do backend, entao o acesso e' local (nao passa pelo funnel). O console web
   # (9001) so' escuta em 127.0.0.1 do LXC — nao e' exposto pela internet.
+  # quay.io e nao Docker Hub: a MinIO restringiu 'minio/minio' no Docker Hub
+  # (pull access denied), mas quay.io/minio/minio segue publico.
   staging-minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     container_name: staging-minio
     command: server /data --console-address ":9001"
     environment:
