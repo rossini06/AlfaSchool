@@ -5,6 +5,17 @@ programa. Cada entrada diz o que a pessoa via antes, o que vê agora e por
 quê. O registro começa em 21/09/2026; o que veio antes está no histórico
 do repositório.
 
+## AlfaSchool — 22/09/2026 — Tela de Alunos mais leve e a administração no lugar certo
+
+Uma rodada de velocidade e de deixar cada perfil na tela certa. Nada exige ação de quem usa; as mudanças valem assim que o sistema é atualizado.
+
+### Melhorias
+- **A tela de Alunos abre bem mais rápido.** A lista trazia a foto de cada aluno embutida nela — dezenas de fotos vinham juntas, mesmo para quem só queria ver os nomes, e isso a deixava pesada. Agora a lista vem leve e cada foto carrega sozinha, só quando aparece na tela. Em conexões mais lentas a diferença é grande.
+
+### Correções
+- **A administração da Alfa entra direto no Painel SaaS.** Ao entrar como superadministrador, a pessoa caía no painel de uma escola vazio — sem alunos nem turmas, porque a administração da plataforma não é uma escola — e parecia falta de acesso. Agora entra direto no Painel SaaS, de onde escolhe em qual rede vai trabalhar; ao entrar numa rede, vê o painel daquela escola normalmente.
+- **Trocar de rede não trava mais numa sessão vencida.** Quando a sessão expirava, tentar entrar em outra rede deixava a tela num erro sem saída. Agora o sistema encerra a sessão e leva ao login, para a pessoa entrar de novo e seguir.
+
 ## AlfaSchool — 22/09/2026 — Horários no fuso certo, foto que carrega, nome no financeiro e boletim do Infantil
 
 Uma rodada de correções deixa a exibição mais fiel ao que acontece na escola: os horários passam a seguir o fuso de Brasília, o boletim do Ensino Infantil deixa de sair vazio e algumas telas voltam a mostrar o que deviam. Nada exige ação de quem usa; as mudanças valem assim que o sistema é atualizado.
