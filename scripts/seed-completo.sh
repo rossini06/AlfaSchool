@@ -108,7 +108,14 @@ ok "rostos de aluno gravados" "${#ALL_AL[@]}"
 echo ">> pessoas autorizadas + autorizacoes (subconjunto) + rosto p/ chegada"
 declare -a PESSOAS PES_ALU
 count=0
-for al in "${ALL_AL[@]}"; do
+# Intercala 2A e 2B para as retiradas (e a atividade das TVs) caírem nas DUAS
+# salas, e nao so' na primeira turma criada.
+INTERCAL=(); na=${#AL_A[@]}; nb=${#AL_B[@]}; mx=$(( na>nb ? na : nb ))
+for ((i=0; i<mx; i++)); do
+  [ $i -lt $na ] && INTERCAL+=("${AL_A[$i]}")
+  [ $i -lt $nb ] && INTERCAL+=("${AL_B[$i]}")
+done
+for al in "${INTERCAL[@]}"; do
   [ $count -ge 8 ] && break
   RESP=$(get "/alunos/$al/responsaveis" | grep -oE "\"responsavelId\":\"[^\"]+\"" | head -1 | cut -d'"' -f4)
   [ -z "$RESP" ] && continue
@@ -190,5 +197,9 @@ echo ">> fotos (avatar ilustrado p/ alunos, foto real p/ adultos e paineis)"
 # continua valido — so' fica sem foto. Reaproveita MYSQL_CONT e TENANT.
 MYSQL_CONT="$MYSQL_CONT" TENANT="$TENANT" bash "$(dirname "$0")/popular-fotos.sh" \
   || echo "  (fotos: pulado — rode ./scripts/popular-fotos.sh depois)"
+
+echo ">> tokens de TV dos paineis (URLs prontas para abrir na parede)"
+API="$API" MYSQL_CONT="$MYSQL_CONT" TENANT="$TENANT" bash "$(dirname "$0")/paineis-tv.sh" \
+  || echo "  (tokens: pulado — rode ./scripts/paineis-tv.sh depois)"
 
 echo ">> pronto. Alunos: ${#ALL_AL[@]} | Presentes: $p"

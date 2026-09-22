@@ -37,13 +37,15 @@ OUT="$(mktemp -d)"
 DEMO="$OUT/flat"        # arquivos planos que vao para a raiz do FotoStorage
 mkdir -p "$DEMO"
 SQLF="$OUT/updates.sql"
+PARF="$OUT/parentesco.sql"      # overrides de parentesco aplicados por ULTIMO
 printf 'SET NAMES utf8mb4;\n' > "$SQLF"
+: > "$PARF"
 trap 'rm -rf "$OUT"' EXIT
 
 sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool -N -e "$1" 2>/dev/null; }
 
 # Conjunto feminino explicito (nomes reais do seed); o resto e' masculino.
-FEM=" Adriana Alice Ana Aurora Beatriz Cecilia Cristina Eloa Fernanda Isabella Julia Juliana Laura Livia Luiza Maite Maitê Manuela Maria Mariana Patricia Renata Simone Sofia Valentina Vanessa "
+FEM=" Adriana Alice Ana Antonella Aurora Beatriz Cecilia Cristina Eloa Fernanda Helena Heloisa Isabella Julia Juliana Laura Liz Livia Luciana Luiza Maite Maitê Manuela Maria Mariana Patricia Renata Simone Sofia Sophia Valentina Vanessa "
 sexo_nome(){ case "$FEM" in *" $1 "*) echo F;; *) echo M;; esac; }
 
 # Estilo "personas": flat e sobrio (nao cartunesco). Sexo pelo cabelo.
@@ -86,20 +88,32 @@ while IFS=$'\t' read -r id nome; do
   f="$OUT/resp-${id}.jpg"; adulto_foto "$sx" "$f"
   if ! is_jpg "$f"; then echo "  WARN resp $id ($first) sem JPG"; warn=$((warn+1)); continue; fi
   b64=$(openssl base64 -A -in "$f")
-  printf "UPDATE responsaveis SET foto='data:image/jpeg;base64,%s' WHERE id='%s';\n" "$b64" "$id" >> "$SQLF"
+  # grava tambem o sexo (o cadastro nasce sem) para o parentesco sair certo
+  printf "UPDATE responsaveis SET sexo='%s', foto='data:image/jpeg;base64,%s' WHERE id='%s';\n" "$sx" "$b64" "$id" >> "$SQLF"
   nr=$((nr+1))
 done < <(sql "SELECT id, nome FROM responsaveis WHERE tenant_id='$TENANT' AND (deleted=FALSE OR deleted IS NULL)")
 echo "  $nr responsaveis"
 
 echo ">> pessoas autorizadas (foto adulto -> arquivo)"; np=0
-while IFS=$'\t' read -r id nome; do
+while IFS=$'\t' read -r id nome respid; do
   [ -z "$id" ] && continue
   first="${nome%% *}"; sx=$(sexo_nome "$first")
   f="$DEMO/pa-${id}.jpg"; adulto_foto "$sx" "$f"
   if ! is_jpg "$f"; then echo "  WARN pa $id ($first) sem JPG"; warn=$((warn+1)); continue; fi
+  # A TV mostra o NOME desta pessoa autorizada, mas o parentesco vem do
+  # aluno_responsaveis (via responsavel_id). Alinho o parentesco ao SEXO de
+  # quem aparece, senao sai "Simone ... Pai autorizado".
+  if [ -n "$respid" ]; then
+    par=$([ "$sx" = "F" ] && echo "Mãe" || echo "Pai")
+    printf "UPDATE aluno_responsaveis SET parentesco='%s' WHERE tenant_id='%s' AND responsavel_id='%s';\n" "$par" "$TENANT" "$respid" >> "$PARF"
+  fi
   np=$((np+1))
-done < <(sql "SELECT id, nome FROM acc_pessoas_autorizadas WHERE tenant_id='$TENANT' AND (deleted=FALSE OR deleted IS NULL)")
+done < <(sql "SELECT id, nome, COALESCE(responsavel_id,'') FROM acc_pessoas_autorizadas WHERE tenant_id='$TENANT' AND (deleted=FALSE OR deleted IS NULL)")
 echo "  $np pessoas autorizadas"
+
+# Parentesco do responsavel principal condizente com o sexo (o seed grava
+# "Mae" fixo, o que deixa homem rotulado como "Mae" na fila/TV).
+printf "UPDATE aluno_responsaveis ar JOIN responsaveis r ON r.id=ar.responsavel_id SET ar.parentesco = IF(r.sexo='F','Mãe','Pai') WHERE ar.tenant_id='%s';\n" "$TENANT" >> "$SQLF"
 
 # Chaves planas para os paineis/fila/TV (os arquivos ja foram gravados acima).
 {
@@ -107,6 +121,10 @@ echo "  $np pessoas autorizadas"
   printf "UPDATE acc_faces SET foto_key=CONCAT('pa-', titular_id, '.jpg') WHERE tenant_id='%s' AND titular_tipo='AUTORIZADA';\n" "$TENANT"
   printf "UPDATE acc_pessoas_autorizadas SET foto_key=CONCAT('pa-', id, '.jpg') WHERE tenant_id='%s';\n" "$TENANT"
 } >> "$SQLF"
+
+# Overrides de parentesco por ULTIMO: sobrepoem o baseline (por sexo do
+# responsavel) alinhando ao sexo da pessoa autorizada que a TV exibe.
+cat "$PARF" >> "$SQLF"
 
 echo ">> aplicando UPDATEs no banco ($MYSQL_CONT)"
 docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool < "$SQLF"
