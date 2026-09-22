@@ -11,9 +11,10 @@ set -uo pipefail
 API="${API:-http://localhost:8085}"
 B="$API/api/v1"
 MYSQL_CONT="${MYSQL_CONT:-alfaschool-mysql}"
+MYSQL_PW="${MYSQL_PW:-alfaschool123}"
 TENANT="${TENANT:-b1000000-0000-0000-0000-000000000001}"
 
-sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -palfaschool123 alfaschool -N -e "$1" 2>/dev/null; }
+sql(){ docker exec -i "$MYSQL_CONT" mysql --default-character-set=utf8mb4 -uroot -p"$MYSQL_PW" alfaschool -N -e "$1" 2>/dev/null; }
 tok=$(curl -s -X POST "$B/auth/login" -H 'Content-Type: application/json' \
       -d '{"email":"diretor@mundodosaber.com","password":"100%Alfa@"}' | sed -nE 's/.*"accessToken":"([^"]+)".*/\1/p')
 [ -n "$tok" ] || { echo "!! login do diretor falhou"; exit 1; }
