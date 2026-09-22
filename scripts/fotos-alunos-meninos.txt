@@ -1,0 +1,48 @@
+# Fotos reais de criancas (MENINOS) do Pexels — banco gratuito, licenca Pexels.
+# Uma URL por linha; linhas iniciadas por # sao ignoradas.
+# Usadas por scripts/popular-fotos.sh para a foto dos alunos na demonstracao.
+# Credite os fotografos do Pexels ao exibir publicamente (https://www.pexels.com).
+https://images.pexels.com/photos/36586364/pexels-photo-36586364.jpeg
+https://images.pexels.com/photos/16282033/pexels-photo-16282033.jpeg
+https://images.pexels.com/photos/34988575/pexels-photo-34988575.jpeg
+https://images.pexels.com/photos/35198561/pexels-photo-35198561.jpeg
+https://images.pexels.com/photos/38260159/pexels-photo-38260159.jpeg
+https://images.pexels.com/photos/35862621/pexels-photo-35862621.jpeg
+https://images.pexels.com/photos/3953832/pexels-photo-3953832.jpeg
+https://images.pexels.com/photos/12197025/pexels-photo-12197025.jpeg
+https://images.pexels.com/photos/29790577/pexels-photo-29790577.jpeg
+https://images.pexels.com/photos/33970128/pexels-photo-33970128.jpeg
+https://images.pexels.com/photos/33970130/pexels-photo-33970130.jpeg
+https://images.pexels.com/photos/17888541/pexels-photo-17888541.jpeg
+https://images.pexels.com/photos/8791478/pexels-photo-8791478.jpeg
+https://images.pexels.com/photos/4687230/pexels-photo-4687230.jpeg
+https://images.pexels.com/photos/33871405/pexels-photo-33871405.jpeg
+https://images.pexels.com/photos/11644812/pexels-photo-11644812.jpeg
+https://images.pexels.com/photos/17888539/pexels-photo-17888539.jpeg
+https://images.pexels.com/photos/38624435/pexels-photo-38624435.jpeg
+https://images.pexels.com/photos/14854490/pexels-photo-14854490.jpeg
+https://images.pexels.com/photos/1524414/pexels-photo-1524414.jpeg
+https://images.pexels.com/photos/12943932/pexels-photo-12943932.jpeg
+https://images.pexels.com/photos/21642995/pexels-photo-21642995.jpeg
+https://images.pexels.com/photos/695954/pexels-photo-695954.jpeg
+https://images.pexels.com/photos/33871414/pexels-photo-33871414.jpeg
+https://images.pexels.com/photos/14616956/pexels-photo-14616956.jpeg
+https://images.pexels.com/photos/38624439/pexels-photo-38624439.jpeg
+https://images.pexels.com/photos/17888532/pexels-photo-17888532.jpeg
+https://images.pexels.com/photos/32713313/pexels-photo-32713313.jpeg
+https://images.pexels.com/photos/13106974/pexels-photo-13106974.jpeg
+https://images.pexels.com/photos/17888474/pexels-photo-17888474.jpeg
+https://images.pexels.com/photos/6552273/pexels-photo-6552273.jpeg
+https://images.pexels.com/photos/749072/pexels-photo-749072.jpeg
+https://images.pexels.com/photos/17888542/pexels-photo-17888542.jpeg
+https://images.pexels.com/photos/38008350/pexels-photo-38008350.jpeg
+https://images.pexels.com/photos/33871406/pexels-photo-33871406.jpeg
+https://images.pexels.com/photos/19709211/pexels-photo-19709211.jpeg
+https://images.pexels.com/photos/30255010/pexels-photo-30255010.jpeg
+https://images.pexels.com/photos/19833710/pexels-photo-19833710.jpeg
+https://images.pexels.com/photos/21967198/pexels-photo-21967198.jpeg
+https://images.pexels.com/photos/21967201/pexels-photo-21967201.jpeg
+https://images.pexels.com/photos/17888535/pexels-photo-17888535.jpeg
+https://images.pexels.com/photos/17888543/pexels-photo-17888543.jpeg
+https://images.pexels.com/photos/7962861/pexels-photo-7962861.jpeg
+https://images.pexels.com/photos/37121526/pexels-photo-37121526.jpeg
