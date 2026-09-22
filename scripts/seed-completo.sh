@@ -44,6 +44,11 @@ NOMES_M="Miguel Arthur Gael Heitor Theo Davi Bernardo Noah Ravi Anthony Pedro Lu
 NOMES_F="Helena Alice Laura Maria Sophia Isabella Manuela Cecilia Eloa Antonella Valentina Heloisa Liz Aurora Maite"
 SOBRE="Silva Souza Oliveira Santos Lima Costa Pereira Almeida Nunes Rocha Gomes Ribeiro Carvalho Araujo Mendes"
 arr_m=($NOMES_M); arr_f=($NOMES_F); arr_s=($SOBRE)
+# nomes de adultos (responsaveis e pessoas autorizadas)
+ADULTOS="Mariana Fernanda Patricia Juliana Adriana Simone Cristina Vanessa Renata Luciana Roberto Carlos Marcelo Fernando Ricardo Andre Paulo Rogerio Sergio Eduardo"
+PARENTES="Avo Avoo Tia Tio Madrinha Padrinho Vizinha Motorista"
+arr_ad=($ADULTOS); arr_pt=($PARENTES)
+adulto(){ echo "${arr_ad[$((RANDOM%${#arr_ad[@]}))]} ${arr_s[$((RANDOM%${#arr_s[@]}))]}"; }
 NOME=""; SEXO="M"
 rnd_nome(){ if [ $((RANDOM%2)) -eq 0 ]; then NOME="${arr_m[$((RANDOM%${#arr_m[@]}))]}"; SEXO=M; else NOME="${arr_f[$((RANDOM%${#arr_f[@]}))]}"; SEXO=F; fi; NOME="$NOME ${arr_s[$((RANDOM%${#arr_s[@]}))]}"; }
 cpf(){ printf "%03d.%03d.%03d-%02d" $((RANDOM%999)) $((RANDOM%999)) $((RANDOM%999)) $((RANDOM%99)); }
@@ -75,8 +80,7 @@ criar_turma(){
     [ -z "$al" ] && { n=$((n+1)); continue; }
     # responsavel + vinculo (a rota /alunos/{id}/responsaveis popula aluno_responsaveis,
     # que e' o que a retirada consulta para achar os filhos do responsavel).
-    resp="${arr_s[$((RANDOM%${#arr_s[@]}))]}"
-    rid=$(post /responsaveis "{\"nome\":\"Familia $resp\",\"telefone\":\"(27) 9$((10000000+RANDOM%89999999))\",\"email\":\"familia.${al:0:8}@exemplo.com\"}" | idof)
+    rid=$(post /responsaveis "{\"nome\":\"$(adulto)\",\"telefone\":\"(27) 9$((10000000+RANDOM%89999999))\",\"email\":\"resp.${al:0:8}@exemplo.com\"}" | idof)
     [ -n "$rid" ] && post "/alunos/$al/responsaveis" "{\"responsavelId\":\"$rid\",\"parentesco\":\"Mae\",\"autorizadoBuscar\":true,\"principal\":true,\"responsavelFinanceiro\":true}" >/dev/null
     # matricula na turma
     post /matriculas "{\"alunoId\":\"$al\",\"turmaId\":\"$turma\",\"dataMatricula\":\"2026-02-01\"}" >/dev/null
@@ -108,7 +112,7 @@ for al in "${ALL_AL[@]}"; do
   [ $count -ge 8 ] && break
   RESP=$(get "/alunos/$al/responsaveis" | grep -oE "\"responsavelId\":\"[^\"]+\"" | head -1 | cut -d'"' -f4)
   [ -z "$RESP" ] && continue
-  pa=$(post /access/pessoas-autorizadas "{\"responsavelId\":\"$RESP\",\"nome\":\"Avo da familia\",\"parentesco\":\"Avo\",\"telefone\":\"(27) 98888-0000\",\"podeRetirar\":true}" | idof)
+  pa=$(post /access/pessoas-autorizadas "{\"responsavelId\":\"$RESP\",\"nome\":\"$(adulto)\",\"parentesco\":\"${arr_pt[$((RANDOM%${#arr_pt[@]}))]}\",\"telefone\":\"(27) 98888-$((1000+RANDOM%8999))\",\"podeRetirar\":true}" | idof)
   [ -z "$pa" ] && continue
   post /access/autorizacoes "{\"alunoId\":\"$al\",\"pessoaAutorizadaId\":\"$pa\",\"permanente\":true,\"motivo\":\"Retirada habitual\"}" >/dev/null
   AUTFACE_SQL+="(UUID(),'$TENANT','AUTORIZADA','$pa','demo/pessoa.jpg',$DUSEQ,'CONSENTIMENTO_TITULAR',TRUE,NOW(6),'1.0','SECRETARIA','Titular',TRUE,NOW(6),NOW(6),FALSE),"
