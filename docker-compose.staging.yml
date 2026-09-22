@@ -29,6 +29,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # Num volume frio o MySQL leva ~25s criando o banco antes de aceitar
+      # conexao. Sem start_period as falhas desse intervalo contam para o
+      # limite de retries e o depends_on do backend desiste antes da hora.
+      start_period: 60s
     restart: unless-stopped
 
   staging-redis:
