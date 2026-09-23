@@ -5,6 +5,13 @@ programa. Cada entrada diz o que a pessoa via antes, o que vê agora e por
 quê. O registro começa em 21/09/2026; o que veio antes está no histórico
 do repositório.
 
+## AlfaSchool — 22/09/2026 — Página de apresentação na frente do sistema
+
+O endereço do AlfaSchool passa a abrir numa página que apresenta o produto, com um caminho claro para quem já é da escola entrar.
+
+### Novidades
+- **Uma página de apresentação (landing) na raiz do endereço.** Quem abre o endereço do sistema agora encontra uma página única que explica o AlfaSchool — os três momentos da saída (a chegada do responsável, o preparo e a saída efetiva da criança), a retirada em tempo real na TV da sala, segurança e LGPD, a presença ao vivo, o portal da família e os planos —, responsiva no celular e com um botão **"Entrar"** que leva direto à tela de login. Antes, o endereço abria direto no login. Quem já usa o sistema é só clicar em **Entrar**.
+
 ## AlfaSchool — 22/09/2026 — Tela de Alunos mais leve e a administração no lugar certo
 
 Uma rodada de velocidade e de deixar cada perfil na tela certa. Nada exige ação de quem usa; as mudanças valem assim que o sistema é atualizado.
