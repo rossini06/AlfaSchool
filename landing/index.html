@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlfaSchool — a saída da escola com hora, rosto e autorização</title>
+<meta name="description" content="Plataforma de gestão escolar com controle de acesso e retirada segura de alunos. Fila de retirada ao vivo, painéis de sala, autorizações e portal da família.">
+<link rel="icon" type="image/svg+xml" href="/landing-assets/img/brand/alfaschool-simbolo.svg">
+<link rel="apple-touch-icon" href="/landing-assets/img/brand/alfaschool-simbolo.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AlfaSchool — a saída da escola com hora, rosto e autorização">
+<meta property="og:description" content="Controle de acesso e retirada segura de alunos: fila de retirada ao vivo, painéis de sala e portal da família.">
+<meta property="og:image" content="/landing-assets/img/prints/01-coordenacao-hero.png">
+<meta name="theme-color" content="#029CAF">
+<script>
+  /* Tema antes do primeiro paint, para nao piscar. */
+  (function(){try{var t=localStorage.getItem("alfaschool_landing_tema");
+    if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);}
+    else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.setAttribute("data-theme","dark");}
+  }catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/landing-assets/css/landing.css">
+</head>
+<body>
+
+<a href="#conteudo" class="lp-skip">Pular para o conteúdo</a>
+
+<header style="position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:saturate(1.2) blur(6px)">
+  <div class="lp-container" style="height:76px;display:flex;align-items:center;gap:24px">
+    <a href="#topo" aria-label="AlfaSchool — início" style="display:flex;align-items:center;flex-shrink:0">
+      <img src="/landing-assets/img/brand/alfaschool-logo.svg" alt="AlfaSchool" height="44" style="height:44px;width:auto;display:block">
+    </a>
+
+    <nav aria-label="Navegação principal" class="lp-desktop-nav">
+      <a href="#tempo-real" class="lp-navlink">Tempo real</a>
+      <a href="#recursos" class="lp-navlink">Recursos</a>
+      <a href="#seguranca" class="lp-navlink">Segurança</a>
+      <a href="#como-funciona" class="lp-navlink">Como funciona</a>
+      <a href="#planos" class="lp-navlink">Planos</a>
+      <a href="#contato" class="lp-navlink">Contato</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+      <button type="button" data-theme-toggle class="lp-theme" aria-label="Mudar para o tema escuro" title="Mudar para o tema escuro">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
+      </button>
+      <a href="/login" class="lp-btn lp-btn-secondary" style="min-height:46px;padding:0 20px;font-size:15px">Entrar</a>
+      <a href="#contato" class="lp-btn lp-btn-primary lp-header-cta" style="min-height:46px;padding:0 24px;font-size:15px">Agende uma demonstração</a>
+      <button type="button" data-menu-btn class="lp-menu-btn" aria-expanded="false" aria-controls="menu-mobile" aria-label="Abrir menu" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);place-items:center;color:var(--text)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="menu-mobile" style="display:none;border-top:1px solid var(--border);background:var(--surface);padding:12px 24px 22px">
+    <nav aria-label="Navegação" style="display:flex;flex-direction:column;gap:2px">
+      <a href="#tempo-real" class="lp-mnav">Tempo real</a>
+      <a href="#recursos" class="lp-mnav">Recursos</a>
+      <a href="#seguranca" class="lp-mnav">Segurança</a>
+      <a href="#como-funciona" class="lp-mnav">Como funciona</a>
+      <a href="#planos" class="lp-mnav">Planos</a>
+      <a href="#contato" class="lp-mnav">Contato</a>
+      <a href="/login" class="lp-btn lp-btn-secondary" style="margin-top:12px;min-height:48px">Entrar</a>
+      <a href="#contato" class="lp-btn lp-btn-primary" style="margin-top:8px;min-height:48px">Agende uma demonstração</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+
+<!-- 1. Hero -->
+<section id="topo" style="padding:clamp(48px,7vw,88px) 0 clamp(56px,8vw,96px);background:linear-gradient(180deg,var(--bg-soft),var(--bg))">
+  <div class="lp-container lp-2col" style="display:grid;gap:clamp(40px,5vw,64px);align-items:center">
+    <div data-reveal>
+      <span style="display:inline-flex;align-items:center;flex-wrap:wrap;max-width:100%;gap:8px;background:var(--teal-dim);color:var(--teal-ink);font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 14px;border-radius:999px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.6 3.4 8.2 8 9 4.6-.8 8-4.4 8-9V6l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <span style="min-width:0;overflow-wrap:anywhere">Gestão escolar e retirada segura</span>
+      </span>
+      <h1 style="margin-top:22px;font-size:clamp(28px,5.4vw,58px);line-height:1.08;letter-spacing:-.025em;font-weight:800;text-wrap:balance;overflow-wrap:break-word;hyphens:auto">A saída da escola com <span style="color:var(--amber-ink)">hora, rosto e autorização</span>.</h1>
+      <p style="margin-top:22px;font-size:clamp(17px,1.7vw,20px);line-height:1.6;color:var(--text-2);max-width:56ch;text-wrap:pretty">Reconhecer o responsável não entrega o aluno. O AlfaSchool registra os três momentos da retirada — chegada, preparo e saída — para a escola responder, meses depois, quem levou a criança e com qual autorização.</p>
+      <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:14px">
+        <a href="#contato" class="lp-btn lp-btn-primary" style="min-height:52px;padding:0 30px;font-size:16px">Agende uma demonstração</a>
+        <a href="#como-funciona" class="lp-btn lp-btn-secondary" style="gap:8px;min-height:52px;padding:0 26px;font-size:16px">
+          Ver como funciona
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+      <p style="margin-top:20px;font-size:14px;color:var(--text-2)">Modular: contrate só o controle de acesso, só o pedagógico, ou a plataforma completa.</p>
+    </div>
+
+    <div data-reveal style="min-width:0">
+      <figure class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-md)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Central de Coordenação — fila de retirada ao vivo</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-01-coordenacao.png"><img src="/landing-assets/img/prints/01-coordenacao-hero.png" alt="Central de Coordenação do AlfaSchool: contadores de alunos presentes, aguardando retirada e horário excedido, e a fila de retirada com foto do aluno e de quem veio buscar" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">Tela do AlfaSchool. A fila mostra quem chegou, em que etapa está cada criança e quanto tempo espera.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Três momentos -->
+<section style="padding:clamp(60px,8vw,104px) 0;background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">O problema</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">A saída não é um evento. São três.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">A maioria dos sistemas guarda um carimbo só: "retirado". O AlfaSchool guarda os três momentos, cada um com hora própria — e é isso que sustenta a resposta meses depois.</p>
+    </div>
+    <div style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px">
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span style="width:46px;height:46px;border-radius:10px;background:var(--teal-dim);color:var(--teal-ink);display:grid;place-items:center">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="10.5" r="2.4"></circle><path d="M8.4 16.2c.7-1.7 2-2.5 3.6-2.5s2.9.8 3.6 2.5"></path></svg>
+          </span>
+          <span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-2)">17:02</span>
+        </div>
+        <h3 style="margin-top:20px;font-size:20px;font-weight:700">1. O responsável chega</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15.5px">Ana encosta o rosto no leitor da portaria. O sistema confere a autorização vigente e a criança entra na fila de retirada.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span style="width:46px;height:46px;border-radius:10px;background:var(--amber-dim);color:var(--amber-ink);display:grid;place-items:center">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path><circle cx="12" cy="9.4" r="2"></circle><path d="M9 13.4c.6-1.3 1.7-2 3-2s2.4.7 3 2"></path></svg>
+          </span>
+          <span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-2)">17:05</span>
+        </div>
+        <h3 style="margin-top:20px;font-size:20px;font-weight:700">2. A criança é preparada</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15.5px">O cartão aparece na TV da sala com o rosto da criança e o de quem veio buscar. A professora prepara e leva até a porta.</p>
+      </div>
+      <div data-reveal style="background:var(--surface);border:2px solid var(--teal);border-radius:14px;padding:28px;box-shadow:var(--shadow-md)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <span style="width:46px;height:46px;border-radius:10px;background:var(--teal-cta);color:#fff;display:grid;place-items:center">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5M15 12H3"></path></svg>
+          </span>
+          <span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--teal-ink)">17:09</span>
+        </div>
+        <h3 style="margin-top:20px;font-size:20px;font-weight:700">3. A criança sai</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15.5px">O rosto dela cruza o leitor de saída. Só esse evento fecha a retirada — e é ele que vira registro: quem levou, quando, com qual autorização.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Retirada em tempo real -->
+<section id="tempo-real" style="padding:clamp(60px,8vw,104px) 0">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Retirada em tempo real</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">A TV da sala mostra quem chegou. O leitor de saída fecha a retirada.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">Uma Smart TV por sala, sem login: o rosto da criança e o de quem veio buscar, lado a lado. A tela só informa — o cartão sai quando a criança passa o rosto no leitor de saída.</p>
+    </div>
+    <div style="margin-top:40px">
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Painel da sala — Smart TV</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-02-painel-tv.png"><img src="/landing-assets/img/prints/02-painel-tv.png" alt="Painel da sala em Smart TV: cartões do aluno e de quem veio buscar, aviso “Aguardando o aluno na saída” e a fila das próximas retiradas" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">O painel não tem botão de entrega: quem fecha a retirada é a leitura do rosto no leitor de saída.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Módulos -->
+<section id="recursos" style="padding:clamp(60px,8vw,104px) 0">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Recursos</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Dois módulos. Juntos ou separados.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">A escola contrata o que precisa agora e acrescenta o resto depois. Nada fica esperando o pacote inteiro.</p>
+    </div>
+    <div style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px">
+      <div data-reveal style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(24px,3vw,36px);box-shadow:var(--shadow-sm)">
+        <span style="width:52px;height:52px;border-radius:10px;background:var(--teal-dim);color:var(--teal-ink);display:grid;place-items:center">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.6 3.4 8.2 8 9 4.6-.8 8-4.4 8-9V6l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        </span>
+        <h3 style="margin-top:22px;font-size:24px;font-weight:700;letter-spacing:-.01em">Controle de acesso e retirada segura</h3>
+        <p style="margin-top:12px;color:var(--text-2);line-height:1.6">Quem entra, quem sai, quem pode buscar — e a que horas cada coisa aconteceu.</p>
+        <ul style="margin-top:22px;display:flex;flex-direction:column;gap:14px;list-style:none">
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Fila de retirada ao vivo.</strong> <span style="color:var(--text-2)">O responsável é reconhecido na portaria e a criança aparece na TV da sala dela.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Painéis de sala.</strong> <span style="color:var(--text-2)">Uma Smart TV por sala, sem login. A tela informa; o leitor de saída é quem encerra.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Autorizações por pessoa.</strong> <span style="color:var(--text-2)">Com prazo, dias da semana e faixa de horário.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Restrições judiciais.</strong> <span style="color:var(--text-2)">Uma medida protetiva prevalece sobre qualquer autorização, por qualquer caminho.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Permanência e hora excedente.</strong> <span style="color:var(--text-2)">Quanto tempo cada aluno ficou contra a jornada contratada — a base da cobrança extra.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Relatórios.</strong> <span style="color:var(--text-2)">Movimentação, permanência, excedentes, retiradas, tempo de espera, acessos negados e ocorrências.</span></span></li>
+        </ul>
+      </div>
+      <div data-reveal style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(24px,3vw,36px);box-shadow:var(--shadow-sm)">
+        <span style="width:52px;height:52px;border-radius:10px;background:var(--amber-dim);color:var(--amber-ink);display:grid;place-items:center">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H5.5A1.5 1.5 0 0 1 4 15.5Z"></path><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h4.5a1.5 1.5 0 0 0 1.5-1.5Z"></path></svg>
+        </span>
+        <h3 style="margin-top:22px;font-size:24px;font-weight:700;letter-spacing:-.01em">Gestão escolar</h3>
+        <p style="margin-top:12px;color:var(--text-2);line-height:1.6">O dia a dia pedagógico fora do papel e da planilha.</p>
+        <ul style="margin-top:22px;display:flex;flex-direction:column;gap:14px;list-style:none">
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Cadastros.</strong> <span style="color:var(--text-2)">Alunos, responsáveis, professores, cursos, disciplinas, turmas e matrículas.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Diário de classe.</strong> <span style="color:var(--text-2)">Frequência, conteúdo ministrado, avaliações, notas e boletim.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Financeiro.</strong> <span style="color:var(--text-2)">Planos, contratos e cobranças, incluindo a hora excedente apurada pelo acesso.</span></span></li>
+          <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:15.5px;line-height:1.55"><strong style="font-weight:650">Perfis por função.</strong> <span style="color:var(--text-2)">Direção, coordenação, secretaria, professor, portaria e financeiro veem telas diferentes.</span></span></li>
+        </ul>
+        <div style="margin-top:26px;padding:16px 18px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border)">
+          <p style="font-size:14.5px;color:var(--text-2);line-height:1.55">O bloco de acesso é vendido à parte do pedagógico. A escola que já tem sistema acadêmico pode levar só a retirada segura.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Segurança e LGPD -->
+<section id="seguranca" style="padding:clamp(60px,8vw,104px) 0;background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Segurança e proteção de dados</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Dado de criança não é rodapé.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">O sistema lida com o rosto de menores. Por isso o consentimento vem antes do equipamento, e a família pode voltar atrás a qualquer momento.</p>
+    </div>
+    <div style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:20px">
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Consentimento antes do rosto</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">A biometria de um menor exige base legal e consentimento registrados antes de o rosto ir para qualquer equipamento.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"></path><path d="M3 19v-5h5"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Revogação que apaga</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">A família revoga quando quiser — e a revogação remove o rosto de cada leitor onde ele foi gravado.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Relatório do titular</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">A direção emite tudo o que a escola guarda sobre um aluno (LGPD, Art. 18), sem o dado biométrico.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M12 5v14"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Isolamento entre escolas</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Multi-escola com separação total: uma unidade nunca alcança o dado da outra.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19c.6-3.4 2.8-5.2 5.5-5.2s4.9 1.8 5.5 5.2"></path><path d="M17 11h4M17 15h4"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Perfis e permissões</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Cada função vê só o que precisa: a portaria não vê financeiro, o professor não vê permissões.</p>
+      </div>
+      <div data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="color:var(--teal-ink);display:block"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg></span>
+        <h3 style="margin-top:16px;font-size:18px;font-weight:700">Trilha de auditoria</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">As ações sensíveis ficam registradas com autor e hora. Avisos automáticos nunca carregam foto.</p>
+      </div>
+    </div>
+    <div style="margin-top:44px;display:flex;flex-direction:column;gap:28px">
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Autorizações</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-04-autorizacoes.png"><img src="/landing-assets/img/prints/04-autorizacoes.png" alt="Tela de Autorizações: quem pode retirar cada aluno, com status, vigência, dias da semana e faixa de horário" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">Autorização por pessoa, com prazo, dias da semana e faixa de horário. O pedido vem do portal da família; a escola aprova.</figcaption>
+      </figure>
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Restrições Judiciais</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-05-restricoes.png"><img src="/landing-assets/img/prints/05-restricoes-judiciais.png" alt="Tela de Restrições Judiciais, com o aviso de que a restrição prevalece sobre qualquer autorização" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">Uma medida protetiva prevalece sobre qualquer autorização, por qualquer caminho.</figcaption>
+      </figure>
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Pessoas Autorizadas</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-03-pessoas.png"><img src="/landing-assets/img/prints/03-pessoas-autorizadas.png" alt="Tela de Pessoas Autorizadas: cadastro de quem se relaciona com a escola na retirada e no portal" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">Cada pessoa cadastrada uma vez, com parentesco, contato e o que ela pode fazer.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Presença ao vivo -->
+<section id="presenca" style="padding:clamp(60px,8vw,104px) 0">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Presença ao vivo</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Quem está na escola agora, e por quanto tempo.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">A entrada e a saída de cada criança viram tempo de permanência — e a hora excedente sobre a jornada contratada fica pronta para a cobrança, sem planilha.</p>
+    </div>
+    <div style="margin-top:44px;display:flex;flex-direction:column;gap:28px">
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Presentes Agora</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-06-presentes.png"><img src="/landing-assets/img/prints/06-presentes-agora.png" alt="Tela Presentes Agora: alunos na unidade neste momento, com turma, sala, entrada e tempo na unidade" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">A lista muda em tempo real conforme os leitores registram entrada e saída.</figcaption>
+      </figure>
+      <figure data-reveal class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Permanência</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-07-permanencia.png"><img src="/landing-assets/img/prints/07-permanencia.png" alt="Tela de Permanência: extrato por aluno com tempo realizado, jornada contratada e excedente" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">Tempo realizado contra a jornada contratada, dia a dia — base da cobrança de hora extra.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Como funciona -->
+<section id="como-funciona" style="padding:clamp(60px,8vw,104px) 0">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Como funciona</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Quatro passos até a primeira saída registrada.</h2>
+    </div>
+    <ol style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:20px;list-style:none">
+      <li data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="display:grid;place-items:center;width:38px;height:38px;border-radius:999px;background:var(--teal-cta);color:#fff;font-weight:700;font-size:16px">1</span>
+        <h3 style="margin-top:18px;font-size:18px;font-weight:700">Cadastra a escola e as turmas</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Unidades, salas, turmas e jornadas contratadas.</p>
+      </li>
+      <li data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="display:grid;place-items:center;width:38px;height:38px;border-radius:999px;background:var(--teal-cta);color:#fff;font-weight:700;font-size:16px">2</span>
+        <h3 style="margin-top:18px;font-size:18px;font-weight:700">Registra alunos e autorizações</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Quem pode buscar cada criança, com prazo, dias e horário — e as restrições judiciais.</p>
+      </li>
+      <li data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="display:grid;place-items:center;width:38px;height:38px;border-radius:999px;background:var(--teal-cta);color:#fff;font-weight:700;font-size:16px">3</span>
+        <h3 style="margin-top:18px;font-size:18px;font-weight:700">Instala leitores e painéis</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Leitor na portaria, leitor de saída e uma Smart TV por sala. O consentimento vem antes.</p>
+      </li>
+      <li data-reveal class="lp-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:var(--shadow-sm)">
+        <span style="display:grid;place-items:center;width:38px;height:38px;border-radius:999px;background:var(--amber);color:#3b2600;font-weight:700;font-size:16px">4</span>
+        <h3 style="margin-top:18px;font-size:18px;font-weight:700">A família acompanha</h3>
+        <p style="margin-top:8px;color:var(--text-2);line-height:1.6;font-size:15px">Pelo portal, o responsável vê presença, histórico e quem está autorizado.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- 8. Portal da família -->
+<section style="padding:clamp(60px,8vw,104px) 0;background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="lp-container lp-2col" style="display:grid;gap:clamp(36px,5vw,64px);align-items:center">
+    <div data-reveal>
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--amber-ink);font-weight:700">Portal da família</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">O que a família vê do outro lado.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">Menos ligação para a secretaria, mais tranquilidade em casa. O responsável resolve sozinho o que antes virava telefonema.</p>
+      <ul style="margin-top:26px;display:flex;flex-direction:column;gap:14px;list-style:none">
+        <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:16px;line-height:1.55">Se o filho está na escola agora.</span></li>
+        <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:16px;line-height:1.55">O histórico de entradas e saídas, com hora e com quem saiu.</span></li>
+        <li style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:3px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span style="font-size:16px;line-height:1.55">Quem está autorizado a buscar — e o pedido para incluir alguém novo, que a escola aprova.</span></li>
+      </ul>
+    </div>
+    <div data-reveal style="min-width:0">
+      <figure class="lp-frame" style="margin:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-md)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Portal da família</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-11-portal.png"><img src="/landing-assets/img/prints/d-11-portal.png" alt="Portal da família: resumo do dia do aluno com entrada, tempo atual, saída e jornada contratada, sem foto nem dado biométrico" loading="lazy" style="display:block;width:100%;background:#0f1117"></picture>
+        <figcaption style="padding:15px 18px;color:var(--text-2);font-size:14px;line-height:1.6">O portal mostra o dia do filho — e nenhuma foto ou dado biométrico, só as iniciais. Tela no tema escuro; os horários vêm da leitura feita na portaria.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Plataforma completa -->
+<section style="padding:clamp(56px,7vw,88px) 0 clamp(60px,8vw,104px);border-top:1px solid var(--border)">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Plataforma completa</span>
+      <h2 style="margin-top:14px;font-size:clamp(24px,3.2vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.16;text-wrap:balance">E, se a escola quiser, o resto da gestão no mesmo lugar.</h2>
+      <p style="margin-top:16px;font-size:clamp(15px,1.5vw,17px);line-height:1.65;color:var(--text-2);text-wrap:pretty">Diário de classe, notas, boletim e financeiro — com a permanência do aluno alimentando a cobrança de hora extra.</p>
+    </div>
+    <div style="margin-top:36px;display:flex;flex-direction:column;gap:22px;align-items:center">
+      <figure data-reveal class="lp-frame" style="margin:0;max-width:660px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Dashboard</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-08-dashboard.png"><img src="/landing-assets/img/prints/mini-dashboard.png" alt="Indicadores do Dashboard: total de alunos, turmas ativas e matrículas ativas" loading="lazy" style="display:block;width:100%;background:#f5f7fa"></picture>
+        <figcaption style="padding:13px 16px;color:var(--text-2);font-size:13.5px;line-height:1.55">Alunos, turmas e matrículas em um resumo.</figcaption>
+      </figure>
+      <figure data-reveal class="lp-frame" style="margin:0;max-width:660px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Boletim</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-10-boletim.png"><img src="/landing-assets/img/prints/mini-boletim.png" alt="Boletim: média geral e frequência geral do aluno" loading="lazy" style="display:block;width:100%;background:#f5f7fa"></picture>
+        <figcaption style="padding:13px 16px;color:var(--text-2);font-size:13.5px;line-height:1.55">Média, frequência e situação por disciplina.</figcaption>
+      </figure>
+      <figure data-reveal class="lp-frame" style="margin:0;max-width:660px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--surface-2)">
+          <span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span><span style="width:9px;height:9px;border-radius:9999px;background:var(--border)"></span>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--text-2)">Financeiro</span>
+        </div>
+        <picture><source media="(max-width:700px)" srcset="/landing-assets/img/prints/m-09-financeiro.png"><img src="/landing-assets/img/prints/mini-financeiro.png" alt="Financeiro: cobranças por aluno, com descrição e valor" loading="lazy" style="display:block;width:100%;background:#f5f7fa"></picture>
+        <figcaption style="padding:13px 16px;color:var(--text-2);font-size:13.5px;line-height:1.55">Planos, contratos e cobranças — com a hora extra da permanência.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 10. Planos -->
+<section id="planos" style="padding:clamp(60px,8vw,104px) 0">
+  <div class="lp-container">
+    <div data-reveal style="max-width:66ch">
+      <span style="font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-ink);font-weight:700">Planos</span>
+      <h2 style="margin-top:14px;font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Modular, do jeito que a escola precisa.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">O preço depende do número de alunos, de unidades e dos equipamentos. Conversamos antes de propor.</p>
+    </div>
+    <div style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:22px;align-items:stretch">
+      <div data-reveal class="lp-card" style="display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:30px;box-shadow:var(--shadow-sm)">
+        <h3 style="font-size:21px;font-weight:700">Controle de acesso</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15px">Para a escola que já tem sistema acadêmico e quer resolver a saída.</p>
+        <p style="margin-top:22px;font-size:26px;font-weight:700">Sob consulta</p>
+        <ul style="margin-top:20px;display:flex;flex-direction:column;gap:11px;list-style:none;flex:1">
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Fila de retirada, painéis de sala e leitores</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Autorizações, restrições e ocorrências</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Portal da família e relatórios</span></li>
+        </ul>
+        <a href="#contato" class="lp-btn lp-btn-outline" style="margin-top:26px;min-height:48px">Falar com a equipe</a>
+      </div>
+      <div data-reveal class="lp-card" style="display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:30px;box-shadow:var(--shadow-sm)">
+        <h3 style="font-size:21px;font-weight:700">Pedagógico</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15px">Para tirar cadastros, diário e financeiro do papel.</p>
+        <p style="margin-top:22px;font-size:26px;font-weight:700">Sob consulta</p>
+        <ul style="margin-top:20px;display:flex;flex-direction:column;gap:11px;list-style:none;flex:1">
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Alunos, turmas, matrículas e professores</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Diário, frequência, notas e boletim</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Planos, contratos e cobranças</span></li>
+        </ul>
+        <a href="#contato" class="lp-btn lp-btn-outline" style="margin-top:26px;min-height:48px">Falar com a equipe</a>
+      </div>
+      <div data-reveal style="position:relative;display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--teal);border-radius:14px;padding:30px;box-shadow:var(--shadow-md)">
+        <span style="position:absolute;top:-13px;left:30px;background:var(--amber);color:#3b2600;font-size:12px;font-weight:700;padding:5px 13px;border-radius:999px">Mais completo</span>
+        <h3 style="font-size:21px;font-weight:700">Plataforma completa</h3>
+        <p style="margin-top:10px;color:var(--text-2);line-height:1.6;font-size:15px">Acesso e pedagógico no mesmo cadastro, com a hora excedente indo direto para a cobrança.</p>
+        <p style="margin-top:22px;font-size:26px;font-weight:700">Sob consulta</p>
+        <ul style="margin-top:20px;display:flex;flex-direction:column;gap:11px;list-style:none;flex:1">
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Tudo dos dois módulos</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Permanência e hora excedente na cobrança</span></li>
+          <li style="display:grid;grid-template-columns:18px 1fr;gap:10px;color:var(--text-2);font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top:4px"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg><span>Várias unidades, com dados isolados entre elas</span></li>
+        </ul>
+        <a href="#contato" class="lp-btn lp-btn-primary" style="margin-top:26px;min-height:48px">Agende uma demonstração</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. CTA + formulário -->
+<section id="contato" style="padding:clamp(60px,8vw,104px) 0;background:var(--bg-soft);border-top:1px solid var(--border)">
+  <div class="lp-container lp-2col" style="display:grid;gap:clamp(36px,5vw,56px);align-items:start">
+    <div data-reveal>
+      <h2 style="font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.022em;line-height:1.14;text-wrap:balance">Veja o fluxo da saída com os dados da sua escola.</h2>
+      <p style="margin-top:18px;font-size:clamp(16px,1.6vw,19px);line-height:1.65;color:var(--text-2);text-wrap:pretty">Uma conversa de 30 minutos: mostramos a fila de retirada, o painel de sala e o portal da família, e entendemos como sua saída funciona hoje.</p>
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:12px">
+        <p style="display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:15px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.6 3.4 8.2 8 9 4.6-.8 8-4.4 8-9V6l-8-3Z"></path></svg> Sem compromisso e sem instalar nada para ver.</p>
+        <p style="display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:15px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg> Respondemos em até um dia útil.</p>
+      </div>
+      <div style="margin-top:28px">
+        <figure style="margin:0;position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--surface-2)">
+          <img src="/landing-assets/img/portal-ambiente.jpg" alt="Duas crianças desenhando juntas em uma sala de aula" loading="lazy" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:50% 40%">
+          <figcaption style="position:absolute;right:8px;bottom:8px;background:rgba(15,17,23,.62);color:#fff;font-size:11px;padding:4px 9px;border-radius:6px">Foto: <a href="https://www.pexels.com/photo/1720186/" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">Pexels</a></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div data-reveal style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(22px,3vw,34px);box-shadow:var(--shadow-md)">
+      <div data-form-sucesso role="status" hidden style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:16px 0">
+        <span style="width:52px;height:52px;border-radius:999px;background:var(--teal-dim);color:var(--teal-ink);display:grid;place-items:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+        <h3 style="font-size:20px;font-weight:700">Pedido registrado.</h3>
+        <p style="color:var(--text-2);line-height:1.6">Entramos em contato para combinar o horário da demonstração.</p>
+        <button type="button" data-form-novo class="lp-btn lp-btn-secondary" style="min-height:44px;padding:0 20px">Enviar outro pedido</button>
+      </div>
+      <form data-form novalidate>
+        <h3 style="font-size:20px;font-weight:700">Agende uma demonstração</h3>
+        <p style="margin-top:8px;color:var(--text-2);font-size:14.5px">Campos com * são obrigatórios.</p>
+        <div style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:16px">
+          <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+            <label for="f-nome" style="font-size:14px;font-weight:600">Nome *</label>
+            <input id="f-nome" name="nome" type="text" required autocomplete="name" class="lp-input">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+            <label for="f-escola" style="font-size:14px;font-weight:600">Escola *</label>
+            <input id="f-escola" name="escola" type="text" required autocomplete="organization" class="lp-input">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+            <label for="f-email" style="font-size:14px;font-weight:600">E-mail *</label>
+            <input id="f-email" name="email" type="email" required autocomplete="email" class="lp-input">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+            <label for="f-tel" style="font-size:14px;font-weight:600">Telefone</label>
+            <input id="f-tel" name="telefone" type="tel" autocomplete="tel" placeholder="(11) 90000-0000" class="lp-input">
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:7px">
+          <label for="f-msg" style="font-size:14px;font-weight:600">Mensagem</label>
+          <textarea id="f-msg" name="mensagem" rows="4" placeholder="Quantos alunos, quantas unidades, como é a saída hoje." class="lp-textarea"></textarea>
+        </div>
+        <p data-form-erro role="alert" hidden style="margin-top:14px;color:#c0392b;font-size:14.5px;font-weight:600"></p>
+        <button type="submit" class="lp-btn lp-btn-primary" style="margin-top:22px;width:100%;min-height:52px;font-size:16px">Agende uma demonstração</button>
+        <p style="margin-top:14px;font-size:13px;color:var(--text-2);line-height:1.55">Usamos seus dados apenas para responder a este contato. Nenhum dado de aluno é solicitado aqui.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- 12. Rodapé -->
+<footer style="background:var(--surface);border-top:1px solid var(--border);padding:clamp(44px,6vw,64px) 0 32px">
+  <div class="lp-container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:36px">
+      <div>
+        <img src="/landing-assets/img/brand/alfaschool-logo.svg" alt="AlfaSchool" height="38" style="height:38px;width:auto;display:block">
+        <p style="margin-top:16px;color:var(--text-2);font-size:14.5px;line-height:1.65;max-width:38ch">Da Alfa Soluções Tecnológicas, ao lado de AlfaJornada, AlfaGym e AlfaControl.</p>
+        <address style="margin-top:16px;font-style:normal;color:var(--text-2);font-size:14.5px;line-height:1.65;max-width:38ch">
+          <span style="display:block">R. Pedro Palácios, 79 — Centro</span>
+          <span style="display:block">Vila Velha, ES · CEP 29100-190</span>
+        </address>
+      </div>
+      <div>
+        <p style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);font-weight:700">Produto</p>
+        <nav aria-label="Links do produto" style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <a href="#recursos" class="lp-footlink">Recursos</a>
+          <a href="#seguranca" class="lp-footlink">Segurança e LGPD</a>
+          <a href="#como-funciona" class="lp-footlink">Como funciona</a>
+          <a href="#planos" class="lp-footlink">Planos</a>
+        </nav>
+      </div>
+      <div>
+        <p style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);font-weight:700">Contato</p>
+        <nav aria-label="Links de contato" style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+          <a href="#contato" class="lp-footlink">Agende uma demonstração</a>
+          <a href="https://wa.me/552731093265" target="_blank" rel="noopener" class="lp-footlink">WhatsApp (27) 3109-3265</a>
+          <a href="mailto:alfa.comercial.solucoes@gmail.com" class="lp-footlink" style="overflow-wrap:anywhere">alfa.comercial.solucoes@gmail.com</a>
+          <a href="https://www.instagram.com/alfa.solucoestecnologicas/" target="_blank" rel="noopener" class="lp-footlink">Instagram</a>
+        </nav>
+      </div>
+      <div>
+        <p style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);font-weight:700">Privacidade</p>
+        <p style="margin-top:14px;color:var(--text-2);font-size:14.5px;line-height:1.65">Tratamos dado de criança com consentimento registrado e revogação a qualquer momento. A escola é a controladora dos dados dos seus alunos.</p>
+      </div>
+    </div>
+    <div style="margin-top:36px;padding-top:22px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between">
+      <p style="color:var(--text-2);font-size:13.5px">© <span data-ano>2026</span> Alfa Soluções Tecnológicas. Todos os direitos reservados.</p>
+      <p style="color:var(--text-2);font-size:13.5px;display:flex;gap:10px;flex-wrap:wrap"><a href="/politica-de-privacidade" class="lp-footlink-sm">Política de privacidade</a><span aria-hidden="true">·</span><a href="/termos-de-uso" class="lp-footlink-sm">Termos de uso</a></p>
+    </div>
+  </div>
+</footer>
+
+<div style="position:fixed;right:20px;bottom:20px;z-index:120;display:flex;flex-direction:column;gap:12px;align-items:flex-end">
+  <a href="https://api.whatsapp.com/send?phone=552731093265&text=Ol%C3%A1!%20Tenho%20interesse%20no%20AlfaSchool." target="_blank" rel="noopener" aria-label="Falar pelo WhatsApp" title="Falar pelo WhatsApp" class="lp-fab-wa">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.3-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0 0 12.04 2Zm0 18.02h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.1.81.83-3.03-.2-.31a8.19 8.19 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.23-8.23 2.2 0 4.26.86 5.82 2.41a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.22-8.24 8.22Zm4.52-6.16c-.25-.13-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.53.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.72 2.62 4.16 3.68.58.25 1.03.4 1.39.51.58.19 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.29Z"></path></svg>
+  </a>
+  <button type="button" data-topo hidden aria-label="Voltar ao topo" title="Voltar ao topo" class="lp-fab-top">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V6M6 12l6-6 6 6"></path></svg>
+  </button>
+</div>
+
+<script src="/landing-assets/js/landing.js" defer></script>
+</body>
+</html>

@@ -10,9 +10,12 @@ RUN npm ci || npm install
 COPY frontend/ .
 RUN npm run build
 
-# ── Stage 2: nginx servindo o dist ─────────────────────────────────────
+# ── Stage 2: nginx servindo o dist do app + a landing estatica ─────────
 FROM nginx:1.27-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+# Landing de marketing (site estatico, servido na raiz "/"). Nao passa pelo
+# build do Vite — sao arquivos prontos do diretorio landing/ do repo.
+COPY landing /usr/share/landing
 COPY infra/nginx/default.staging.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
