@@ -156,6 +156,44 @@ sql "UPDATE notas n JOIN matriculas m ON m.aluno_id=n.aluno_id AND m.tenant_id=n
 sql "UPDATE frequencias f JOIN matriculas m ON m.aluno_id=f.aluno_id AND m.tenant_id=f.tenant_id AND (m.deleted=FALSE OR m.deleted IS NULL) SET f.matricula_id=m.id WHERE f.tenant_id='$TENANT' AND (f.matricula_id IS NULL OR f.matricula_id='')"
 ok "frequencia/avaliacoes/notas" "ok"
 
+# Gera as MEDIAS do boletim. Sem isso a tabela medias fica vazia e o boletim
+# sai "—" apesar das notas — /medias/calcular cria+persiste o registro (media,
+# conceito, situacao, frequencia). Atencao: usa QUERY PARAMS, nao corpo JSON.
+echo ">> boletim: calculando medias (matricula x disciplina)"
+nmed=0
+for mid in $(sql "SELECT id FROM matriculas WHERE tenant_id='$TENANT' AND (deleted=FALSE OR deleted IS NULL)"); do
+  for did in "${DISC[@]}"; do
+    curl -s -o /dev/null -H "$AUTH" -X POST "$B/medias/calcular?matriculaId=$mid&disciplinaId=$did&periodo=1BIMESTRE" && nmed=$((nmed+1))
+  done
+done
+ok "medias/boletim" "$nmed"
+
+# Matriz curricular (disciplina x curso) — sem isto a tela de Matriz fica vazia.
+echo ">> matriz curricular"
+nmat=0
+for di in "${DISC[@]}"; do
+  post /matriz-curricular "{\"cursoId\":\"$CURSO\",\"disciplinaId\":\"$di\",\"periodo\":\"ANUAL\",\"cargaHoraria\":80,\"obrigatoria\":true}" >/dev/null && nmat=$((nmat+1))
+done
+# Mais conteudo ministrado, para o diario nao ficar raso.
+for tu in "$TURMA_A" "$TURMA_B"; do for di in "${DISC[@]}"; do for dia in 2026-08-11 2026-08-18; do
+  post /conteudos-ministrados "{\"turmaId\":\"$tu\",\"disciplinaId\":\"$di\",\"data\":\"$dia\",\"descricao\":\"Atividade em grupo e registro no caderno\",\"objetivos\":\"Desenvolvimento da autonomia\"}" >/dev/null
+done; done; done
+ok "matriz + conteudo" "$nmat"
+
+# Notificacoes: um canal configurado + templates por evento. Sem isto o motor
+# de avisos a familia nao tem o que montar. canal e' obrigatorio na config.
+echo ">> notificacoes (config + templates)"
+post /access/notificacoes/configs '{"canal":"EMAIL","provider":"smtp","remetente":"avisos@mundodosaber.com","limiteDiario":500,"ativo":true}' >/dev/null
+nnt=0
+for ev in ENTRADA_CONFIRMADA SAIDA_CONFIRMADA RETIRADA_SOLICITADA HORARIO_EXCEDIDO; do
+  post /access/notificacoes/templates "{\"evento\":\"$ev\",\"canal\":\"EMAIL\",\"assunto\":\"AlfaSchool — aviso\",\"corpo\":\"Ola {{responsavel}}, evento $ev de {{aluno}} as {{hora}}.\",\"ativo\":true}" >/dev/null && nnt=$((nnt+1))
+done
+ok "notificacoes (config+templates)" "$nnt"
+
+# Fechamento de permanencia: fecha a competencia para virar hora-extra no
+# financeiro. competencia = YYYY-MM.
+post /access/permanencia/fechamentos "{\"unitId\":\"$UNIDADE\",\"competencia\":\"2026-08\"}" >/dev/null && ok "fechamento permanencia" "2026-08"
+
 echo ">> restricao judicial"
 post /access/restricoes "{\"alunoId\":\"${ALL_AL[0]}\",\"pessoaAutorizadaId\":\"${PESSOAS[0]}\",\"tipo\":\"JUDICIAL\",\"descricao\":\"Medida protetiva: genitor sem direito de retirada.\",\"numeroProcesso\":\"0012345-67.2026.8.08.0000\",\"orgaoEmissor\":\"Vara da Infancia\",\"vigenciaInicio\":\"2026-08-01\",\"ativo\":true}" >/dev/null
 ok "restricao" "1"

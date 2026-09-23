@@ -88,6 +88,22 @@ echo "== 6/6  garante que o backend le as fotos do volume =="
 UIDBE=$(docker exec "$BACKEND_CONT" id -u 2>/dev/null)
 docker exec -u 0 "$BACKEND_CONT" sh -c "chown -R ${UIDBE:-0} '$FOTO_DIR' 2>/dev/null; chmod -R a+rX '$FOTO_DIR' 2>/dev/null" || true
 
+# Catalogo de planos SaaS: e' da PLATAFORMA (global, nao do tenant) e so' o
+# superadmin cria. Sem isto a aba Planos do painel SaaS fica vazia. Idempotente:
+# so' cria se ainda nao houver plano (o slug e' unico).
+echo "== extra  catalogo de planos SaaS (superadmin) =="
+if [ "$(mysqlq -N -e 'SELECT COUNT(*) FROM saas_plans;' 2>/dev/null | tr -dc '0-9')" -gt 0 ]; then
+  echo "   ja existem planos SaaS — nao recria."
+else
+  SUPERPW=$(grep -m1 '^APP_SUPERADMIN_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
+  STOK=$(curl -s -X POST "$API/api/v1/auth/login" -H "Content-Type: application/json" -d "{\"email\":\"superadmin@alfaschool.com\",\"password\":\"$SUPERPW\"}" | grep -oE '"accessToken":"[^"]+' | cut -d'"' -f4)
+  addplan(){ curl -s -o /dev/null -H "Authorization: Bearer $STOK" -H "Content-Type: application/json" -X POST "$API/api/v1/saas/plans" -d "$1"; }
+  addplan '{"nome":"Controle de Acesso","slug":"acesso","descricao":"Retirada segura, biometria, paineis de sala e portal da familia.","maxEscolas":1,"maxUsuarios":50,"maxDispositivos":10,"recursos":"[\"ACCESS\",\"PORTAL\",\"NOTIFICACOES\"]","ativo":true}'
+  addplan '{"nome":"Pedagogico","slug":"pedagogico","descricao":"Cursos, turmas, matriculas, diario, boletim e financeiro.","maxEscolas":1,"maxUsuarios":50,"maxDispositivos":0,"recursos":"[\"PEDAGOGICO\"]","ativo":true}'
+  addplan '{"nome":"Plataforma Completa","slug":"completa","descricao":"Controle de acesso + pedagogico, tudo no mesmo lugar.","maxEscolas":5,"maxUsuarios":200,"maxDispositivos":30,"recursos":"[\"ACCESS\",\"PORTAL\",\"NOTIFICACOES\",\"PEDAGOGICO\"]","ativo":true}'
+  echo "   planos SaaS: $(mysqlq -N -e 'SELECT COUNT(*) FROM saas_plans;' 2>/dev/null | tr -dc '0-9')"
+fi
+
 # Se o storage e' MinIO, as fotos que o popular-fotos gravou no disco NAO sao
 # lidas pelo backend (ele le do bucket). Espelha o disco -> bucket.
 if [ "$(docker exec "$BACKEND_CONT" printenv ACCESS_STORAGE 2>/dev/null)" = "minio" ]; then
