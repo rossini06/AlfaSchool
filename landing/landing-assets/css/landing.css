@@ -1,0 +1,106 @@
+/* AlfaSchool — landing page. CSS proprio, sem framework. Tokens iguais aos do
+   handoff; comportamento (hover/foco/responsivo) em CSS de verdade — o layout
+   fino segue nos style="" inline do HTML, fiel ao design. */
+:root{
+  --bg:#ffffff; --bg-soft:#f4f8f9; --surface:#ffffff; --surface-2:#f7f9fb;
+  --border:#e2e8ee; --text:#14181f; --text-2:#54607a;
+  --teal:#029CAF; --teal-ink:#0b7481; --teal-cta:#0e7a85; --teal-cta-hover:#0a5f6a; --teal-dim:rgba(2,156,175,.10);
+  --amber:#F59E0B; --amber-ink:#8a5a00; --amber-dim:rgba(245,158,11,.12);
+  --ok:#15803d;
+  --shadow-sm:0 1px 2px rgba(16,32,44,.06), 0 4px 16px rgba(16,32,44,.05);
+  --shadow-md:0 8px 30px rgba(16,32,44,.10);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0f1117; --bg-soft:#151824; --surface:#1a1d27; --surface-2:#22263a;
+  --border:#2e3347; --text:#e8eaf0; --text-2:#a0a7bb;
+  --teal:#1fb5c4; --teal-ink:#7adbe6; --teal-cta:#0e7a85; --teal-cta-hover:#0a5f6a; --teal-dim:rgba(31,181,196,.14);
+  --amber:#f5b23c; --amber-ink:#f5c877; --amber-dim:rgba(245,178,60,.14);
+  --ok:#4ade80;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4); --shadow-md:0 8px 30px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:96px;-webkit-text-size-adjust:100%}
+body{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:clip;transition:background-color .25s ease,color .25s ease}
+img{max-width:100%;display:block}
+a{color:var(--teal-ink);text-decoration:none}
+a:hover{color:var(--teal)}
+button{font-family:inherit;border:none;background:none;cursor:pointer}
+input,textarea,select{font-family:inherit}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:6px}
+
+@keyframes as-pulso{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+@keyframes as-flutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes as-surge{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Skip link */
+.lp-skip{position:absolute;left:-9999px;top:8px;background:var(--teal-cta);color:#fff;padding:12px 20px;border-radius:6px;z-index:200}
+.lp-skip:focus{left:16px;color:#fff}
+
+/* Container padrao */
+.lp-container{width:100%;max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* Links de navegacao */
+.lp-navlink{color:var(--text-2);font-size:15px;font-weight:500;white-space:nowrap}
+.lp-navlink:hover{color:var(--teal-ink)}
+.lp-mnav{padding:14px 8px;font-weight:500;color:var(--text);border-radius:10px}
+.lp-mnav:hover{background:var(--surface-2)}
+.lp-footlink{color:var(--text-2);font-size:15px}
+.lp-footlink:hover{color:var(--teal-ink)}
+.lp-footlink-sm{color:var(--text-2)}
+.lp-footlink-sm:hover{color:var(--teal-ink)}
+
+/* Botoes */
+.lp-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:6px;font-weight:600;white-space:nowrap;text-align:center}
+.lp-btn-primary{background:var(--teal-cta);color:#fff;box-shadow:var(--shadow-sm)}
+.lp-btn-primary:hover{background:var(--teal-cta-hover);color:#fff}
+.lp-btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.lp-btn-secondary:hover{border-color:var(--teal);color:var(--teal-ink)}
+.lp-btn-outline{border:1px solid var(--teal);color:var(--teal-ink)}
+.lp-btn-outline:hover{background:var(--teal-dim);color:var(--teal-ink)}
+
+/* Toggle de tema */
+.lp-theme{width:44px;height:44px;border-radius:999px;border:1px solid var(--border);display:grid;place-items:center;color:var(--text-2);background:var(--surface)}
+.lp-theme:hover{color:var(--teal-ink);border-color:var(--teal)}
+
+/* Cartoes com hover (lift) */
+.lp-card{transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease, border-color .35s ease}
+.lp-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.lp-frame{transition:transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease}
+.lp-frame:hover{transform:translateY(-5px);box-shadow:var(--shadow-md)}
+
+/* Botoes flutuantes */
+.lp-fab-wa{width:58px;height:58px;border-radius:9999px;background:#128C4A;color:#fff;display:grid;place-items:center;box-shadow:var(--shadow-md);animation:as-flutua 4s ease-in-out infinite;transition:transform .25s ease}
+.lp-fab-wa:hover{transform:scale(1.06);color:#fff}
+.lp-fab-top{width:50px;height:50px;border-radius:9999px;background:var(--surface);border:1px solid var(--border);color:var(--text);display:grid;place-items:center;box-shadow:var(--shadow-md);animation:as-surge .3s ease;transition:transform .25s ease,border-color .25s ease}
+.lp-fab-top:hover{transform:translateY(-3px);border-color:var(--teal)}
+.lp-fab-top[hidden]{display:none}
+
+/* Campos do formulario */
+.lp-input{min-height:48px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:0 14px;font-size:15px;width:100%}
+.lp-textarea{border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:12px 14px;font-size:15px;width:100%;resize:vertical}
+
+/* Entrada ao rolar (aplicada por JS; sem JS o conteudo fica visivel) */
+.lp-reveal-init{opacity:0;transform:translateY(16px)}
+.lp-reveal-in{opacity:1;transform:none}
+
+/* Responsivo — no lugar das media queries que o prototipo fazia por JS */
+.lp-desktop-nav{display:none;gap:28px;margin-left:auto;align-items:center}
+.lp-header-cta{display:none}
+.lp-menu-btn{display:grid}
+.lp-2col{grid-template-columns:minmax(0,1fr)}
+@media (min-width:980px){
+  .lp-2col{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
+}
+@media (min-width:1040px){
+  .lp-desktop-nav{display:flex}
+  .lp-header-cta{display:inline-flex}
+  .lp-menu-btn{display:none}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+  html{scroll-behavior:auto}
+  .lp-reveal-init{opacity:1;transform:none}
+}
