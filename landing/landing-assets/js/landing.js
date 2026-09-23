@@ -1,5 +1,5 @@
 /* AlfaSchool — landing. JS minimo: tema, menu mobile, entrada ao rolar,
-   voltar-ao-topo e formulario (com ponto de integracao isolado). */
+   formulario (com ponto de integracao isolado). */
 (function () {
   "use strict";
   var root = document.documentElement;
@@ -79,17 +79,6 @@
     }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
     alvos.forEach(function (el) { obs.observe(el); });
     setTimeout(function () { alvos.forEach(mostra); }, 3000); // fallback
-  }
-
-  /* ---- Voltar ao topo ---- */
-  var btnTopo = document.querySelector("[data-topo]");
-  if (btnTopo) {
-    var atualiza = function () { btnTopo.hidden = window.scrollY <= 600; };
-    atualiza();
-    window.addEventListener("scroll", atualiza, { passive: true });
-    btnTopo.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
   }
 
   /* ---- Ano do rodape ---- */
