@@ -89,6 +89,15 @@ input,textarea,select{font-family:inherit}
 .lp-desktop-nav{display:none;gap:28px;margin-left:auto;align-items:center}
 .lp-header-cta{display:none}
 .lp-menu-btn{display:grid}
+/* Cabecalho: o lockup tem ~220px de largura a 44px de altura. No celular,
+   logo + tema + hamburguer nao cabem em 320-390px e o hamburguer era
+   empurrado para fora da tela. Encolhe o logo e o espacamento no celular. */
+.lp-logo{height:44px}
+.lp-headrow{gap:24px}
+@media (max-width:640px){
+  .lp-logo{height:32px}
+  .lp-headrow{gap:12px}
+}
 .lp-2col{grid-template-columns:minmax(0,1fr)}
 @media (min-width:980px){
   .lp-2col{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
